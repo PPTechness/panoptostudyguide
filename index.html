@@ -2517,19 +2517,36 @@ function init() {
   }
   
   // FAQ Accordion
-  $$('.faq-item').forEach(item => {
+  console.log('Setting up FAQ accordion');
+  const faqItems = $$('.faq-item');
+  console.log('Found FAQ items:', faqItems.length);
+  
+  faqItems.forEach((item, index) => {
     const question = item.querySelector('.faq-question');
-    question.onclick = () => {
-      // Close all other items
-      $$('.faq-item').forEach(other => {
-        if (other !== item) {
-          other.classList.remove('open');
-        }
+    if (question) {
+      console.log('Attaching click handler to FAQ item', index);
+      question.addEventListener('click', function(e) {
+        console.log('FAQ item clicked:', index);
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Close all other items
+        $$('.faq-item').forEach(other => {
+          if (other !== item) {
+            other.classList.remove('open');
+          }
+        });
+        
+        // Toggle this item
+        item.classList.toggle('open');
+        console.log('FAQ item toggled, now open:', item.classList.contains('open'));
       });
-      // Toggle this item
-      item.classList.toggle('open');
-    };
+    } else {
+      console.error('No question element found for FAQ item', index);
+    }
   });
+  
+  console.log('FAQ accordion setup complete');
 }
 
 init();
