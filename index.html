@@ -1651,7 +1651,7 @@
   </div>
   
   <!-- Preview Section (Shared) -->
-  <div class="preview-section centered">
+  <div class="preview-section centered" id="previewSection">
     <div class="preview-header">
       <div class="section-title">Your Copilot Prompt</div>
       <div class="preview-stats">
@@ -2285,43 +2285,6 @@ function init() {
   const np = PEDAGOGY[state.notesPedagogy];
   if (np && $('notesPedBrief')) $('notesPedBrief').textContent = np.brief;
   
-  // Help button - navigate to Getting Started page
-  if ($('helpToggle')) {
-    $('helpToggle').onclick = () => {
-      $$('.workflow-btn').forEach(b => b.classList.remove('active'));
-      const helpBtn = document.querySelector('[data-tab="help"]');
-      if (helpBtn) {
-        helpBtn.classList.add('active');
-        state.workflow = 'help';
-        $$('.workflow-content').forEach(w => w.classList.add('hidden'));
-        document.querySelector('.help-workflow').classList.remove('hidden');
-      }
-    };
-  }
-  
-  // Dismiss handlers
-  if ($('dismissAbout')) {
-    $('dismissAbout').onclick = () => {
-      $('about').classList.remove('show');
-    };
-  }
-  
-  if ($('hidePreflight')) {
-    $('hidePreflight').onclick = () => {
-      $('preflight').classList.remove('show');
-    };
-  }
-  
-  if ($('hideCanvasHow')) {
-    $('hideCanvasHow').onclick = () => {
-      $('canvasHow').classList.remove('show');
-    };
-  }
-  
-  initQuestionTypes();
-  initStudyComponents();
-  render();
-  
   // Hero content for each page
   const heroContent = {
     quiz: {
@@ -2350,6 +2313,56 @@ function init() {
     }
   };
   
+  // Help button - navigate to Getting Started page
+  if ($('helpToggle')) {
+    $('helpToggle').onclick = () => {
+      $$('.workflow-btn').forEach(b => b.classList.remove('active'));
+      const helpBtn = document.querySelector('[data-tab="help"]');
+      if (helpBtn) {
+        helpBtn.classList.add('active');
+        state.workflow = 'help';
+        $$('.workflow-content').forEach(w => w.classList.add('hidden'));
+        document.querySelector('.help-workflow').classList.remove('hidden');
+        
+        // Hide preview section and update hero banner
+        const previewSection = $('previewSection');
+        if (previewSection) previewSection.style.display = 'none';
+        
+        const hero = heroContent.help;
+        if (hero) {
+          const heroBanner = $('heroBanner');
+          heroBanner.className = 'hero-banner ' + hero.class;
+          $('heroBadgeText').textContent = hero.badge;
+          $('heroTitle').textContent = hero.title;
+          $('heroSubtitle').textContent = hero.subtitle;
+        }
+      }
+    };
+  }
+  
+  // Dismiss handlers
+  if ($('dismissAbout')) {
+    $('dismissAbout').onclick = () => {
+      $('about').classList.remove('show');
+    };
+  }
+  
+  if ($('hidePreflight')) {
+    $('hidePreflight').onclick = () => {
+      $('preflight').classList.remove('show');
+    };
+  }
+  
+  if ($('hideCanvasHow')) {
+    $('hideCanvasHow').onclick = () => {
+      $('canvasHow').classList.remove('show');
+    };
+  }
+  
+  initQuestionTypes();
+  initStudyComponents();
+  render();
+  
   // Workflow tabs
   $$('.workflow-btn').forEach(btn => {
     btn.onclick = () => {
@@ -2368,6 +2381,16 @@ function init() {
         $('heroBadgeText').textContent = hero.badge;
         $('heroTitle').textContent = hero.title;
         $('heroSubtitle').textContent = hero.subtitle;
+      }
+      
+      // Show/hide preview section based on workflow
+      const previewSection = $('previewSection');
+      if (previewSection) {
+        if (state.workflow === 'help') {
+          previewSection.style.display = 'none';
+        } else {
+          previewSection.style.display = 'block';
+        }
       }
       
       // Only render if not on help page
