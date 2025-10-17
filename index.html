@@ -406,6 +406,36 @@
     background: var(--gradient-qub);
   }
   
+  /* Help Button */
+  .help-toggle {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.75rem;
+    background: var(--gradient-qub);
+    color: white;
+    border: none;
+    border-radius: 999px;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(224,0,27,0.3);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  
+  .help-toggle:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 32px rgba(224,0,27,0.4);
+  }
+  
+  .help-toggle-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
   
   /* Quick Start Section */
   .quick-start {
@@ -1756,6 +1786,12 @@
   
 </main>
 
+<!-- Help Button -->
+<button class="help-toggle" id="helpToggle">
+  <span class="help-toggle-icon">?</span>
+  <span>Need Help?</span>
+</button>
+
 <!-- Toast Notification -->
 <div class="toast" id="toast">
   <span>✓</span>
@@ -1881,35 +1917,12 @@ function slugify(s) {
   return (a.replace(/[^A-Za-z0-9]+/g, '_').replace(/_+/g, '_').replace(/^_+|_+$/g, '') || 'Lecture_Quiz');
 }
 
-// Panopto source block (mandatory)
-const PANOPTO_BLOCK = `
-SOURCE ACQUISITION (PANOPTO DOM — MANDATORY)
-You are viewing a Panopto video page. Read THIS page's DOM and collect text in priority:
-  1) Captions/Transcript panel (full transcript, not just visible lines)
-  2) Contents/Slides titles + any slide text
-  3) Any visible notes/doc panel
+// Panopto source block (compact)
+const PANOPTO_BLOCK = `SOURCE: Read THIS Panopto page DOM: (1) Full captions/transcript, (2) Slides/contents, (3) Notes panel.
 
-❗️ CRITICAL: EXTRACT REAL VIDEO TITLE FROM PANOPTO PAGE ❗️
-This is MANDATORY. You MUST extract the actual video title. Look in this exact order:
-  1. <meta property="og:title" content="..."> — Extract the content attribute value (MOST RELIABLE)
-  2. Element with [data-role="session-title"] or class="session-title" — Extract its textContent
-  3. Page heading (h1 near video player) — Extract its textContent
-  4. document.title — Extract and remove " - Panopto" suffix if present
+TITLE EXTRACTION (MANDATORY): Extract real video title from: <meta property="og:title">, [data-role="session-title"], h1, or document.title. Use ACTUAL title (e.g., "Week 5: Cell Division") NOT "Lecture Quiz" or placeholders. Use in filenames and file content.
 
-EXAMPLE: If you find <meta property="og:title" content="Week 5: Cell Division - Dr. Ahmed">
-  ✅ CORRECT: LECTURE_TITLE = "Week 5: Cell Division - Dr. Ahmed"
-             SAFE_LECTURE_TITLE = "Week_5_Cell_Division_Dr_Ahmed"
-  ❌ WRONG:   LECTURE_TITLE = "Lecture Quiz" (generic placeholder - DO NOT USE)
-             LECTURE_TITLE = "Panopto_Canvas_Prompt_Builder" (DO NOT USE)
-
-You MUST use the ACTUAL VIDEO TITLE you extract from the page. NOT "Lecture Quiz", NOT "Study Guide", NOT any generic text.
-This title will be used in filenames and inside the generated files.
-
-MINIMUM MATERIAL CHECK (FAIL-CLOSED)
-  After deduplication, if captions+slides text < 300 words: STOP and return EXACTLY
-  "INSUFFICIENT_PAGE_CONTENT — Open captions & contents panels, scroll transcript fully, enable 'Use page content', then run again."
-  Do NOT produce any files in this failure case.
-`;
+FAIL-CLOSED: If <300 words after dedupe, return: "INSUFFICIENT_PAGE_CONTENT — Open captions+slides panels, scroll transcript, then retry." No files.`;
 
 // Prompt builders
 function buildQuizPrompt() {
@@ -1917,286 +1930,145 @@ function buildQuizPrompt() {
   const slug = slugify(title);
   const types = state.questionTypes.join(', ');
   const target = state.questionTypes.length * state.quizCount;
-  
-  // Get pedagogy notes
   const ped = PEDAGOGY[state.pedagogy] || PEDAGOGY["Concept Check (Retrieval)"];
-  const pedagogyLines = ped.inject.map(l => `• ${l}`).join('\n');
+  const pedBlock = ped.inject.map(l => `• ${l}`).join('\n');
   
-  // Add special rules for TF and Numerical if selected
-  let specialRules = '';
-  if (state.questionTypes.includes('true_false_question')) {
-    specialRules += '\nTRUE/FALSE: Use <response_lid> with two <response_label>: "True" and "False".';
-  }
-  if (state.questionTypes.includes('numerical_question')) {
-    specialRules += '\nNUMERICAL: Include <response_num> with answer tolerance in metadata.';
-  }
+  let tfNum = '';
+  if (state.questionTypes.includes('true_false_question')) tfNum += '\nTF: <response_lid> with 2 labels: True/False.';
+  if (state.questionTypes.includes('numerical_question')) tfNum += '\nNUM: <response_num> + tolerance.';
   
-  return `SYSTEM
-Return EXACTLY two files and no other text:
-(1) ${slug}_quiz_qti.zip
-(2) ${slug}_quiz.pdf
-
-Use ONLY content visible on THIS Panopto page (captions/transcript and contents/slides). Language=${state.quizLang}. No external sources. Do NOT ask questions.
+  return `SYSTEM: Return EXACTLY 2 files: (1) ${slug}_quiz_qti.zip, (2) ${slug}_quiz.pdf
+Use ONLY THIS Panopto page. Language=${state.quizLang}. Do NOT ask questions.
 ${PANOPTO_BLOCK}
-PEDAGOGY
-${pedagogyLines}
+PEDAGOGY: ${pedBlock}
 
-HE QUALITY STANDARDS (Every Item Must Meet):
-STEMS: Clear, standalone, test specific outcomes; avoid trivial recall; one defensible answer
-DISTRACTORS: Plausible, based on lecture misconceptions, similar length/grammar; no tricks
-FEEDBACK: Explain WHY correct answer is right; address misconceptions; reference lecture with timestamp when possible
-COGNITIVE RIGOR: Mix Bloom levels per pedagogy (not all recall); require thinking not just memory
-ACADEMIC REGISTER: Precise terminology; evidence-based; acknowledge nuance; university-level depth
+HE STANDARDS: Clear stems testing outcomes (not trivia); plausible distractors from lecture; meaningful feedback explaining WHY with timestamps; mix Bloom levels; university-level precision.
 
-TITLE & FILENAMES (CRITICAL — NO PLACEHOLDERS)
-You MUST extract the real video title from the Panopto page you are viewing. Look in this exact order:
-  1. <meta property="og:title" content="..."> — Extract the content attribute value
-  2. Element with [data-role="session-title"] or class="session-title" — Extract its text
-  3. Main heading (h1) near the video player — Extract its text
-  4. document.title — Extract and remove " - Panopto" suffix if present
+Q TYPES: ${types} | ${state.quizCount} per type | TARGET=${target} exactly | Rewrite invalid as essay${tfNum}
 
-EXAMPLE:
-  If you find: <meta property="og:title" content="Week 3: Neural Networks - Prof. Johnson">
-  Then: LECTURE_TITLE = "Week 3: Neural Networks - Prof. Johnson"
-        SAFE_LECTURE_TITLE = "Week_3_Neural_Networks_Prof_Johnson"
-
-Use LECTURE_TITLE in the assessment.xml title attribute.
-Use SAFE_LECTURE_TITLE for filenames: [SAFE_LECTURE_TITLE]_quiz_qti.zip and [SAFE_LECTURE_TITLE]_quiz.pdf
-
-DO NOT use generic placeholders like "Lecture Quiz" or "Panopto_Canvas_Prompt_Builder".
-You MUST use the ACTUAL video title from the page you are viewing.
-
-QUESTION TYPES & COUNTS
-Type: ${types}
-Count per type: ${state.quizCount}
-TARGET_TOTAL: ${target} items exactly
-If validation fails, rewrite as essay_question (keep count).${specialRules}
-
-QTI STRUCTURE — ${slug}_quiz_qti.zip
-Create ZIP containing:
-  - imsmanifest.xml
-  - assessment.xml
-
+QTI ZIP — ${slug}_quiz_qti.zip:
 imsmanifest.xml:
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest identifier="man1" xmlns="http://www.imsglobal.org/xsd/imscp_v1p1">
-  <resources>
-    <resource identifier="res1" type="imsqti_xmlv1p2" href="assessment.xml">
-      <file href="assessment.xml"/>
-    </resource>
-  </resources>
+  <resources><resource identifier="res1" type="imsqti_xmlv1p2" href="assessment.xml"><file href="assessment.xml"/></resource></resources>
 </manifest>
 
-assessment.xml structure:
+assessment.xml:
 <?xml version="1.0" encoding="UTF-8"?>
 <questestinterop xmlns="http://www.imsglobal.org/xsd/ims_qtiasiv1p2">
-  <assessment ident="asmt1" title="[LECTURE_TITLE from Panopto page]">
-    <section ident="root_section">
-      <!-- ${target} items here -->
-    </section>
-  </assessment>
+  <assessment ident="asmt1" title="[ACTUAL_VIDEO_TITLE]"><section ident="root_section"><!-- ${target} items --></section></assessment>
 </questestinterop>
-Note: Replace [LECTURE_TITLE from Panopto page] with the actual video title you extracted.
 
-ITEM TEMPLATE (multiple_choice_question):
-<item ident="q1" title="Question 1">
-  <itemmetadata>
-    <qtimetadata>
-      <qtimetadatafield><fieldlabel>question_type</fieldlabel><fieldentry>multiple_choice_question</fieldentry></qtimetadatafield>
-      <qtimetadatafield><fieldlabel>points_possible</fieldlabel><fieldentry>1</fieldentry></qtimetadatafield>
-    </qtimetadata>
-  </itemmetadata>
-  <presentation>
-    <material><mattext texttype="text/html">STEM_TEXT_HERE</mattext></material>
-    <response_lid ident="response1" rcardinality="Single">
-      <render_choice shuffle="Yes">
-        <response_label ident="A"><material><mattext texttype="text/html">OPTION_A</mattext></material></response_label>
-        <response_label ident="B"><material><mattext texttype="text/html">OPTION_B</mattext></material></response_label>
-        <response_label ident="C"><material><mattext texttype="text/html">OPTION_C</mattext></material></response_label>
-        <response_label ident="D"><material><mattext texttype="text/html">OPTION_D</mattext></material></response_label>
-      </render_choice>
-    </response_lid>
-  </presentation>
-  <resprocessing>
-    <outcomes><decvar varname="SCORE" vartype="Decimal" minvalue="0" maxvalue="100"/></outcomes>
-    <respcondition continue="No">
-      <conditionvar><varequal respident="response1">CORRECT_IDENT</varequal></conditionvar>
-      <setvar varname="SCORE" action="Set">100</setvar>${state.quizFeedback !== 'off' ? '\n      <displayfeedback feedbacktype="Response" linkrefid="correct_fb"/>' : ''}
-    </respcondition>
-  </resprocessing>${state.quizFeedback !== 'off' ? '\n  <itemfeedback ident="correct_fb"><material><mattext texttype="text/html">FEEDBACK_TEXT. See around [mm:ss] if timestamp available.</mattext></material></itemfeedback>' : ''}
+MC ITEM:
+<item ident="q1" title="Q1">
+<itemmetadata><qtimetadata>
+<qtimetadatafield><fieldlabel>question_type</fieldlabel><fieldentry>multiple_choice_question</fieldentry></qtimetadatafield>
+<qtimetadatafield><fieldlabel>points_possible</fieldlabel><fieldentry>1</fieldentry></qtimetadatafield>
+</qtimetadata></itemmetadata>
+<presentation><material><mattext texttype="text/html">STEM</mattext></material>
+<response_lid ident="response1" rcardinality="Single"><render_choice shuffle="Yes">
+<response_label ident="A"><material><mattext texttype="text/html">OPT_A</mattext></material></response_label>
+<response_label ident="B"><material><mattext texttype="text/html">OPT_B</mattext></material></response_label>
+<response_label ident="C"><material><mattext texttype="text/html">OPT_C</mattext></material></response_label>
+<response_label ident="D"><material><mattext texttype="text/html">OPT_D</mattext></material></response_label>
+</render_choice></response_lid></presentation>
+<resprocessing><outcomes><decvar varname="SCORE" vartype="Decimal" minvalue="0" maxvalue="100"/></outcomes>
+<respcondition continue="No"><conditionvar><varequal respident="response1">CORRECT</varequal></conditionvar>
+<setvar varname="SCORE" action="Set">100</setvar>${state.quizFeedback !== 'off' ? '<displayfeedback feedbacktype="Response" linkrefid="fb"/>' : ''}</respcondition></resprocessing>${state.quizFeedback !== 'off' ? '<itemfeedback ident="fb"><material><mattext texttype="text/html">WHY correct [mm:ss]</mattext></material></itemfeedback>' : ''}
 </item>
 
-GUARDS
-- UTF-8 encoding
-- Escape: &amp; &lt; &gt; &quot; &apos;
-- mattext max 1200 chars
-- Exactly ${target} items
-- All items have question_type + points_possible
+GUARDS: UTF-8; escape XML chars; mattext≤1200; exactly ${target} items; all have metadata
 
-PDF — [SAFE_LECTURE_TITLE]_quiz.pdf
-A4 portrait. Title page with "[LECTURE_TITLE]" (the actual video title you extracted) + date. Table of contents. Then ONE QUESTION PER PAGE (page break before each):
-- Question number and stem
-- All options (A/B/C/D)
-- Answer key: Correct = [LETTER]${state.quizFeedback !== 'off' ? '\n- Feedback with timestamp if available' : ''}
+PDF: A4. Title=[ACTUAL_VIDEO_TITLE], TOC, then 1Q/page: number, stem, options, answer${state.quizFeedback !== 'off' ? ', feedback+timestamp' : ''}
 
-INTERNAL VALIDATION (Mandatory Before Output)
-1. Captions+slides ≥300 words OR return "INSUFFICIENT_PAGE_CONTENT" (no files)
-2. VIDEO TITLE extracted correctly from Panopto page (not a placeholder)
-3. Exactly ${target} items in <section>
-4. Valid XML, UTF-8, well-formed
-5. Each item has metadata fields
-6. QUALITY CHECK - Every item: stem is clear + defensible answer + plausible distractors + meaningful feedback
-7. COGNITIVE CHECK - Not all recall: includes application/analysis questions appropriate to pedagogy
-8. HE STANDARD - Would a subject expert approve this content? University-level precision?
+VALIDATE: (1) ≥300w or "INSUFFICIENT_PAGE_CONTENT", (2) Real title extracted, (3) ${target} items, (4) Valid XML, (5) All metadata, (6) HE quality (clear/defensible/plausible/meaningful), (7) Mixed Bloom, (8) Expert-approvable
 
-OUTPUT
-Return these two files with names based on the ACTUAL video title you extracted:
-(1) [SAFE_LECTURE_TITLE]_quiz_qti.zip — contains imsmanifest.xml + assessment.xml
-(2) [SAFE_LECTURE_TITLE]_quiz.pdf — title, TOC, questions (one per page)
-
-FINAL CHECK: Did you use the ACTUAL Panopto video title (e.g., "Week_3_Neural_Networks_Prof_Johnson") or a placeholder (e.g., "Lecture_Quiz")? 
-You MUST use the real video title. Check og:title, [data-role="session-title"], h1, or document.title before outputting.`;
+OUTPUT: [ACTUAL_TITLE_SLUG]_quiz_qti.zip + [ACTUAL_TITLE_SLUG]_quiz.pdf using REAL title from og:title/[data-role="session-title"]/h1/document.title—NOT "Lecture_Quiz" placeholder.`;
 }
 
 function buildStudyPrompt() {
-  console.log('buildStudyPrompt called, state:', {
-    sgFormat: state.sgFormat,
-    studyDepth: state.studyDepth,
-    studyPedagogy: state.studyPedagogy,
-    studyComponents: state.studyComponents
-  });
   const panoptoTitle = detectPanoptoTitle();
   const title = panoptoTitle || 'Study Pack';
   const slug = slugify(title);
   const format = state.sgFormat;
   const depth = state.studyDepth;
   const ped = PEDAGOGY[state.studyPedagogy] || PEDAGOGY["Concept Check (Retrieval)"];
-  const pedBlock = `PEDAGOGY NOTES\n• ${ped.inject.join('\n• ')}`;
-  const comps = state.studyComponents;
+  const pedBlock = ped.inject.map(l => `• ${l}`).join('\n');
+  const c = state.studyComponents;
+  const ext = format === 'pptx' ? 'pptx' : (format === 'docx' ? 'docx' : 'pdf');
+  const fmt = format === 'pptx' ? 'PPTX 16:9' : (format === 'docx' ? 'Word A4' : 'PDF A4');
+  const pg = depth==='quick'?'10-12':depth==='standard'?'18-25':'30-40';
+  const ts = depth==='quick'?'12':depth==='standard'?'20':'30';
+  const fc = depth==='quick'?'20-30':depth==='standard'?'25-40':'35-50';
+  const pr = depth==='quick'?'6-8':depth==='standard'?'10-15':'12-18';
   
-  const formatExt = format === 'pptx' ? 'pptx' : (format === 'docx' ? 'docx' : 'pdf');
-  const formatDesc = format === 'pptx' ? 'PPTX 16:9 slides' : (format === 'docx' ? 'Word .docx A4 portrait' : 'PDF A4 portrait');
-  
-  return `SYSTEM: Return ONE complete, ready-to-use file: ${slug}_study.${formatExt}
-Use ONLY Panopto page (captions+slides); no external data. Language=${state.quizLang}.
-
-CRITICAL: Generate the ENTIRE study guide in ONE output. Do NOT stop partway through. Do NOT ask if you should continue. Do NOT ask for permission to build remaining sections. Generate ALL sections listed below in a single, complete, deliverable file. This is a one-shot generation—produce the full ${depth==='quick'?'10-12':depth==='standard'?'18-25':'30-40'} page guide now.
-
-TITLE EXTRACTION (CRITICAL — NO PLACEHOLDERS)
-You MUST extract the real video title from the Panopto page you are viewing. Look in this exact order:
-  1. <meta property="og:title" content="..."> — Extract the content attribute value
-  2. Element with [data-role="session-title"] or class="session-title" — Extract its text
-  3. Main heading (h1) near the video player — Extract its text
-  4. document.title — Extract and remove " - Panopto" suffix if present
-
-EXAMPLE: If og:title = "Lecture 5: Photosynthesis - Dr. Martinez"
-  → Use "Lecture 5: Photosynthesis - Dr. Martinez" as the title throughout the guide
-  → Filename: Lecture_5_Photosynthesis_Dr_Martinez_study.${formatExt}
-
-DO NOT use generic placeholders like "Study Guide" or "Lecture Notes". Use the ACTUAL video title from the page.
-
-SOURCE: (1) Full transcript, (2) Slides/contents, (3) Notes. Dedupe. PRESERVE timestamps. Min 500 words or return "INSUFFICIENT_CONTENT".
-
-BRANDING: QUB red #E0001B accents; white bg; WCAG AA contrast.
-
-HE QUALITY STANDARDS (Every Section Must Meet):
-• COGNITIVE RIGOR: Promote thinking over memorization; require "why" not just "what"; scaffold from accessible to challenging
-• PRECISION: Accurate terminology; evidence-based claims; acknowledge complexity; avoid oversimplification
-• CONNECTIONS: Link concepts across topics; relate to broader disciplinary context; show how ideas integrate
-• METACOGNITION: Include reflection prompts; develop independent learning skills; promote self-assessment
-• TIMESTAMPS: Cite lecture sources liberally (min ${depth==='quick'?'12':depth==='standard'?'20':'30'}); enable verification and strategic rewatch
-• ACADEMIC REGISTER: University-level language; precise definitions; scholarly tone while remaining accessible
-• FORMATIVE VALUE: Feedback teaches not just corrects; address misconceptions; provide actionable guidance
-
-${pedBlock}
+  return `SYSTEM: Return ONE complete file: ${slug}_study.${ext}
+Use ONLY Panopto page (captions+slides). Language=${state.quizLang}. Do NOT stop partway or ask to continue. Generate ALL sections in ONE output. ${pg}p guide now.
+Extract REAL video title from og:title/[data-role="session-title"]/h1/document.title. Use it (NOT placeholder) in title+filename.
+Source: transcript+slides+notes. Dedupe. Keep [mm:ss]. ≥500w or "INSUFFICIENT_CONTENT".
+Brand: QUB red #E0001B; white bg; WCAG AA.
+PEDAGOGY: ${pedBlock}
+HE STANDARDS: Cognitive rigor (why not what); precise terminology; connections across topics; metacognition; ${ts}+ timestamps; university register; formative feedback.
 
 STRUCTURE (omit unticked):
-1) Title page — video title, module, date, "Independent study guide"
-2) How to use (≤150w) — active recall, spaced practice, rewatch with timestamps
-3) Learning outcomes (4-8) — Bloom-tagged, link to module goals
-4) Key concepts (6-12) — 2-3 sentences each; relationships; flashcard IDs; timestamps
-${comps.conceptMap?`5) Concept map — hierarchical outline; relationships ("leads to", "contrasts with"); timestamps\n`:''}${comps.glossary?`6) Glossary (15-35) — plain English; examples; timestamps; mark confusing terms\n`:''}${comps.worked?`7) Worked examples (3-6) — numbered steps; "why this step"; errors box; expert thinking; timestamps; LO links; extensions\n`:''}${comps.problems?`8) Problems (8-15) — recall→apply→extend; 3-level hints. Solutions: model answer, rationale, mistakes, timestamps, "extend" prompt\n`:''}${comps.cases?`9) Cases (3-5) — scenarios from lecture; 4-6 questions (ID→analyze→evaluate); teaching points; timestamps; research prompts\n`:''}10) Flashcards (25-50) — grouped/ordered by difficulty. QUALITY STANDARD: Questions test understanding not recognition; answers precise and complete; explanations connect to broader concepts (not just restate answer); Foundation = core concepts, Intermediate = application/connections, Advanced = synthesis/evaluation:
-  • Card ID (FC-01), Question (requires active recall), Answer (precise, complete), Explanation (why it matters + how it connects to other concepts), Source ([mm:ss] when available), Difficulty (Foundation/Intermediate/Advanced), Related (links to FC-XX)
-  • Appendix A: CSV table (id,question,answer,explanation,source,difficulty,related_cards)
-EXAMPLE QUALITY: "Q: Why does X cause Y in the context discussed [timestamp]? A: [Complete explanation with mechanism]. Explanation: This connects to [concept] because [relationship]. Understanding this is key to [broader application]."
-${comps.selfcheck?`11) Self-check (10-15) — MC/TF/SA/case mix. Answer key: correct answer, rationale, misconceptions, timestamp, guidance. For self-diagnosis only.\n`:''}${comps.reflect?`12) Reflection — prompts: confident (evidence), unclear (questions), connections, explore further, study approach. Self-explanation guidance.\n`:''}${comps.planner?`13) Study planner (2-3 weeks) — Day 1: review FC-01..15, problems 1-4. Day 3: self-test, 5-8. Day 7: random order, quiz. Day 14: full, weak areas. Retrieval tips, avoid passive re-reading.\n`:''}14) Further support — 5-8 rewatch segments with timestamps, why valuable, active watching (pause/predict/explain)
-15) Independent learning (150w) — library resources, evaluate understanding, seek help, link to assessments, critical reading
-16) Accessibility — headings, links, contrast, no colour-only info, plain English, screen reader/text size guidance
+1) Title=[REAL_VIDEO_TITLE], module, date
+2) How to use (≤150w): active recall, spaced, timestamps
+3) Outcomes (4-8): Bloom-tagged
+4) Key concepts (6-12): 2-3 sentences, links, IDs, [mm:ss]
+${c.conceptMap?`5) Concept map: hierarchical, relationships, [mm:ss]\n`:''}${c.glossary?`6) Glossary (15-35): plain English, examples, [mm:ss]\n`:''}${c.worked?`7) Worked (3-6): steps, "why", errors, thinking, [mm:ss]\n`:''}${c.problems?`8) Problems (8-15): recall→extend; hints+solutions+rationale+[mm:ss]\n`:''}${c.cases?`9) Cases (3-5): scenarios, 4-6Q, teaching points, [mm:ss]\n`:''}10) Flashcards (${fc}): ID, Q (understanding not recall), A (precise), Explanation (connections), Source [mm:ss], Difficulty (Fdn/Int/Adv), Related. Appendix: CSV
+${c.selfcheck?`11) Self-check (10-15): mixed; key=answer+rationale+misconceptions+[mm:ss]\n`:''}${c.reflect?`12) Reflection: confident/unclear/connections/approach\n`:''}${c.planner?`13) Planner (2-3wk): Day1 FC-01..15+prob1-4; Day3 self-test; Day7 quiz; Day14 full\n`:''}14) Rewatch (5-8 segments [mm:ss]+why+active)
+15) Independent (150w): resources, self-assess, help
+16) Accessibility: headings, contrast, plain English
 
-FORMAT: ${formatDesc}; section per page; H1/H2+intro; no split cards/examples; [mm:ss] timestamps (min ${depth==='quick'?'12':depth==='standard'?'20':'30'})${format==='docx'?'; Word: H1/H2 styles, tables, TOC, page numbers, editable':''}
+FORMAT: ${fmt}; section/page; H1/H2; no splits; ${ts}+ [mm:ss]${format==='docx'?'; H1/H2 styles, TOC, editable':''}
+DEPTH: ${fc} flashcards, ${pr} problems, ${pg}p, ${ts}+ [mm:ss]
 
-DEPTH: ${depth==='quick'?'Quick: 20-30 flashcards, 6-8 problems, 10-12 pages, 12+ timestamps':depth==='standard'?'Standard: 25-40 flashcards, 10-15 problems, 18-25 pages, 20+ timestamps':'Deep: 35-50 flashcards, 12-18 problems, 30-40 pages, 30+ timestamps'}
+VALIDATE: (1) ≥500w or INSUFFICIENT, (2) Real title extracted, (3) All sections, (4) ${ts}+ timestamps, (5) Flashcards: 7 fields + quality, (6) Expert reasoning, (7) Progress Fdn→Adv, (8) Metacognitive, (9) HE register, (10) Accessible, (11) ONE complete file—ALL sections
+QUALITY: Lecturer-approvable? HE-level? Independent learning?
 
-VALIDATE (Before Output):
-(1) ≥500w or INSUFFICIENT_CONTENT, (2) VIDEO TITLE extracted from Panopto page (not "Study Guide" or placeholder), (3) All required sections present, (4) Min timestamps met (${depth==='quick'?'12':depth==='standard'?'20':'30'}+), (5) Every flashcard has all 7 fields + quality standard met, (6) Examples show expert reasoning not just steps, (7) Problems progress foundation→advanced, (8) Metacognitive+independent elements throughout, (9) Academic register; explanations require thinking not just recall, (10) Accessibility: structure+contrast+plain English, (11) ONE complete file only—ALL sections included.
-QUALITY GATE: Would a lecturer approve this for distribution? University-level throughout? Promotes independent learning?
-
-FINAL CHECK: Did you use the ACTUAL Panopto video title in:
-  - Title page (e.g., "Lecture 5: Photosynthesis - Dr. Martinez")
-  - Filename (e.g., Lecture_5_Photosynthesis_Dr_Martinez_study.${formatExt})
-NOT generic placeholders like "Study_Guide.${formatExt}" or "Lecture_Notes_study.${formatExt}"
-Check og:title, [data-role="session-title"], h1, or document.title before outputting.
-
-OUTPUT INSTRUCTION: Generate and return the COMPLETE study guide file now. Include ALL sections from 1-16 (except unticked components). Do NOT provide a partial guide. Do NOT ask if you should continue. The file must be complete, ready-to-use, and downloadable immediately.
-`;
+OUTPUT NOW: Complete ${ext} with REAL title (e.g., Lecture_5_Photosynthesis_Dr_Martinez_study.${ext}). ALL sections. No partials. Downloadable immediately.`;
 }
 
 function buildNotesPrompt() {
   const slug = 'Lecture_Notes_Pack';
   const format = state.notesFormat;
   const ped = PEDAGOGY[state.notesPedagogy] || PEDAGOGY["Concept Check (Retrieval)"];
-  const pedBlock = `PEDAGOGY NOTES\n• ${ped.inject.join('\n• ')}`;
+  const pedBlock = ped.inject.map(l => `• ${l}`).join('\n');
+  const ext = format === 'pptx' ? 'pptx' : (format === 'docx' ? 'docx' : 'pdf');
+  const fmt = format === 'pptx' ? 'PPTX 16:9' : (format === 'docx' ? 'Word A4' : 'PDF A4');
   
-  const formatExt = format === 'pptx' ? 'pptx' : (format === 'docx' ? 'docx' : 'pdf');
-  const formatDesc = format === 'pptx' ? 'PPTX 16:9 slides' : (format === 'docx' ? 'Word .docx A4 portrait' : 'PDF A4 portrait');
-  
-  return `SYSTEM: Return ONE complete, ready-to-use file: ${slug}.${formatExt}
-Use ONLY lecturer's notes below. Language=${state.quizLang}. No external sources.
+  return `SYSTEM: Return ONE complete file: ${slug}.${ext}
+Use ONLY notes below. Language=${state.quizLang}. Do NOT stop partway or ask to continue. Generate ALL 13 sections in ONE output. 25-35p guide now.
+Parse headings/bullets; dedupe. Extract title (first heading). ≥400w or "INSUFFICIENT_CONTENT".
 
-CRITICAL: Generate the ENTIRE study guide in ONE output. Do NOT stop partway through. Do NOT ask if you should continue. Do NOT ask for permission to build remaining sections. Generate ALL 13 sections listed below in a single, complete, deliverable file. This is a one-shot generation—produce the full 25-35 page guide now.
+NOTES: ${state.notesInput || '[PASTE HERE]'}
 
-INPUT: Parse headings/bullets; dedupe; remove formatting. Extract title from notes (first heading/text). Min 400 words or return "INSUFFICIENT_CONTENT".
+PEDAGOGY: ${pedBlock}
+HE STANDARDS + SOURCE FIDELITY: Every concept from notes (no invention); match lecturer terminology exactly; understanding not recall; scaffold accessible→advanced; connections; precise terms; inference limits; metacognition; HE depth.
 
-NOTES: ${state.notesInput || '[PASTE NOTES HERE]'}
+STRUCTURE (all 13):
+1) Title (from notes or "Notes Pack"), module, date
+2) How to use (≤150w): active recall, spaced
+3) Outcomes (4-8): Bloom-tagged
+4) Key concepts (6-12): 2-3 sentences, links, IDs
+5) Concept map: hierarchical, relationships
+6) Glossary (12-30): plain English, examples
+7) Worked (3-6) OR Cases (3-5): steps+"why", errors, thinking OR scenarios+Q+points
+8) Problems (8-12): recall→extend; hints+solutions+rationale
+9) Flashcards (25-45): ID, Q (retrieval), A, Explanation (why/connect), Difficulty (Fdn/Int/Adv), Related. Appendix: CSV
+10) Self-check (10-15): mixed; key=correct+rationale+misconceptions
+11) Reflection: confident/unclear/connections/approach
+12) Independent (≤200w): resources, self-assess, help
+13) Accessibility: headings, contrast, plain English
 
-HE QUALITY STANDARDS + SOURCE FIDELITY:
-• SOURCE TRUTH: Every concept traces to provided notes; examples from notes not invented; match lecturer's terminology exactly; don't "correct" their language
-• COGNITIVE RIGOR: Questions require understanding not just recall; scaffold from accessible to advanced; promote connections
-• PRECISION: Accurate use of terms from notes; evidence-based; acknowledge complexity; university-level depth
-• INFERENCE LIMITS: Learning outcomes must be inferable from notes content; don't fabricate scholarly detail from sparse notes
-• METACOGNITION: Reflection prompts; independent learning skills; self-assessment guidance
-• ACADEMIC REGISTER: Match notes' level of formality; precise definitions; avoid oversimplification
+FORMAT: ${fmt}; section/page; H1/H2; no splits${format==='docx'?'; H1/H2 styles, TOC, editable':''}
+DEPTH: 25-35p, 25-45 flashcards, 8-12 problems, 3-6 examples/cases
 
-${pedBlock}
+VALIDATE: (1) ≥400w or INSUFFICIENT, (2) Title from notes, (3) All 13 sections, (4) Flashcards: 6 fields + quality, (5) Progress Fdn→Adv, (6) Reasoning not just steps, (7) Metacognitive, (8) Register matches notes, (9) Accessible, (10) ONE complete file—ALL sections
+SOURCE CHECK: Trace every concept to notes? No fabrication?
+QUALITY: HE-level? Lecturer recognizes content? Thinking not recall?
 
-STRUCTURE (all 13 sections):
-1) Title page — extract title or "Lecture Notes Study Pack", module, date, "Independent study guide"
-2) How to use (≤150w) — active recall, spaced practice, systematic approach
-3) Learning outcomes (4-8) — Bloom-tagged, link to broader goals
-4) Key concepts (6-12) — 2-3 sentences; relationships; flashcard IDs
-5) Concept map — hierarchical outline; relationships ("leads to", "contrasts with")
-6) Glossary (12-30) — plain English; examples; mark confusing terms
-7) Worked examples (3-6 procedures) OR Cases (3-5 conceptual) — steps+"why"; errors box; expert thinking OR scenarios+questions+teaching points
-8) Problems (8-12) — recall→apply→extend; 3-level hints. Solutions: answer, rationale, mistakes, "extend" prompt
-9) Flashcards (25-45) — grouped by topic:
-  • Card ID (FC-01), Question (retrieval), Answer, Explanation (why/connect), Difficulty (Foundation/Intermediate/Advanced), Related
-  • Appendix A: CSV (id,question,answer,explanation,difficulty,related_cards)
-10) Self-check (10-15) — varied types; answer key: correct, rationale, misconceptions, guidance
-11) Reflection — prompts: confident (evidence), unclear (questions), connections, explore, study approach
-12) Independent learning (≤200w) — library, evaluate, seek help, assessments, critical reading
-13) Accessibility — headings, links, contrast, plain English, no colour-only
-
-FORMAT: ${formatDesc}; section per page; H1/H2+intro; no split cards/examples${format==='docx'?'; Word: H1/H2 styles, tables, TOC, page numbers, editable':''}
-
-DEPTH: 25-35 pages; 25-45 flashcards; 8-12 problems; 3-6 examples/cases; understanding over memorization
-
-VALIDATE (Before Output):
-(1) ≥400w or INSUFFICIENT_CONTENT, (2) Title extracted from notes, (3) All 13 sections present, (4) Every flashcard has 6 fields + quality met, (5) Problems progress foundation→advanced, (6) Examples show reasoning not just steps, (7) Metacognitive+independent elements, (8) Academic register matches notes depth, (9) Accessibility OK, (10) ONE complete file only—ALL sections included.
-SOURCE CHECK: Can you trace every major concept to the provided notes? No fabrication?
-QUALITY GATE: University-level? Would lecturer recognize their content? Promotes thinking not just recall?
-
-OUTPUT INSTRUCTION: Generate and return the COMPLETE study guide file now. Include ALL 13 sections. Do NOT provide a partial guide. Do NOT ask if you should continue. The file must be complete, ready-to-use, and downloadable immediately.
-`;
+OUTPUT NOW: Complete ${ext}. ALL 13 sections. No partials. Downloadable immediately.`;
 }
 
 // Render preview
@@ -2365,6 +2237,20 @@ function init() {
   // Update pedagogy brief on load (notes)
   const np = PEDAGOGY[state.notesPedagogy];
   if (np && $('notesPedBrief')) $('notesPedBrief').textContent = np.brief;
+  
+  // Help button - navigate to Getting Started page
+  if ($('helpToggle')) {
+    $('helpToggle').onclick = () => {
+      $$('.workflow-btn').forEach(b => b.classList.remove('active'));
+      const helpBtn = document.querySelector('[data-tab="help"]');
+      if (helpBtn) {
+        helpBtn.classList.add('active');
+        state.workflow = 'help';
+        $$('.workflow-content').forEach(w => w.classList.add('hidden'));
+        document.querySelector('.help-workflow').classList.remove('hidden');
+      }
+    };
+  }
   
   // Dismiss handlers
   if ($('dismissAbout')) {
