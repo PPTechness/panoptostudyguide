@@ -1,0 +1,2416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Panopto Canvas Prompt Builder</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+  
+  * { margin:0; padding:0; box-sizing:border-box; }
+  
+  :root {
+    --qub: #E0001B;
+    --qub-red: #E0001B;
+    --primary: #E0001B;
+    --primary-hover: #b00016;
+    --primary-gradient: linear-gradient(135deg, #E0001B 0%, #ff4757 100%);
+    --success: #34c759;
+    --success-gradient: linear-gradient(135deg, #34c759 0%, #00d9ff 100%);
+    --warning: #ff9500;
+    --danger: #ff3b30;
+    --bg: #fafafa;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f0f2f5;
+    --text: #0a0a0a;
+    --text-secondary: #6b7280;
+    --text-tertiary: #9ca3af;
+    --border: #e5e7eb;
+    --shadow: 0 4px 20px rgba(0,0,0,0.06);
+    --shadow-md: 0 8px 30px rgba(0,0,0,0.08);
+    --shadow-lg: 0 20px 60px rgba(0,0,0,0.12);
+    --shadow-xl: 0 30px 80px rgba(0,0,0,0.15);
+    --radius: 16px;
+    --radius-lg: 24px;
+    --radius-xl: 32px;
+    --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --gradient-qub: linear-gradient(135deg, #E0001B 0%, #ff4757 50%, #ff6b81 100%);
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+  
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    position: relative;
+    overflow-x: hidden;
+  }
+  
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(224,0,27,0.03) 0%, transparent 70%);
+    animation: float 20s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -50%;
+    left: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(102,126,234,0.03) 0%, transparent 70%);
+    animation: float 25s ease-in-out infinite reverse;
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  /* Header */
+  header {
+    background: rgba(255,255,255,0.8);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    backdrop-filter: blur(30px) saturate(180%);
+    border-bottom: 1px solid rgba(224,0,27,0.1);
+    padding: 1.25rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: fadeInUp 0.6s ease-out;
+  }
+  
+  header:hover {
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+  }
+  
+  .header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .brand img {
+    height: 32px;
+    transition: transform 0.3s ease;
+    filter: drop-shadow(0 2px 8px rgba(224,0,27,0.15));
+  }
+  
+  .brand img:hover {
+    transform: scale(1.05);
+  }
+  
+  .brand h1 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--text) 0%, var(--text-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    font-size: 1.35rem;
+    font-weight: 700;
+  }
+  
+  .logo-icon {
+    width: 42px;
+    height: 42px;
+    background: var(--gradient-qub);
+    background-size: 200% 200%;
+    animation: gradientShift 8s ease infinite;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 8px 24px rgba(224,0,27,0.25);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .logo-icon::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: rotate(45deg);
+    animation: shimmer 3s infinite;
+  }
+  
+  .logo-icon:hover {
+    transform: rotate(-5deg) scale(1.1);
+    box-shadow: 0 12px 32px rgba(224,0,27,0.35);
+  }
+  
+  /* Workflow Selector */
+  .workflow-selector {
+    display: flex;
+    gap: 6px;
+    background: var(--bg-tertiary);
+    padding: 6px;
+    border-radius: 14px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+    position: relative;
+  }
+  
+  .workflow-btn {
+    padding: 0.625rem 1.25rem;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.01em;
+  }
+  
+  .workflow-btn:hover:not(.active) {
+    color: var(--text);
+    background: rgba(255,255,255,0.5);
+    transform: translateY(-1px);
+  }
+  
+  .workflow-btn.active {
+    background: white;
+    color: var(--primary);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
+    transform: translateY(-2px);
+  }
+  
+  .workflow-btn.active::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    padding: 2px;
+    background: var(--gradient-qub);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    opacity: 0.5;
+  }
+  
+  /* Main Container */
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* Hero Section */
+  .hero {
+    max-width: 1000px;
+    margin: 0 auto 4rem;
+    text-align: center;
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+  }
+  
+  .hero h2 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin: 0 0 1.5rem;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, var(--text) 0%, var(--text-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+  }
+  
+  .hero h2::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 5px;
+    background: var(--gradient-qub);
+    border-radius: 999px;
+    opacity: 0.6;
+  }
+  
+  .hero p {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    max-width: 680px;
+    margin: 0 auto;
+    line-height: 1.7;
+    font-weight: 400;
+  }
+  
+  .hero-sub {
+    max-width: 920px;
+    margin: 12px auto 0;
+    color: var(--text-tertiary);
+  }
+  
+  .info {
+    max-width: 920px;
+    margin: 2rem auto;
+    padding: 2rem;
+    border: 1px solid rgba(224,0,27,0.1);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.8s ease-out 0.4s both;
+  }
+  
+  .info::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-qub);
+  }
+  
+  /* Quick Start Section */
+  .quick-start {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    padding: 3rem;
+    margin-bottom: 3rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+    animation: fadeInUp 0.8s ease-out 0.3s both;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  
+  .preset-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  
+  .preset-card {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .preset-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-qub);
+    opacity: 0;
+    transition: opacity 0.4s;
+    z-index: 0;
+  }
+  
+  .preset-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: var(--shadow-xl);
+  }
+  
+  .preset-card:hover::before {
+    opacity: 0.03;
+  }
+  
+  .preset-card.active {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, rgba(224,0,27,0.05) 0%, rgba(224,0,27,0.02) 100%);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+  }
+  
+  .preset-icon {
+    font-size: 3rem;
+    margin-bottom: 0.75rem;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  
+  .preset-card:hover .preset-icon {
+    transform: scale(1.2) rotate(-5deg);
+  }
+  
+  .preset-name {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    font-size: 1.125rem;
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.01em;
+  }
+  
+  .preset-desc {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* Primary Action */
+  .primary-action {
+    text-align: center;
+    margin: 3rem 0;
+  }
+  
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.125rem 2.5rem;
+    background: var(--gradient-qub);
+    background-size: 200% 200%;
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1.125rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 8px 24px rgba(224,0,27,0.25);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: -0.01em;
+  }
+  
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: rotate(45deg);
+    animation: shimmer 3s infinite;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 16px 40px rgba(224,0,27,0.35);
+    background-position: 100% 50%;
+  }
+  
+  .btn-primary:active {
+    transform: translateY(-2px) scale(0.98);
+  }
+  
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.875rem 1.75rem;
+    background: white;
+    color: var(--text);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    letter-spacing: -0.01em;
+  }
+  
+  .btn-secondary:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .btn-secondary:active {
+    transform: translateY(-1px);
+  }
+  
+  /* Advanced Options (Collapsible) */
+  .advanced-options {
+    background: white;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    animation: fadeInUp 0.8s ease-out 0.5s both;
+  }
+  
+  .advanced-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    transition: all 0.3s;
+  }
+  
+  .advanced-header:hover {
+    background: linear-gradient(135deg, rgba(224,0,27,0.02) 0%, transparent 100%);
+  }
+  
+  .advanced-title {
+    font-weight: 700;
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
+  }
+  
+  .advanced-toggle {
+    color: var(--text-secondary);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-size: 1.25rem;
+  }
+  
+  .advanced-toggle.open {
+    transform: rotate(180deg);
+  }
+  
+  .advanced-content {
+    display: none;
+    padding: 0 2rem 2rem;
+    border-top: 1px solid var(--border);
+  }
+  
+  .advanced-content.open {
+    display: block;
+    animation: fadeInUp 0.4s ease-out;
+  }
+  
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .form-label {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: inherit;
+    background: white;
+  }
+  
+  input:hover,
+  select:hover,
+  textarea:hover {
+    border-color: var(--text-tertiary);
+  }
+  
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(224,0,27,0.08);
+    transform: translateY(-2px);
+  }
+  
+  textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+  
+  .chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+  
+  .chip {
+    padding: 0.625rem 1.125rem;
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    letter-spacing: -0.01em;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .chip::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-qub);
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 0;
+  }
+  
+  .chip:hover {
+    border-color: var(--primary);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .chip:hover::before {
+    opacity: 0.05;
+  }
+  
+  .chip.active {
+    background: var(--gradient-qub);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 6px 20px rgba(224,0,27,0.25);
+    transform: translateY(-2px);
+  }
+  
+  .chip.active::before {
+    opacity: 1;
+  }
+  
+  .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  /* Preview Section */
+  .preview-section {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
+    animation: fadeInUp 0.8s ease-out 0.6s both;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .preview-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: var(--gradient-qub);
+  }
+  
+  .preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding-top: 0.5rem;
+  }
+  
+  .preview-stats {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+  }
+  
+  .stat {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .stat-value {
+    font-weight: 700;
+    color: var(--text);
+    font-size: 1.125rem;
+  }
+  
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--success-gradient);
+    color: white;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(52,199,89,0.25);
+    letter-spacing: -0.01em;
+  }
+  
+  .status-badge.warning {
+    background: linear-gradient(135deg, var(--warning) 0%, #ffa726 100%);
+    box-shadow: 0 4px 12px rgba(255,149,0,0.25);
+  }
+  
+  .status-badge.danger {
+    background: linear-gradient(135deg, var(--danger) 0%, #ff6b6b 100%);
+    box-shadow: 0 4px 12px rgba(255,59,48,0.25);
+  }
+  
+  .preview-box {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    max-height: 500px;
+    overflow-y: auto;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
+    position: relative;
+  }
+  
+  .preview-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--gradient-qub);
+    opacity: 0.3;
+  }
+  
+  .preview-text {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', Consolas, monospace;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    color: var(--text);
+    font-weight: 500;
+  }
+  
+  .preview-placeholder {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: var(--text-secondary);
+  }
+  
+  .preview-placeholder-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.3;
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  /* Progress Bar */
+  .progress-bar {
+    height: 6px;
+    background: var(--bg-tertiary);
+    border-radius: 999px;
+    margin: 1.5rem 0;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background: var(--success-gradient);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 999px;
+    box-shadow: 0 0 12px rgba(52,199,89,0.4);
+  }
+  
+  .progress-fill.warning {
+    background: linear-gradient(135deg, var(--warning) 0%, #ffa726 100%);
+    box-shadow: 0 0 12px rgba(255,149,0,0.4);
+  }
+  
+  .progress-fill.danger {
+    background: var(--danger);
+  }
+  
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: linear-gradient(135deg, #1d1d1f 0%, #2d2d2f 100%);
+    color: white;
+    padding: 1.25rem 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transform: translateY(150%) scale(0.9);
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+    z-index: 10000;
+    opacity: 0;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+  }
+  
+  .toast.show {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  
+  .toast::before {
+    content: '✓';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--success-gradient);
+    border-radius: 50%;
+    font-size: 16px;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(52,199,89,0.4);
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero h2 {
+      font-size: 2.5rem;
+    }
+    
+    .preset-cards {
+      grid-template-columns: 1fr;
+    }
+    
+    .workflow-selector {
+      flex-direction: column;
+      width: 100%;
+    }
+    
+    .header-content {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .toast {
+      left: 1rem;
+      right: 1rem;
+      bottom: 1rem;
+    }
+  }
+  
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+    border-radius: 999px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--border) 0%, var(--text-tertiary) 100%);
+    border-radius: 999px;
+    border: 3px solid var(--bg-tertiary);
+    transition: background 0.3s;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, var(--text-tertiary) 0%, var(--text-secondary) 100%);
+  }
+  
+  /* Hidden */
+  .hidden {
+    display: none !important;
+  }
+  
+  /* Utility classes */
+  .w-100 {
+    width: 100%;
+  }
+  
+  .min-h-200 {
+    min-height: 200px;
+  }
+  
+  .mt-1half {
+    margin-top: 1.5rem;
+  }
+  
+  /* Radio group styles */
+  .radio-group {
+    display: flex;
+    gap: 1.25rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  
+  .radio-group label:hover {
+    color: var(--primary);
+  }
+  
+  .radio-group input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--primary);
+    cursor: pointer;
+  }
+  
+  /* Muted text */
+  .muted {
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    margin-top: 0.75rem;
+  }
+  
+  /* Help text */
+  .help {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    margin-top: 0.5rem;
+  }
+  
+  /* Helper message */
+  .helper-message {
+    background: linear-gradient(135deg, rgba(224,0,27,0.05) 0%, rgba(224,0,27,0.02) 100%);
+    border-left: 4px solid var(--primary);
+    padding: 1.25rem 1.5rem;
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    box-shadow: 0 4px 12px rgba(224,0,27,0.08);
+  }
+  
+  .helper-message-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    color: var(--primary);
+  }
+  
+  .helper-message-text {
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--text);
+  }
+  
+  .helper-message-text strong {
+    font-weight: 700;
+    color: var(--text);
+  }
+  
+  /* Preview actions row */
+  .preview-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  /* Utility classes additions */
+  .centered {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .align-center {
+    text-align: center;
+  }
+  
+  .help {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  
+  .kb {
+    font-size: 0.8125rem;
+    line-height: 1.45;
+  }
+  
+  .tooltip {
+    border-bottom: 1px dotted #8aa;
+    cursor: help;
+  }
+  
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  fieldset {
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem 2rem;
+    margin-bottom: 2rem;
+    background: white;
+    box-shadow: var(--shadow);
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  fieldset:hover {
+    border-color: var(--text-tertiary);
+    box-shadow: var(--shadow-md);
+  }
+  
+  legend {
+    font-weight: 700;
+    padding: 0 0.75rem;
+    color: var(--text);
+    font-size: 1.125rem;
+    letter-spacing: -0.01em;
+  }
+  
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: white;
+    color: var(--text);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: -0.01em;
+  }
+  
+  .btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .btn:active {
+    transform: translateY(0);
+  }
+  
+  /* FAQ Section */
+  .faq-section {
+    max-width: 1200px;
+    margin: 6rem auto 4rem;
+    padding: 0 2rem;
+    animation: fadeInUp 0.8s ease-out 0.7s both;
+  }
+  
+  .faq-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 3rem;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #2d3561 0%, #6b4c9a 25%, #c74b7c 50%, #e74c3c 75%, #f39c12 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    background-size: 200% auto;
+    animation: gradientShift 8s ease infinite;
+  }
+  
+  .faq-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  
+  .faq-item {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  
+  .faq-item:hover {
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+    transform: translateY(-4px);
+  }
+  
+  .faq-question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.75rem 2rem;
+    cursor: pointer;
+    background: white;
+    transition: all 0.3s;
+    -webkit-user-select: none;
+    user-select: none;
+    gap: 1.5rem;
+  }
+  
+  .faq-question:hover {
+    background: linear-gradient(135deg, rgba(224,0,27,0.02) 0%, transparent 100%);
+  }
+  
+  .faq-question-text {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    line-height: 1.5;
+    flex: 1;
+  }
+  
+  .faq-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-size: 1.25rem;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  
+  .faq-item.open .faq-icon {
+    transform: rotate(180deg);
+    background: var(--gradient-qub);
+    color: white;
+    box-shadow: 0 4px 12px rgba(224,0,27,0.25);
+  }
+  
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0 2rem;
+  }
+  
+  .faq-item.open .faq-answer {
+    max-height: 500px;
+    padding: 0 2rem 2rem;
+  }
+  
+  .faq-answer-text {
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--text-secondary);
+    padding-top: 0.5rem;
+    border-top: 2px solid var(--bg-tertiary);
+  }
+  
+  .faq-answer-text strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+  
+  .faq-answer-text ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+  }
+  
+  .faq-answer-text li {
+    margin-bottom: 0.5rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-content">
+    <div class="brand">
+      <img src="Queen's Red Logo - Landscape.png" alt="Queen's University Belfast" />
+      <h1>Prompt Builder</h1>
+    </div>
+    
+    <div class="workflow-selector">
+      <button class="workflow-btn active" data-tab="quiz">Canvas Quiz</button>
+      <button class="workflow-btn" data-tab="study">Study Guide</button>
+      <button class="workflow-btn" data-tab="notes">From Notes</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Quiz Workflow -->
+  <div class="workflow-content quiz-workflow">
+    <section class="hero">
+      <h2>Generate Canvas Quiz Prompts</h2>
+    </section>
+    <div class="info" id="about">
+      <div class="section-title">
+        <strong>About this tool</strong>
+        <button class="btn" id="dismissAbout" title="Hide this message">Hide</button>
+      </div>
+      <p class="kb">Choose a pedagogy approach, customise your settings, then paste the prompt into the Copilot sidebar with your Panopto lecture open. Copilot reads your captions/slides and produces a Canvas-ready QTI zip and a lecturer PDF, using only your materials.</p>
+    </div>
+    
+    <div class="info" id="preflight" style="background: #fff9e6; border-color: #ffa500;">
+      <div class="section-title">
+        <strong>⚡ Panopto Preflight (1 minute)</strong>
+        <button class="btn" id="hidePreflight" title="Hide this checklist">Hide</button>
+        </div>
+      <ol class="kb" style="margin-top: 0.75rem; padding-left: 1.5rem;">
+        <li style="margin-bottom: 0.5rem;">Open the full Panopto <em>Watch</em> page (not the small Canvas embed).</li>
+        <li style="margin-bottom: 0.5rem;">Open <em>Captions</em> and <em>Contents/Slides</em> panels.</li>
+        <li style="margin-bottom: 0.5rem;">Scroll the transcript to the bottom once (loads all captions).</li>
+        <li>Open Copilot and enable <em>Use page content</em>/<em>Allow this page</em>.</li>
+      </ol>
+    </div>
+    
+    <!-- Customise Options (Now at Top) -->
+    <div class="advanced-options" style="margin-bottom: 2rem;">
+      <div class="advanced-header" id="advancedToggle">
+        <span class="advanced-title">Customise Options</span>
+        <span class="advanced-toggle open">▼</span>
+      </div>
+      <div class="advanced-content open" id="advancedContent">
+        
+        <div class="form-grid">
+          
+          <div class="form-group">
+            <label class="form-label" for="quizLang">Language</label>
+            <select id="quizLang" title="Output language and terminology style. Default: English (UK).">
+              <option value="en-GB" selected>English (UK)</option>
+              <option value="ga-IE">Irish</option>
+              <option value="cy-GB">Welsh</option>
+              <option value="fr-FR">French</option>
+              <option value="es-ES">Spanish</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="quizCount">Questions per type</label>
+            <input type="number" id="quizCount" min="1" max="12" value="3" title="How many items to generate for each selected question type.">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="quizFeedback">Feedback level</label>
+            <select id="quizFeedback" title="What students will see after answering.">
+              <option value="off">Off — no explanations</option>
+              <option value="brief" selected>Brief — 1-sentence rationale for the correct answer</option>
+              <option value="detailed">Detailed — explain the correct answer AND why each distractor is less accurate, with study tips</option>
+            </select>
+            <p class="help">This feedback appears to students when they review the Canvas quiz. It helps address misconceptions and supports revision.</p>
+          </div>
+        </div>
+        
+        <div class="form-group mt-1half">
+          <label class="form-label">Pedagogy Preset</label>
+          <select id="pedagogy" title="Sets tone and question style across disciplines.">
+            <option>Concept Check (Retrieval)</option>
+            <option>Worked Examples (Scaffolded)</option>
+            <option>Case/Scenario-Based</option>
+            <option>Debate / Critical Analysis</option>
+            <option>Metacognitive Reflection</option>
+            <option>Accessibility-First (UDL)</option>
+          </select>
+          <p class="help" id="pedBrief"></p>
+        </div>
+        
+        <div class="form-group mt-1half">
+          <label class="form-label">Question Types</label>
+          <div class="chip-group" id="questionTypes"></div>
+          <p class="help">Multiple Choice is a good default to check core understanding. You can add other Canvas-compatible types:
+            <span class="tooltip" title="Multiple Answers: choose all that apply, scored with partial credit.">MA</span>,
+            <span class="tooltip" title="True/False: two options; the prompt enforces valid structure in QTI.">TF</span>,
+            <span class="tooltip" title="Short Answer: exact strings (or variants) are accepted.">SA</span>,
+            <span class="tooltip" title="Essay: unscored text response; used as a fallback if a question can't be validated.">Essay</span>,
+            <span class="tooltip" title="Numerical: exact value or tolerance range.">Numerical</span>,
+            <span class="tooltip" title="Matching: valid pairs; if not possible, we auto-rewrite to MC/Essay.">Matching</span>.
+          </p>
+        </div>
+        
+    </div>
+  </div>
+  
+    <!-- Primary Action -->
+    <div class="primary-action">
+      <button class="btn-primary" id="generateQuiz" onclick="alert('Quiz button clicked!'); copyPrompt();">
+        📋 Copy Prompt to Clipboard
+      </button>
+    </div>
+    
+    <!-- Canvas How-To (Quiz Only) -->
+    <div class="info" id="canvasHow" style="margin-top: 1.5rem;">
+      <div class="section-title">
+        <strong>Using this in Canvas (New or Classic Quizzes)</strong>
+        </div>
+      <ol class="kb" style="margin-top: 1rem; padding-left: 1.5rem;">
+        <li style="margin-bottom: 0.5rem;">Complete the Panopto preflight steps above (open Watch page, captions/slides panels, scroll transcript).</li>
+        <li style="margin-bottom: 0.5rem;">Copy the prompt (button above) and paste it into Copilot sidebar. It will produce:
+          <ul style="margin-top: 0.25rem; padding-left: 1.5rem;"><li>A QTI <code>.zip</code> for Canvas</li><li>A lecturer PDF</li></ul>
+        </li>
+        <li style="margin-bottom: 0.5rem;"><strong>Import to Canvas:</strong> In your course, go to <strong>Settings → Import Course Content → Content Type: QTI .zip file</strong>. Choose the downloaded ZIP and click <strong>Import</strong>.</li>
+        <li style="margin-bottom: 0.5rem;">After import, check <strong>Quizzes</strong> (or <strong>Assignments</strong> for New Quizzes). If you only see an item bank, the importer auto-rewrote items—open the bank and build a quiz from it.</li>
+        <li>Review points, feedback, and availability dates; then publish.</li>
+      </ol>
+      <p class="help" style="margin-top: 0.75rem;"><strong>Note:</strong> If Copilot returns "INSUFFICIENT_PAGE_CONTENT", go back and ensure captions/contents panels are fully expanded and loaded.</p>
+      </div>
+    </div>
+    
+  <!-- Study Guide Workflow -->
+  <div class="workflow-content study-workflow hidden">
+    <section class="hero">
+      <h2>Generate Study Guides</h2>
+    </section>
+    <div class="info">
+      <p class="kb">Create rich, pedagogy-first study resources from your Panopto lectures using QUB principles.</p>
+    </div>
+    
+    <!-- Study Guide Options -->
+    <div class="advanced-options" style="margin-bottom: 2rem;">
+      <div class="advanced-header" id="studyAdvancedToggle">
+        <span class="advanced-title">Customise Study Guide</span>
+        <span class="advanced-toggle open">▼</span>
+      </div>
+      <div class="advanced-content open" id="studyAdvancedContent">
+        
+        <div class="form-group">
+          <label class="form-label">Pedagogy Preset</label>
+          <select id="studyPedagogy" title="Sets tone and structure across disciplines." onchange="state.studyPedagogy = this.value; document.getElementById('studyPedBrief').textContent = PEDAGOGY[this.value].brief; render();">
+            <option>Concept Check (Retrieval)</option>
+            <option>Worked Examples (Scaffolded)</option>
+            <option>Case/Scenario-Based</option>
+            <option>Debate / Critical Analysis</option>
+            <option>Metacognitive Reflection</option>
+            <option>Accessibility-First (UDL)</option>
+          </select>
+          <p class="help" id="studyPedBrief"></p>
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Output Format</label>
+            <div class="radio-group" style="gap:14px;">
+              <label><input type="radio" name="sgFormat" value="pdf" onchange="state.sgFormat = this.value; render();"> PDF (A4)</label>
+              <label><input type="radio" name="sgFormat" value="docx" checked onchange="state.sgFormat = this.value; render();"> Word (.docx)</label>
+              <label><input type="radio" name="sgFormat" value="pptx" onchange="state.sgFormat = this.value; render();"> PPTX (16:9)</label>
+            </div>
+            <p class="help">Choose Word for editable study guides you can customise before distributing to students.</p>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="studyDepth">Depth</label>
+            <select id="studyDepth" onchange="state.studyDepth = this.value; render();">
+              <option value="quick">Quick (10–12 pages) — 20–30 flashcards, 6–8 problems, concise explanations</option>
+              <option value="standard" selected>Standard (18–25 pages) — 25–40 flashcards, 10–15 problems, fuller detail</option>
+              <option value="deep">Deep (30–40 pages) — 35–50 flashcards, 12–18 problems, extensive explanations</option>
+            </select>
+            <p class="help">Depth controls thoroughness and quantity. Use Components below to choose which sections to include.</p>
+          </div>
+        </div>
+        
+        <div class="form-group mt-1half">
+          <label class="form-label">Components (untick to exclude)</label>
+          <div class="chip-group" id="studyComponents"></div>
+          <p class="help">All ticked components will be included regardless of depth. Depth only affects detail level and quantity.</p>
+        </div>
+        
+      </div>
+        </div>
+        
+    <!-- Primary Action -->
+    <div class="primary-action">
+      <button class="btn-primary" id="generateStudy" onclick="alert('Button clicked!'); copyPrompt();">
+        📋 Copy Prompt to Clipboard
+      </button>
+      <p class="help" style="margin-top: 0.5rem;">Paste into Copilot with your Panopto Watch page (captions & contents open).</p>
+    </div>
+  </div>
+  
+  <!-- From Notes Workflow -->
+  <div class="workflow-content notes-workflow hidden">
+    <section class="hero">
+      <h2>Generate from Notes</h2>
+    </section>
+    <div class="info">
+      <p class="kb">Transform your lecture notes into rich study materials with flashcards, problems, and reflections.</p>
+    </div>
+    
+    <!-- Notes Input -->
+    <div class="quick-start">
+      <div class="section-title">Paste your notes</div>
+      <textarea id="notesInput" placeholder="Paste your lecture notes here (plain text, headings, bullets)..." class="w-100 min-h-200"></textarea>
+      <p class="help">Minimum 400 words recommended. Include headings and structure where possible.</p>
+    </div>
+    
+    <!-- Notes Options -->
+    <div class="advanced-options" style="margin-bottom: 2rem;">
+      <div class="advanced-header" id="notesAdvancedToggle">
+        <span class="advanced-title">Customise Output</span>
+        <span class="advanced-toggle open">▼</span>
+        </div>
+      <div class="advanced-content open" id="notesAdvancedContent">
+        
+        <div class="form-group">
+          <label class="form-label">Pedagogy Preset</label>
+          <select id="notesPedagogy" title="Sets tone and structure." onchange="state.notesPedagogy = this.value; document.getElementById('notesPedBrief').textContent = PEDAGOGY[this.value].brief; render();">
+            <option>Concept Check (Retrieval)</option>
+            <option>Worked Examples (Scaffolded)</option>
+            <option>Case/Scenario-Based</option>
+            <option>Debate / Critical Analysis</option>
+            <option>Metacognitive Reflection</option>
+            <option>Accessibility-First (UDL)</option>
+          </select>
+          <p class="help" id="notesPedBrief"></p>
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Output Format</label>
+            <div class="radio-group" style="gap:14px;">
+              <label><input type="radio" name="notesFormat" value="pdf" onchange="state.notesFormat = this.value; render();"> PDF (A4)</label>
+              <label><input type="radio" name="notesFormat" value="docx" checked onchange="state.notesFormat = this.value; render();"> Word (.docx)</label>
+              <label><input type="radio" name="notesFormat" value="pptx" onchange="state.notesFormat = this.value; render();"> PPTX (16:9)</label>
+        </div>
+            <p class="help">Choose Word to edit and customise the study materials before sharing.</p>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+    <!-- Primary Action -->
+    <div class="primary-action">
+      <button class="btn-primary" id="generateNotes" onclick="alert('Notes button clicked!'); copyPrompt();">
+        📋 Copy Prompt to Clipboard
+      </button>
+      <p class="help" style="margin-top: 0.5rem;">Paste into Copilot (no Panopto page needed for this workflow).</p>
+    </div>
+  </div>
+  
+  <!-- Preview Section (Shared) -->
+  <div class="preview-section centered">
+    <div class="preview-header">
+      <div class="section-title">Your Copilot Prompt</div>
+      <div class="preview-stats">
+        <div class="stat">
+          <span>📊</span>
+          <span><span class="stat-value" id="charCount">0</span> chars (aim &lt; 8000)</span>
+        </div>
+        <span class="status-badge" id="statusBadge">
+          <span>✓</span>
+          <span id="statusText">Ready</span>
+        </span>
+      </div>
+    </div>
+    
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressBar"></div>
+    </div>
+    
+    <div class="preview-actions" style="margin: 1rem 0; justify-content: space-between;">
+      <span class="help">Paste into Copilot with your Panopto Watch page open. Ensure preflight steps are done.</span>
+      <button class="btn-primary" id="copyTop" title="Copy the prompt" onclick="alert('copyTop clicked!'); copyPrompt();">📋 Copy Prompt</button>
+    </div>
+    
+    <div class="preview-box">
+      <div class="preview-placeholder" id="previewPlaceholder">
+        <div class="preview-placeholder-icon">👆</div>
+        <p>Customise your options above and your prompt will appear here</p>
+      </div>
+      <pre class="preview-text hidden" id="previewText"></pre>
+    </div>
+  </div>
+  
+  <!-- FAQ Section -->
+  <section class="faq-section">
+    <h2 class="faq-title">Frequently Asked Questions</h2>
+    
+    <div class="faq-items">
+      <div class="faq-item">
+        <div class="faq-question">
+          <span class="faq-question-text">How do I use the Prompt Builder with Panopto?</span>
+          <div class="faq-icon">›</div>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-text">
+            <strong>It's simple!</strong> Open your Panopto video in your browser, then open Microsoft Copilot in the sidebar. Copy the generated prompt from this tool and paste it into Copilot. Copilot will read the captions and slides from your Panopto page to create Canvas-ready quizzes or study guides.
+          </div>
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question">
+          <span class="faq-question-text">What outputs does the Prompt Builder create?</span>
+          <div class="faq-icon">›</div>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-text">
+            The builder creates three types of outputs:
+            <ul>
+              <li><strong>Canvas Quiz:</strong> QTI .zip file for import + lecturer PDF with answer key</li>
+              <li><strong>Study Guide:</strong> Comprehensive study resource with flashcards, problems, and reflection prompts</li>
+              <li><strong>From Notes:</strong> Transform your lecture notes into a structured study pack</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question">
+          <span class="faq-question-text">What are pedagogy presets and how do I choose one?</span>
+          <div class="faq-icon">›</div>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-text">
+            Pedagogy presets shape the <strong>tone and structure</strong> of your questions based on Queen's Beyond Blended framework. Choose based on your learning objectives:
+            <ul>
+              <li><strong>Concept Check:</strong> Quick retrieval practice for essential concepts</li>
+              <li><strong>Worked Examples:</strong> Step-by-step problem solving with scaffolding</li>
+              <li><strong>Case-Based:</strong> Apply ideas to realistic scenarios</li>
+              <li><strong>Critical Analysis:</strong> Compare viewpoints with evidence</li>
+              <li><strong>Metacognitive:</strong> Reflection on process and next steps</li>
+              <li><strong>Accessibility-First:</strong> Clear language with UDL principles</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question">
+          <span class="faq-question-text">How do I import the quiz into Canvas?</span>
+          <div class="faq-icon">›</div>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-text">
+            In Canvas, go to <strong>Settings → Import Course Content → Content Type: QTI .zip file</strong>. Choose the downloaded ZIP and click Import. After import, the quiz appears under <strong>Quizzes</strong> (and Assignments for New Quizzes). Review points, feedback, and dates before publishing.
+          </div>
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question">
+          <span class="faq-question-text">Can I customize the generated content?</span>
+          <div class="faq-icon">›</div>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-text">
+            <strong>Absolutely!</strong> For Study Guides, you can choose:
+            <ul>
+              <li><strong>Output format:</strong> Word (.docx), PDF, or PowerPoint</li>
+              <li><strong>Depth:</strong> Quick (10-12 pages), Standard (18-25 pages), or Deep (30-40 pages)</li>
+              <li><strong>Components:</strong> Select which sections to include (flashcards, problems, cases, etc.)</li>
+            </ul>
+            The Word format is especially useful as it's fully editable!
+          </div>
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question">
+          <span class="faq-question-text">Is my content secure and private?</span>
+          <div class="faq-icon">›</div>
+        </div>
+        <div class="faq-answer">
+          <div class="faq-answer-text">
+            Yes! The Prompt Builder is a <strong>client-side tool</strong> that only generates prompts—no data is sent to external servers. When you use the prompt with Copilot, Microsoft's privacy policies apply. The tool only uses content visible on your Panopto page and never accesses external sources.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+</main>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast">
+  <span>✓</span>
+  <span>Prompt copied to clipboard!</span>
+</div>
+
+<script>
+// Pedagogy presets (QUB-aligned)
+const PEDAGOGY = {
+  "Concept Check (Retrieval)": {
+    brief: "Quick checks of core ideas. Tight stems, one clearly best answer, and distractors based on likely misunderstandings.",
+    inject: [
+      "Use retrieval-practice style questions that check essential concepts from the lecture.",
+      "Distractors must reflect plausible misunderstandings taken from the lecture wording only.",
+      "Brief feedback explains the correct idea and points to a timestamp if detectable."
+    ]
+  },
+  "Worked Examples (Scaffolded)": {
+    brief: "Step-by-step problem solving with hints that fade. Great for methods and processes.",
+    inject: [
+      "Prefer worked-example prompts with ordered steps.",
+      "Add a short 'why this step' note; in detailed feedback include 'common slip' guidance."
+    ]
+  },
+  "Case/Scenario-Based": {
+    brief: "Apply the lecture ideas to realistic situations; one answer is most defensible from the material.",
+    inject: [
+      "Frame items as short scenarios derived strictly from lecture captions/slides.",
+      "Provide one best answer; others can be reasonable but less supported."
+    ]
+  },
+  "Debate / Critical Analysis": {
+    brief: "Compare viewpoints; justify the preferred answer with evidence from the lecture.",
+    inject: [
+      "Pose contrastive options; mark the one most defensible by the lecture evidence.",
+      "Feedback references the relevant slide/timestamp where possible."
+    ]
+  },
+  "Metacognitive Reflection": {
+    brief: "Students reflect on process, limits, and next steps. Good as SA/Essay.",
+    inject: [
+      "Include prompts that ask students to explain approach and next steps tied to outcomes.",
+      "Prefer short-answer or essay for depth where MC is weak."
+    ]
+  },
+  "Accessibility-First (UDL)": {
+    brief: "Plain UK English, inclusive phrasing, and multiple means of representation.",
+    inject: [
+      "Ensure each item stands alone without images; suggest alt text when PDF is generated.",
+      "Avoid idioms and culturally specific references."
+    ]
+  }
+};
+
+// State
+let state = {
+  workflow: 'quiz',
+  pedagogy: 'Concept Check (Retrieval)',
+  quizTitle: '',
+  quizLang: 'en-GB',
+  quizCount: 3,
+  quizFeedback: 'brief',
+  questionTypes: ['multiple_choice_question'],
+  
+  // Study Guide
+  studyPedagogy: 'Concept Check (Retrieval)',
+  sgFormat: 'docx',
+  studyDepth: 'standard',
+  studyComponents: {
+    conceptMap: true,
+    glossary: true,
+    worked: true,
+    problems: true,
+    cases: true,
+    selfcheck: true,
+    reflect: true,
+    planner: true
+  },
+  
+  // From Notes
+  notesPedagogy: 'Concept Check (Retrieval)',
+  notesFormat: 'docx',
+  notesInput: ''
+};
+
+const STUDY_COMPONENTS = [
+  { id: 'conceptMap', label: 'Concept Map' },
+  { id: 'glossary', label: 'Glossary' },
+  { id: 'worked', label: 'Worked Examples' },
+  { id: 'problems', label: 'Problem Set' },
+  { id: 'cases', label: 'Case Vignettes' },
+  { id: 'selfcheck', label: 'Self-Check Quiz' },
+  { id: 'reflect', label: 'Reflection Prompts' },
+  { id: 'planner', label: 'Study Planner' }
+];
+
+const QUESTION_TYPES = [
+  { id: 'multiple_choice_question', label: 'Multiple Choice' },
+  { id: 'multiple_answers_question', label: 'Multiple Answers' },
+  { id: 'true_false_question', label: 'True/False' },
+  { id: 'short_answer_question', label: 'Short Answer' },
+  { id: 'essay_question', label: 'Essay' },
+  { id: 'numerical_question', label: 'Numerical' },
+  { id: 'matching_question', label: 'Matching' }
+];
+
+// DOM helpers
+const $ = id => document.getElementById(id);
+const $$ = sel => document.querySelectorAll(sel);
+
+// Detect Panopto title (enhanced)
+function detectPanoptoTitle() {
+  const og = document.querySelector('meta[property="og:title"]')?.content?.trim();
+  const data = document.querySelector('[data-role="session-title"], .session-title, .video-title')?.textContent?.trim();
+  const doc = document.title?.trim();
+  return og || data || doc || '';
+}
+
+const panoptoTitle = detectPanoptoTitle();
+
+function slugify(s) {
+  const a = (s || '').normalize('NFKD').replace(/[^\x00-\x7F]/g, '');
+  return (a.replace(/[^A-Za-z0-9]+/g, '_').replace(/_+/g, '_').replace(/^_+|_+$/g, '') || 'Lecture_Quiz');
+}
+
+// Panopto source block (mandatory)
+const PANOPTO_BLOCK = `
+SOURCE ACQUISITION (PANOPTO DOM — MANDATORY)
+You are viewing a Panopto video page. Read THIS page's DOM and collect text in priority:
+  1) Captions/Transcript panel (full transcript, not just visible lines)
+  2) Contents/Slides titles + any slide text
+  3) Any visible notes/doc panel
+
+❗️ CRITICAL: EXTRACT REAL VIDEO TITLE FROM PANOPTO PAGE ❗️
+This is MANDATORY. You MUST extract the actual video title. Look in this exact order:
+  1. <meta property="og:title" content="..."> — Extract the content attribute value (MOST RELIABLE)
+  2. Element with [data-role="session-title"] or class="session-title" — Extract its textContent
+  3. Page heading (h1 near video player) — Extract its textContent
+  4. document.title — Extract and remove " - Panopto" suffix if present
+
+EXAMPLE: If you find <meta property="og:title" content="Week 5: Cell Division - Dr. Ahmed">
+  ✅ CORRECT: LECTURE_TITLE = "Week 5: Cell Division - Dr. Ahmed"
+             SAFE_LECTURE_TITLE = "Week_5_Cell_Division_Dr_Ahmed"
+  ❌ WRONG:   LECTURE_TITLE = "Lecture Quiz" (generic placeholder - DO NOT USE)
+             LECTURE_TITLE = "Panopto_Canvas_Prompt_Builder" (DO NOT USE)
+
+You MUST use the ACTUAL VIDEO TITLE you extract from the page. NOT "Lecture Quiz", NOT "Study Guide", NOT any generic text.
+This title will be used in filenames and inside the generated files.
+
+MINIMUM MATERIAL CHECK (FAIL-CLOSED)
+  After deduplication, if captions+slides text < 300 words: STOP and return EXACTLY
+  "INSUFFICIENT_PAGE_CONTENT — Open captions & contents panels, scroll transcript fully, enable 'Use page content', then run again."
+  Do NOT produce any files in this failure case.
+`;
+
+// Prompt builders
+function buildQuizPrompt() {
+  const title = panoptoTitle || 'Lecture Quiz';
+  const slug = slugify(title);
+  const types = state.questionTypes.join(', ');
+  const target = state.questionTypes.length * state.quizCount;
+  
+  // Get pedagogy notes
+  const ped = PEDAGOGY[state.pedagogy] || PEDAGOGY["Concept Check (Retrieval)"];
+  const pedagogyLines = ped.inject.map(l => `• ${l}`).join('\n');
+  
+  // Add special rules for TF and Numerical if selected
+  let specialRules = '';
+  if (state.questionTypes.includes('true_false_question')) {
+    specialRules += '\nTRUE/FALSE: Use <response_lid> with two <response_label>: "True" and "False".';
+  }
+  if (state.questionTypes.includes('numerical_question')) {
+    specialRules += '\nNUMERICAL: Include <response_num> with answer tolerance in metadata.';
+  }
+  
+  return `SYSTEM
+Return EXACTLY two files and no other text:
+(1) ${slug}_quiz_qti.zip
+(2) ${slug}_quiz.pdf
+
+Use ONLY content visible on THIS Panopto page (captions/transcript and contents/slides). Language=${state.quizLang}. No external sources. Do NOT ask questions.
+${PANOPTO_BLOCK}
+PEDAGOGY
+${pedagogyLines}
+
+HE QUALITY STANDARDS (Every Item Must Meet):
+STEMS: Clear, standalone, test specific outcomes; avoid trivial recall; one defensible answer
+DISTRACTORS: Plausible, based on lecture misconceptions, similar length/grammar; no tricks
+FEEDBACK: Explain WHY correct answer is right; address misconceptions; reference lecture with timestamp when possible
+COGNITIVE RIGOR: Mix Bloom levels per pedagogy (not all recall); require thinking not just memory
+ACADEMIC REGISTER: Precise terminology; evidence-based; acknowledge nuance; university-level depth
+
+TITLE & FILENAMES (CRITICAL — NO PLACEHOLDERS)
+You MUST extract the real video title from the Panopto page you are viewing. Look in this exact order:
+  1. <meta property="og:title" content="..."> — Extract the content attribute value
+  2. Element with [data-role="session-title"] or class="session-title" — Extract its text
+  3. Main heading (h1) near the video player — Extract its text
+  4. document.title — Extract and remove " - Panopto" suffix if present
+
+EXAMPLE:
+  If you find: <meta property="og:title" content="Week 3: Neural Networks - Prof. Johnson">
+  Then: LECTURE_TITLE = "Week 3: Neural Networks - Prof. Johnson"
+        SAFE_LECTURE_TITLE = "Week_3_Neural_Networks_Prof_Johnson"
+
+Use LECTURE_TITLE in the assessment.xml title attribute.
+Use SAFE_LECTURE_TITLE for filenames: [SAFE_LECTURE_TITLE]_quiz_qti.zip and [SAFE_LECTURE_TITLE]_quiz.pdf
+
+DO NOT use generic placeholders like "Lecture Quiz" or "Panopto_Canvas_Prompt_Builder".
+You MUST use the ACTUAL video title from the page you are viewing.
+
+QUESTION TYPES & COUNTS
+Type: ${types}
+Count per type: ${state.quizCount}
+TARGET_TOTAL: ${target} items exactly
+If validation fails, rewrite as essay_question (keep count).${specialRules}
+
+QTI STRUCTURE — ${slug}_quiz_qti.zip
+Create ZIP containing:
+  - imsmanifest.xml
+  - assessment.xml
+
+imsmanifest.xml:
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="man1" xmlns="http://www.imsglobal.org/xsd/imscp_v1p1">
+  <resources>
+    <resource identifier="res1" type="imsqti_xmlv1p2" href="assessment.xml">
+      <file href="assessment.xml"/>
+    </resource>
+  </resources>
+</manifest>
+
+assessment.xml structure:
+<?xml version="1.0" encoding="UTF-8"?>
+<questestinterop xmlns="http://www.imsglobal.org/xsd/ims_qtiasiv1p2">
+  <assessment ident="asmt1" title="[LECTURE_TITLE from Panopto page]">
+    <section ident="root_section">
+      <!-- ${target} items here -->
+    </section>
+  </assessment>
+</questestinterop>
+Note: Replace [LECTURE_TITLE from Panopto page] with the actual video title you extracted.
+
+ITEM TEMPLATE (multiple_choice_question):
+<item ident="q1" title="Question 1">
+  <itemmetadata>
+    <qtimetadata>
+      <qtimetadatafield><fieldlabel>question_type</fieldlabel><fieldentry>multiple_choice_question</fieldentry></qtimetadatafield>
+      <qtimetadatafield><fieldlabel>points_possible</fieldlabel><fieldentry>1</fieldentry></qtimetadatafield>
+    </qtimetadata>
+  </itemmetadata>
+  <presentation>
+    <material><mattext texttype="text/html">STEM_TEXT_HERE</mattext></material>
+    <response_lid ident="response1" rcardinality="Single">
+      <render_choice shuffle="Yes">
+        <response_label ident="A"><material><mattext texttype="text/html">OPTION_A</mattext></material></response_label>
+        <response_label ident="B"><material><mattext texttype="text/html">OPTION_B</mattext></material></response_label>
+        <response_label ident="C"><material><mattext texttype="text/html">OPTION_C</mattext></material></response_label>
+        <response_label ident="D"><material><mattext texttype="text/html">OPTION_D</mattext></material></response_label>
+      </render_choice>
+    </response_lid>
+  </presentation>
+  <resprocessing>
+    <outcomes><decvar varname="SCORE" vartype="Decimal" minvalue="0" maxvalue="100"/></outcomes>
+    <respcondition continue="No">
+      <conditionvar><varequal respident="response1">CORRECT_IDENT</varequal></conditionvar>
+      <setvar varname="SCORE" action="Set">100</setvar>${state.quizFeedback !== 'off' ? '\n      <displayfeedback feedbacktype="Response" linkrefid="correct_fb"/>' : ''}
+    </respcondition>
+  </resprocessing>${state.quizFeedback !== 'off' ? '\n  <itemfeedback ident="correct_fb"><material><mattext texttype="text/html">FEEDBACK_TEXT. See around [mm:ss] if timestamp available.</mattext></material></itemfeedback>' : ''}
+</item>
+
+GUARDS
+- UTF-8 encoding
+- Escape: &amp; &lt; &gt; &quot; &apos;
+- mattext max 1200 chars
+- Exactly ${target} items
+- All items have question_type + points_possible
+
+PDF — [SAFE_LECTURE_TITLE]_quiz.pdf
+A4 portrait. Title page with "[LECTURE_TITLE]" (the actual video title you extracted) + date. Table of contents. Then ONE QUESTION PER PAGE (page break before each):
+- Question number and stem
+- All options (A/B/C/D)
+- Answer key: Correct = [LETTER]${state.quizFeedback !== 'off' ? '\n- Feedback with timestamp if available' : ''}
+
+INTERNAL VALIDATION (Mandatory Before Output)
+1. Captions+slides ≥300 words OR return "INSUFFICIENT_PAGE_CONTENT" (no files)
+2. VIDEO TITLE extracted correctly from Panopto page (not a placeholder)
+3. Exactly ${target} items in <section>
+4. Valid XML, UTF-8, well-formed
+5. Each item has metadata fields
+6. QUALITY CHECK - Every item: stem is clear + defensible answer + plausible distractors + meaningful feedback
+7. COGNITIVE CHECK - Not all recall: includes application/analysis questions appropriate to pedagogy
+8. HE STANDARD - Would a subject expert approve this content? University-level precision?
+
+OUTPUT
+Return these two files with names based on the ACTUAL video title you extracted:
+(1) [SAFE_LECTURE_TITLE]_quiz_qti.zip — contains imsmanifest.xml + assessment.xml
+(2) [SAFE_LECTURE_TITLE]_quiz.pdf — title, TOC, questions (one per page)
+
+FINAL CHECK: Did you use the ACTUAL Panopto video title (e.g., "Week_3_Neural_Networks_Prof_Johnson") or a placeholder (e.g., "Lecture_Quiz")? 
+You MUST use the real video title. Check og:title, [data-role="session-title"], h1, or document.title before outputting.`;
+}
+
+function buildStudyPrompt() {
+  console.log('buildStudyPrompt called, state:', {
+    sgFormat: state.sgFormat,
+    studyDepth: state.studyDepth,
+    studyPedagogy: state.studyPedagogy,
+    studyComponents: state.studyComponents
+  });
+  const panoptoTitle = detectPanoptoTitle();
+  const title = panoptoTitle || 'Study Pack';
+  const slug = slugify(title);
+  const format = state.sgFormat;
+  const depth = state.studyDepth;
+  const ped = PEDAGOGY[state.studyPedagogy] || PEDAGOGY["Concept Check (Retrieval)"];
+  const pedBlock = `PEDAGOGY NOTES\n• ${ped.inject.join('\n• ')}`;
+  const comps = state.studyComponents;
+  
+  const formatExt = format === 'pptx' ? 'pptx' : (format === 'docx' ? 'docx' : 'pdf');
+  const formatDesc = format === 'pptx' ? 'PPTX 16:9 slides' : (format === 'docx' ? 'Word .docx A4 portrait' : 'PDF A4 portrait');
+  
+  return `SYSTEM: Return ONE complete, ready-to-use file: ${slug}_study.${formatExt}
+Use ONLY Panopto page (captions+slides); no external data. Language=${state.quizLang}.
+
+CRITICAL: Generate the ENTIRE study guide in ONE output. Do NOT stop partway through. Do NOT ask if you should continue. Do NOT ask for permission to build remaining sections. Generate ALL sections listed below in a single, complete, deliverable file. This is a one-shot generation—produce the full ${depth==='quick'?'10-12':depth==='standard'?'18-25':'30-40'} page guide now.
+
+TITLE EXTRACTION (CRITICAL — NO PLACEHOLDERS)
+You MUST extract the real video title from the Panopto page you are viewing. Look in this exact order:
+  1. <meta property="og:title" content="..."> — Extract the content attribute value
+  2. Element with [data-role="session-title"] or class="session-title" — Extract its text
+  3. Main heading (h1) near the video player — Extract its text
+  4. document.title — Extract and remove " - Panopto" suffix if present
+
+EXAMPLE: If og:title = "Lecture 5: Photosynthesis - Dr. Martinez"
+  → Use "Lecture 5: Photosynthesis - Dr. Martinez" as the title throughout the guide
+  → Filename: Lecture_5_Photosynthesis_Dr_Martinez_study.${formatExt}
+
+DO NOT use generic placeholders like "Study Guide" or "Lecture Notes". Use the ACTUAL video title from the page.
+
+SOURCE: (1) Full transcript, (2) Slides/contents, (3) Notes. Dedupe. PRESERVE timestamps. Min 500 words or return "INSUFFICIENT_CONTENT".
+
+BRANDING: QUB red #E0001B accents; white bg; WCAG AA contrast.
+
+HE QUALITY STANDARDS (Every Section Must Meet):
+• COGNITIVE RIGOR: Promote thinking over memorization; require "why" not just "what"; scaffold from accessible to challenging
+• PRECISION: Accurate terminology; evidence-based claims; acknowledge complexity; avoid oversimplification
+• CONNECTIONS: Link concepts across topics; relate to broader disciplinary context; show how ideas integrate
+• METACOGNITION: Include reflection prompts; develop independent learning skills; promote self-assessment
+• TIMESTAMPS: Cite lecture sources liberally (min ${depth==='quick'?'12':depth==='standard'?'20':'30'}); enable verification and strategic rewatch
+• ACADEMIC REGISTER: University-level language; precise definitions; scholarly tone while remaining accessible
+• FORMATIVE VALUE: Feedback teaches not just corrects; address misconceptions; provide actionable guidance
+
+${pedBlock}
+
+STRUCTURE (omit unticked):
+1) Title page — video title, module, date, "Independent study guide"
+2) How to use (≤150w) — active recall, spaced practice, rewatch with timestamps
+3) Learning outcomes (4-8) — Bloom-tagged, link to module goals
+4) Key concepts (6-12) — 2-3 sentences each; relationships; flashcard IDs; timestamps
+${comps.conceptMap?`5) Concept map — hierarchical outline; relationships ("leads to", "contrasts with"); timestamps\n`:''}${comps.glossary?`6) Glossary (15-35) — plain English; examples; timestamps; mark confusing terms\n`:''}${comps.worked?`7) Worked examples (3-6) — numbered steps; "why this step"; errors box; expert thinking; timestamps; LO links; extensions\n`:''}${comps.problems?`8) Problems (8-15) — recall→apply→extend; 3-level hints. Solutions: model answer, rationale, mistakes, timestamps, "extend" prompt\n`:''}${comps.cases?`9) Cases (3-5) — scenarios from lecture; 4-6 questions (ID→analyze→evaluate); teaching points; timestamps; research prompts\n`:''}10) Flashcards (25-50) — grouped/ordered by difficulty. QUALITY STANDARD: Questions test understanding not recognition; answers precise and complete; explanations connect to broader concepts (not just restate answer); Foundation = core concepts, Intermediate = application/connections, Advanced = synthesis/evaluation:
+  • Card ID (FC-01), Question (requires active recall), Answer (precise, complete), Explanation (why it matters + how it connects to other concepts), Source ([mm:ss] when available), Difficulty (Foundation/Intermediate/Advanced), Related (links to FC-XX)
+  • Appendix A: CSV table (id,question,answer,explanation,source,difficulty,related_cards)
+EXAMPLE QUALITY: "Q: Why does X cause Y in the context discussed [timestamp]? A: [Complete explanation with mechanism]. Explanation: This connects to [concept] because [relationship]. Understanding this is key to [broader application]."
+${comps.selfcheck?`11) Self-check (10-15) — MC/TF/SA/case mix. Answer key: correct answer, rationale, misconceptions, timestamp, guidance. For self-diagnosis only.\n`:''}${comps.reflect?`12) Reflection — prompts: confident (evidence), unclear (questions), connections, explore further, study approach. Self-explanation guidance.\n`:''}${comps.planner?`13) Study planner (2-3 weeks) — Day 1: review FC-01..15, problems 1-4. Day 3: self-test, 5-8. Day 7: random order, quiz. Day 14: full, weak areas. Retrieval tips, avoid passive re-reading.\n`:''}14) Further support — 5-8 rewatch segments with timestamps, why valuable, active watching (pause/predict/explain)
+15) Independent learning (150w) — library resources, evaluate understanding, seek help, link to assessments, critical reading
+16) Accessibility — headings, links, contrast, no colour-only info, plain English, screen reader/text size guidance
+
+FORMAT: ${formatDesc}; section per page; H1/H2+intro; no split cards/examples; [mm:ss] timestamps (min ${depth==='quick'?'12':depth==='standard'?'20':'30'})${format==='docx'?'; Word: H1/H2 styles, tables, TOC, page numbers, editable':''}
+
+DEPTH: ${depth==='quick'?'Quick: 20-30 flashcards, 6-8 problems, 10-12 pages, 12+ timestamps':depth==='standard'?'Standard: 25-40 flashcards, 10-15 problems, 18-25 pages, 20+ timestamps':'Deep: 35-50 flashcards, 12-18 problems, 30-40 pages, 30+ timestamps'}
+
+VALIDATE (Before Output):
+(1) ≥500w or INSUFFICIENT_CONTENT, (2) VIDEO TITLE extracted from Panopto page (not "Study Guide" or placeholder), (3) All required sections present, (4) Min timestamps met (${depth==='quick'?'12':depth==='standard'?'20':'30'}+), (5) Every flashcard has all 7 fields + quality standard met, (6) Examples show expert reasoning not just steps, (7) Problems progress foundation→advanced, (8) Metacognitive+independent elements throughout, (9) Academic register; explanations require thinking not just recall, (10) Accessibility: structure+contrast+plain English, (11) ONE complete file only—ALL sections included.
+QUALITY GATE: Would a lecturer approve this for distribution? University-level throughout? Promotes independent learning?
+
+FINAL CHECK: Did you use the ACTUAL Panopto video title in:
+  - Title page (e.g., "Lecture 5: Photosynthesis - Dr. Martinez")
+  - Filename (e.g., Lecture_5_Photosynthesis_Dr_Martinez_study.${formatExt})
+NOT generic placeholders like "Study_Guide.${formatExt}" or "Lecture_Notes_study.${formatExt}"
+Check og:title, [data-role="session-title"], h1, or document.title before outputting.
+
+OUTPUT INSTRUCTION: Generate and return the COMPLETE study guide file now. Include ALL sections from 1-16 (except unticked components). Do NOT provide a partial guide. Do NOT ask if you should continue. The file must be complete, ready-to-use, and downloadable immediately.
+`;
+}
+
+function buildNotesPrompt() {
+  const slug = 'Lecture_Notes_Pack';
+  const format = state.notesFormat;
+  const ped = PEDAGOGY[state.notesPedagogy] || PEDAGOGY["Concept Check (Retrieval)"];
+  const pedBlock = `PEDAGOGY NOTES\n• ${ped.inject.join('\n• ')}`;
+  
+  const formatExt = format === 'pptx' ? 'pptx' : (format === 'docx' ? 'docx' : 'pdf');
+  const formatDesc = format === 'pptx' ? 'PPTX 16:9 slides' : (format === 'docx' ? 'Word .docx A4 portrait' : 'PDF A4 portrait');
+  
+  return `SYSTEM: Return ONE complete, ready-to-use file: ${slug}.${formatExt}
+Use ONLY lecturer's notes below. Language=${state.quizLang}. No external sources.
+
+CRITICAL: Generate the ENTIRE study guide in ONE output. Do NOT stop partway through. Do NOT ask if you should continue. Do NOT ask for permission to build remaining sections. Generate ALL 13 sections listed below in a single, complete, deliverable file. This is a one-shot generation—produce the full 25-35 page guide now.
+
+INPUT: Parse headings/bullets; dedupe; remove formatting. Extract title from notes (first heading/text). Min 400 words or return "INSUFFICIENT_CONTENT".
+
+NOTES: ${state.notesInput || '[PASTE NOTES HERE]'}
+
+HE QUALITY STANDARDS + SOURCE FIDELITY:
+• SOURCE TRUTH: Every concept traces to provided notes; examples from notes not invented; match lecturer's terminology exactly; don't "correct" their language
+• COGNITIVE RIGOR: Questions require understanding not just recall; scaffold from accessible to advanced; promote connections
+• PRECISION: Accurate use of terms from notes; evidence-based; acknowledge complexity; university-level depth
+• INFERENCE LIMITS: Learning outcomes must be inferable from notes content; don't fabricate scholarly detail from sparse notes
+• METACOGNITION: Reflection prompts; independent learning skills; self-assessment guidance
+• ACADEMIC REGISTER: Match notes' level of formality; precise definitions; avoid oversimplification
+
+${pedBlock}
+
+STRUCTURE (all 13 sections):
+1) Title page — extract title or "Lecture Notes Study Pack", module, date, "Independent study guide"
+2) How to use (≤150w) — active recall, spaced practice, systematic approach
+3) Learning outcomes (4-8) — Bloom-tagged, link to broader goals
+4) Key concepts (6-12) — 2-3 sentences; relationships; flashcard IDs
+5) Concept map — hierarchical outline; relationships ("leads to", "contrasts with")
+6) Glossary (12-30) — plain English; examples; mark confusing terms
+7) Worked examples (3-6 procedures) OR Cases (3-5 conceptual) — steps+"why"; errors box; expert thinking OR scenarios+questions+teaching points
+8) Problems (8-12) — recall→apply→extend; 3-level hints. Solutions: answer, rationale, mistakes, "extend" prompt
+9) Flashcards (25-45) — grouped by topic:
+  • Card ID (FC-01), Question (retrieval), Answer, Explanation (why/connect), Difficulty (Foundation/Intermediate/Advanced), Related
+  • Appendix A: CSV (id,question,answer,explanation,difficulty,related_cards)
+10) Self-check (10-15) — varied types; answer key: correct, rationale, misconceptions, guidance
+11) Reflection — prompts: confident (evidence), unclear (questions), connections, explore, study approach
+12) Independent learning (≤200w) — library, evaluate, seek help, assessments, critical reading
+13) Accessibility — headings, links, contrast, plain English, no colour-only
+
+FORMAT: ${formatDesc}; section per page; H1/H2+intro; no split cards/examples${format==='docx'?'; Word: H1/H2 styles, tables, TOC, page numbers, editable':''}
+
+DEPTH: 25-35 pages; 25-45 flashcards; 8-12 problems; 3-6 examples/cases; understanding over memorization
+
+VALIDATE (Before Output):
+(1) ≥400w or INSUFFICIENT_CONTENT, (2) Title extracted from notes, (3) All 13 sections present, (4) Every flashcard has 6 fields + quality met, (5) Problems progress foundation→advanced, (6) Examples show reasoning not just steps, (7) Metacognitive+independent elements, (8) Academic register matches notes depth, (9) Accessibility OK, (10) ONE complete file only—ALL sections included.
+SOURCE CHECK: Can you trace every major concept to the provided notes? No fabrication?
+QUALITY GATE: University-level? Would lecturer recognize their content? Promotes thinking not just recall?
+
+OUTPUT INSTRUCTION: Generate and return the COMPLETE study guide file now. Include ALL 13 sections. Do NOT provide a partial guide. Do NOT ask if you should continue. The file must be complete, ready-to-use, and downloadable immediately.
+`;
+}
+
+// Render preview
+function render() {
+  console.log('Rendering for workflow:', state.workflow);
+  let prompt = '';
+  if (state.workflow === 'quiz') prompt = buildQuizPrompt();
+  if (state.workflow === 'study') prompt = buildStudyPrompt();
+  if (state.workflow === 'notes') prompt = buildNotesPrompt();
+  
+  console.log('Generated prompt length:', prompt.length);
+  const len = prompt.length;
+  $('charCount').textContent = len;
+  
+  // Update progress bar and status
+  const pct = Math.min(100, (len / 8000) * 100);
+  $('progressBar').style.width = pct + '%';
+  
+  if (len >= 8000) {
+    $('progressBar').classList.add('danger');
+    $('progressBar').classList.remove('warning');
+    $('statusBadge').className = 'status-badge danger';
+    $('statusText').textContent = 'Too long';
+  } else if (len > 7500) {
+    $('progressBar').classList.add('warning');
+    $('progressBar').classList.remove('danger');
+    $('statusBadge').className = 'status-badge warning';
+    $('statusText').textContent = 'Near limit';
+  } else {
+    $('progressBar').classList.remove('danger', 'warning');
+    $('statusBadge').className = 'status-badge';
+    $('statusText').textContent = 'Ready';
+  }
+  
+  // Show preview
+  if (prompt) {
+    $('previewPlaceholder').classList.add('hidden');
+    $('previewText').classList.remove('hidden');
+    $('previewText').textContent = prompt;
+  } else {
+    $('previewPlaceholder').classList.remove('hidden');
+    $('previewText').classList.add('hidden');
+  }
+}
+
+// Copy to clipboard
+function copyPrompt() {
+  console.log('=== COPY BUTTON CLICKED ===');
+  console.log('Current workflow:', state.workflow);
+  
+  // Rebuild the prompt right now to ensure it's fresh
+  let prompt = '';
+  if (state.workflow === 'quiz') prompt = buildQuizPrompt();
+  if (state.workflow === 'study') prompt = buildStudyPrompt();
+  if (state.workflow === 'notes') prompt = buildNotesPrompt();
+  
+  console.log('Fresh prompt length:', prompt.length);
+  console.log('First 100 chars:', prompt.substring(0, 100));
+  
+  if (!prompt || prompt.trim() === '') {
+    console.error('No prompt generated!');
+    alert('No prompt to copy yet. Please ensure you have selected your options.');
+    return;
+  }
+  
+  // Try to copy
+  console.log('Attempting to copy...');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    console.log('Using navigator.clipboard API');
+    navigator.clipboard.writeText(prompt).then(() => {
+      console.log('Copy successful!');
+      // Show toast
+      $('toast').classList.add('show');
+      setTimeout(() => $('toast').classList.remove('show'), 2000);
+      alert('Copied successfully! (' + prompt.length + ' characters)');
+    }).catch(err => {
+      console.error('Clipboard API failed:', err);
+      alert('Failed to copy to clipboard: ' + err.message);
+    });
+  } else {
+    console.log('Using fallback copy method');
+    // Fallback for older browsers
+    const ta = document.createElement('textarea');
+    ta.value = prompt;
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.left = '0';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try { 
+      const success = document.execCommand('copy');
+      console.log('execCommand copy result:', success);
+      if (success) {
+  // Show toast
+  $('toast').classList.add('show');
+  setTimeout(() => $('toast').classList.remove('show'), 2000);
+        alert('Copied successfully! (' + prompt.length + ' characters)');
+      } else {
+        alert('Copy failed. Please try manually selecting and copying the text below.');
+      }
+    } catch(e) {
+      console.error('execCommand failed:', e);
+      alert('Failed to copy: ' + e.message);
+    }
+    document.body.removeChild(ta);
+  }
+}
+
+// Init question type chips
+function initQuestionTypes() {
+  const container = $('questionTypes');
+  container.innerHTML = '';
+  QUESTION_TYPES.forEach(type => {
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (state.questionTypes.includes(type.id) ? ' active' : '');
+    chip.textContent = type.label;
+    chip.onclick = () => {
+      if (state.questionTypes.includes(type.id)) {
+        state.questionTypes = state.questionTypes.filter(t => t !== type.id);
+      } else {
+        state.questionTypes.push(type.id);
+      }
+      chip.classList.toggle('active');
+      render();
+    };
+    container.appendChild(chip);
+  });
+}
+
+// Init study components chips
+function initStudyComponents() {
+  const container = $('studyComponents');
+  if (!container) {
+    console.warn('studyComponents container not found');
+    return;
+  }
+  console.log('Initializing study components, current state:', state.studyComponents);
+  container.innerHTML = '';
+  STUDY_COMPONENTS.forEach(comp => {
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (state.studyComponents[comp.id] ? ' active' : '');
+    chip.textContent = comp.label;
+    chip.onclick = () => {
+      console.log('Component clicked:', comp.id, 'was:', state.studyComponents[comp.id]);
+      state.studyComponents[comp.id] = !state.studyComponents[comp.id];
+      chip.classList.toggle('active');
+      console.log('Component now:', state.studyComponents[comp.id]);
+  render();
+    };
+    container.appendChild(chip);
+  });
+}
+
+// Init
+function init() {
+  // Update pedagogy brief on load (quiz)
+  const p = PEDAGOGY[state.pedagogy];
+  if (p) $('pedBrief').textContent = p.brief;
+  
+  // Update pedagogy brief on load (study guide)
+  const sp = PEDAGOGY[state.studyPedagogy];
+  if (sp && $('studyPedBrief')) $('studyPedBrief').textContent = sp.brief;
+  
+  // Update pedagogy brief on load (notes)
+  const np = PEDAGOGY[state.notesPedagogy];
+  if (np && $('notesPedBrief')) $('notesPedBrief').textContent = np.brief;
+  
+  // Dismiss about handler
+  if ($('dismissAbout')) {
+    $('dismissAbout').onclick = () => $('about').remove();
+  }
+  
+  // Dismiss preflight handler
+  if ($('hidePreflight')) {
+    $('hidePreflight').onclick = () => $('preflight').remove();
+  }
+  
+  initQuestionTypes();
+  initStudyComponents();
+  render();
+  
+  // Workflow tabs
+  $$('.workflow-btn').forEach(btn => {
+    btn.onclick = () => {
+      $$('.workflow-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.workflow = btn.dataset.tab;
+      
+      $$('.workflow-content').forEach(w => w.classList.add('hidden'));
+      document.querySelector('.' + btn.dataset.tab + '-workflow').classList.remove('hidden');
+      
+      render();
+    };
+  });
+  
+  // Pedagogy selector
+  $('pedagogy').addEventListener('change', () => {
+    state.pedagogy = $('pedagogy').value;
+    const p = PEDAGOGY[state.pedagogy];
+    $('pedBrief').textContent = p?.brief || '';
+    render();
+  });
+  
+  // Preset cards - Study
+  $$('.study-workflow .preset-card').forEach(card => {
+    card.onclick = () => {
+      $$('.study-workflow .preset-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      state.format = card.dataset.format;
+      render();
+    };
+  });
+  
+  // Preset cards - Notes
+  $$('.notes-workflow .preset-card').forEach(card => {
+    card.onclick = () => {
+      $$('.notes-workflow .preset-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      state.notesOutput = card.dataset.notesOutput;
+      render();
+    };
+  });
+  
+  // Advanced toggles
+  $('advancedToggle').onclick = () => {
+    $('advancedContent').classList.toggle('open');
+    $('advancedToggle').querySelector('.advanced-toggle').classList.toggle('open');
+  };
+  
+  if ($('studyAdvancedToggle')) {
+  $('studyAdvancedToggle').onclick = () => {
+    $('studyAdvancedContent').classList.toggle('open');
+    $('studyAdvancedToggle').querySelector('.advanced-toggle').classList.toggle('open');
+  };
+  }
+  
+  if ($('notesAdvancedToggle')) {
+    $('notesAdvancedToggle').onclick = () => {
+      $('notesAdvancedContent').classList.toggle('open');
+      $('notesAdvancedToggle').querySelector('.advanced-toggle').classList.toggle('open');
+    };
+  }
+  
+  // Form inputs - Quiz
+  $('quizTitle').oninput = e => { state.quizTitle = e.target.value; render(); };
+  $('quizLang').onchange = e => { state.quizLang = e.target.value; render(); };
+  $('quizCount').oninput = e => { state.quizCount = +e.target.value; render(); };
+  $('quizFeedback').onchange = e => { state.quizFeedback = e.target.value; render(); };
+  
+  // Form inputs - Study Guide
+  if ($('studyPedagogy')) {
+    console.log('Wiring studyPedagogy');
+    $('studyPedagogy').onchange = e => {
+      console.log('Study pedagogy changed to:', e.target.value);
+      state.studyPedagogy = e.target.value;
+      const p = PEDAGOGY[state.studyPedagogy];
+      if (p && $('studyPedBrief')) $('studyPedBrief').textContent = p.brief;
+      render();
+    };
+  }
+  if ($('studyDepth')) {
+    console.log('Wiring studyDepth');
+    $('studyDepth').onchange = e => {
+      console.log('Study depth changed to:', e.target.value);
+      state.studyDepth = e.target.value;
+      render();
+    };
+  }
+  console.log('Found sgFormat radios:', $$('input[name="sgFormat"]').length);
+  $$('input[name="sgFormat"]').forEach(radio => {
+    radio.onchange = e => {
+      console.log('Study format changed to:', e.target.value);
+      state.sgFormat = e.target.value;
+      render();
+    };
+  });
+  
+  // Form inputs - From Notes
+  if ($('notesPedagogy')) {
+    $('notesPedagogy').onchange = e => {
+      state.notesPedagogy = e.target.value;
+      const p = PEDAGOGY[state.notesPedagogy];
+      if (p && $('notesPedBrief')) $('notesPedBrief').textContent = p.brief;
+      render();
+    };
+  }
+  $$('input[name="notesFormat"]').forEach(radio => {
+    radio.onchange = e => { state.notesFormat = e.target.value; render(); };
+  });
+  if ($('notesInput')) {
+  $('notesInput').oninput = e => { state.notesInput = e.target.value; render(); };
+  }
+  
+  // Copy buttons
+  if ($('generateQuiz')) {
+    console.log('Wiring generateQuiz button');
+  $('generateQuiz').onclick = copyPrompt;
+  }
+  if ($('generateStudy')) {
+    console.log('Wiring generateStudy button');
+  $('generateStudy').onclick = copyPrompt;
+  }
+  if ($('generateNotes')) {
+    console.log('Wiring generateNotes button');
+  $('generateNotes').onclick = copyPrompt;
+  }
+  if ($('copyTop')) {
+    console.log('Wiring copyTop button');
+    $('copyTop').onclick = copyPrompt;
+  }
+  
+  // FAQ Accordion
+  $$('.faq-item').forEach(item => {
+    const question = item.querySelector('.faq-question');
+    question.onclick = () => {
+      // Close all other items
+      $$('.faq-item').forEach(other => {
+        if (other !== item) {
+          other.classList.remove('open');
+        }
+      });
+      // Toggle this item
+      item.classList.toggle('open');
+    };
+  });
+}
+
+init();
+</script>
+
+</body>
+</html>
