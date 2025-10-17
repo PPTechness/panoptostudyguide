@@ -269,12 +269,77 @@
     z-index: 1;
   }
   
+  /* Hero Banner */
+  .hero-banner {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    background: linear-gradient(135deg, rgba(224,0,27,0.95) 0%, rgba(139,0,16,0.95) 100%), 
+                url('20160902-0053grass.jpg') center/cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    overflow: hidden;
+    margin-bottom: 4rem;
+  }
+  
+  .hero-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.1) 0%, transparent 50%);
+    animation: float 20s ease-in-out infinite;
+  }
+  
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    padding: 0 2rem;
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+  }
+  
+  .hero-title {
+    font-size: 4rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin: 0 0 1.5rem;
+    letter-spacing: -0.03em;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  
+  .hero-subtitle {
+    font-size: 1.5rem;
+    line-height: 1.6;
+    margin: 0;
+    opacity: 0.95;
+    font-weight: 400;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 999px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+  
   /* Hero Section */
   .hero {
     max-width: 1000px;
     margin: 0 auto 4rem;
     text-align: center;
-    animation: fadeInUp 0.8s ease-out 0.2s both;
+    display: none;
   }
   
   .hero h2 {
@@ -330,7 +395,12 @@
     box-shadow: var(--shadow-md);
     position: relative;
     overflow: hidden;
-    animation: fadeInUp 0.8s ease-out 0.4s both;
+    display: none;
+  }
+  
+  .info.show {
+    display: block;
+    animation: fadeInUp 0.4s ease-out both;
   }
   
   .info::before {
@@ -341,6 +411,36 @@
     right: 0;
     height: 4px;
     background: var(--gradient-qub);
+  }
+  
+  /* Help Toggle Button */
+  .help-toggle {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    background: var(--gradient-qub);
+    color: white;
+    border: none;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(224,0,27,0.3);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  
+  .help-toggle:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 32px rgba(224,0,27,0.4);
+  }
+  
+  .help-toggle-icon {
+    font-size: 1.25rem;
   }
   
   /* Quick Start Section */
@@ -676,14 +776,23 @@
   
   .chip.active {
     background: var(--gradient-qub);
-    color: white;
+    color: white !important;
     border-color: transparent;
     box-shadow: 0 6px 20px rgba(224,0,27,0.25);
     transform: translateY(-2px);
+    position: relative;
+    z-index: 2;
   }
   
   .chip.active::before {
     opacity: 1;
+    z-index: -1;
+  }
+  
+  .chip > * {
+    position: relative;
+    z-index: 3;
+    color: inherit;
   }
   
   .checkbox-group {
@@ -1256,24 +1365,35 @@
   </div>
 </header>
 
+<!-- Hero Banner -->
+<div class="hero-banner">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span>✨</span>
+      <span>Powered by AI & Queen's Beyond Blended Pedagogy</span>
+    </div>
+    <h1 class="hero-title">Transform Your Lectures into Learning Resources</h1>
+    <p class="hero-subtitle">Generate Canvas quizzes and study guides from your Panopto lectures in seconds—aligned with Queen's teaching excellence standards</p>
+  </div>
+</div>
+
 <main>
+  <!-- Help Info Boxes (Hidden by default) -->
+  <div class="info" id="about">
+    <div class="section-title">
+      <strong>About this tool</strong>
+      <button class="btn" id="dismissAbout" title="Hide this message">✕</button>
+    </div>
+    <p class="kb">Choose a pedagogy approach, customise your settings, then paste the prompt into the Copilot sidebar with your Panopto lecture open. Copilot reads your captions/slides and produces a Canvas-ready QTI zip and a lecturer PDF, using only your materials.</p>
+  </div>
+  
   <!-- Quiz Workflow -->
   <div class="workflow-content quiz-workflow">
-    <section class="hero">
-      <h2>Generate Canvas Quiz Prompts</h2>
-    </section>
-    <div class="info" id="about">
-      <div class="section-title">
-        <strong>About this tool</strong>
-        <button class="btn" id="dismissAbout" title="Hide this message">Hide</button>
-      </div>
-      <p class="kb">Choose a pedagogy approach, customise your settings, then paste the prompt into the Copilot sidebar with your Panopto lecture open. Copilot reads your captions/slides and produces a Canvas-ready QTI zip and a lecturer PDF, using only your materials.</p>
-    </div>
     
-    <div class="info" id="preflight" style="background: #fff9e6; border-color: #ffa500;">
+    <div class="info" id="preflight">
       <div class="section-title">
         <strong>⚡ Panopto Preflight (1 minute)</strong>
-        <button class="btn" id="hidePreflight" title="Hide this checklist">Hide</button>
+        <button class="btn" id="hidePreflight" title="Hide this checklist">✕</button>
         </div>
       <ol class="kb" style="margin-top: 0.75rem; padding-left: 1.5rem;">
         <li style="margin-bottom: 0.5rem;">Open the full Panopto <em>Watch</em> page (not the small Canvas embed).</li>
@@ -1357,9 +1477,10 @@
     </div>
     
     <!-- Canvas How-To (Quiz Only) -->
-    <div class="info" id="canvasHow" style="margin-top: 1.5rem;">
+    <div class="info" id="canvasHow">
       <div class="section-title">
         <strong>Using this in Canvas (New or Classic Quizzes)</strong>
+        <button class="btn" id="hideCanvasHow" title="Hide instructions">✕</button>
         </div>
       <ol class="kb" style="margin-top: 1rem; padding-left: 1.5rem;">
         <li style="margin-bottom: 0.5rem;">Complete the Panopto preflight steps above (open Watch page, captions/slides panels, scroll transcript).</li>
@@ -1376,12 +1497,6 @@
     
   <!-- Study Guide Workflow -->
   <div class="workflow-content study-workflow hidden">
-    <section class="hero">
-      <h2>Generate Study Guides</h2>
-    </section>
-    <div class="info">
-      <p class="kb">Create rich, pedagogy-first study resources from your Panopto lectures using QUB principles.</p>
-    </div>
     
     <!-- Study Guide Options -->
     <div class="advanced-options" style="margin-bottom: 2rem;">
@@ -1446,12 +1561,6 @@
   
   <!-- From Notes Workflow -->
   <div class="workflow-content notes-workflow hidden">
-    <section class="hero">
-      <h2>Generate from Notes</h2>
-    </section>
-    <div class="info">
-      <p class="kb">Transform your lecture notes into rich study materials with flashcards, problems, and reflections.</p>
-    </div>
     
     <!-- Notes Input -->
     <div class="quick-start">
@@ -1638,6 +1747,12 @@
   </section>
   
 </main>
+
+<!-- Help Toggle Button -->
+<button class="help-toggle" id="helpToggle">
+  <span class="help-toggle-icon">?</span>
+  <span>Need Help?</span>
+</button>
 
 <!-- Toast Notification -->
 <div class="toast" id="toast">
@@ -2249,14 +2364,37 @@ function init() {
   const np = PEDAGOGY[state.notesPedagogy];
   if (np && $('notesPedBrief')) $('notesPedBrief').textContent = np.brief;
   
-  // Dismiss about handler
-  if ($('dismissAbout')) {
-    $('dismissAbout').onclick = () => $('about').remove();
+  // Help Toggle
+  if ($('helpToggle')) {
+    $('helpToggle').onclick = () => {
+      const about = $('about');
+      const preflight = $('preflight');
+      const canvasHow = $('canvasHow');
+      
+      // Toggle visibility
+      if (about) about.classList.toggle('show');
+      if (preflight) preflight.classList.toggle('show');
+      if (canvasHow && state.workflow === 'quiz') canvasHow.classList.toggle('show');
+    };
   }
   
-  // Dismiss preflight handler
+  // Dismiss handlers
+  if ($('dismissAbout')) {
+    $('dismissAbout').onclick = () => {
+      $('about').classList.remove('show');
+    };
+  }
+  
   if ($('hidePreflight')) {
-    $('hidePreflight').onclick = () => $('preflight').remove();
+    $('hidePreflight').onclick = () => {
+      $('preflight').classList.remove('show');
+    };
+  }
+  
+  if ($('hideCanvasHow')) {
+    $('hideCanvasHow').onclick = () => {
+      $('canvasHow').classList.remove('show');
+    };
   }
   
   initQuestionTypes();
