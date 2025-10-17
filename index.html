@@ -2337,6 +2337,10 @@ function init() {
           $('heroTitle').textContent = hero.title;
           $('heroSubtitle').textContent = hero.subtitle;
         }
+        // Ensure FAQ gets initialized when entering help
+        setTimeout(() => {
+          if (typeof setupFaqAccordion === 'function') setupFaqAccordion();
+        }, 0);
       }
     };
   }
@@ -2394,8 +2398,13 @@ function init() {
         }
       }
       
-      // Only render if not on help page
-      if (state.workflow !== 'help') {
+      // Re-setup FAQ when switching to help page
+      if (state.workflow === 'help') {
+        setTimeout(() => {
+          if (typeof setupFaqAccordion === 'function') setupFaqAccordion();
+        }, 0);
+      } else {
+        // Only render if not on help page
         render();
       }
     };
@@ -2517,25 +2526,59 @@ function init() {
     $('copyTop').onclick = copyPrompt;
   }
   
-  // FAQ Accordion - using event delegation
-  document.addEventListener('click', function(e) {
-    // Find if click was on or inside a .faq-question
-    const faqQuestion = e.target.closest('.faq-question');
-    if (faqQuestion) {
-      const faqItem = faqQuestion.closest('.faq-item');
-      if (faqItem) {
-        // Close all other FAQ items
-        $$('.faq-item').forEach(item => {
-          if (item !== faqItem) {
-            item.classList.remove('open');
+  // FAQ Accordion - robust setup with measured heights
+  function setupFaqAccordion() {
+    const items = document.querySelectorAll('.faq-item');
+    if (!items || items.length === 0) return;
+    items.forEach(item => {
+      const question = item.querySelector('.faq-question');
+      const answer = item.querySelector('.faq-answer');
+      if (!question || !answer) return;
+
+      // Ensure collapsed state baseline
+      item.classList.remove('open');
+      answer.style.maxHeight = '0px';
+      question.setAttribute('role', 'button');
+      question.setAttribute('tabindex', '0');
+      question.setAttribute('aria-expanded', 'false');
+
+      const toggle = () => {
+        // Close others first
+        document.querySelectorAll('.faq-item.open').forEach(other => {
+          if (other !== item) {
+            other.classList.remove('open');
+            const otherAns = other.querySelector('.faq-answer');
+            const otherQ = other.querySelector('.faq-question');
+            if (otherAns) otherAns.style.maxHeight = '0px';
+            if (otherQ) otherQ.setAttribute('aria-expanded', 'false');
           }
         });
-        
-        // Toggle this FAQ item
-        faqItem.classList.toggle('open');
-      }
-    }
-  });
+
+        // Toggle this one
+        const isOpen = item.classList.toggle('open');
+        question.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        if (isOpen) {
+          // Measure content height
+          const inner = answer.querySelector('.faq-answer-text');
+          const h = inner ? (inner.scrollHeight + 32) : 300; // padding guard
+          answer.style.maxHeight = h + 'px';
+        } else {
+          answer.style.maxHeight = '0px';
+        }
+      };
+
+      question.onclick = toggle;
+      question.onkeydown = (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ') {
+          ev.preventDefault();
+          toggle();
+        }
+      };
+    });
+  }
+
+  // Initial setup
+  setupFaqAccordion();
 }
 
 init();
