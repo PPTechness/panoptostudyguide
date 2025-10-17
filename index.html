@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Panopto Canvas Prompt Builder</title>
+<link rel="icon" type="image/png" href="favicon.png" />
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
   
@@ -1385,7 +1386,7 @@
 <header>
   <div class="header-content">
     <div class="brand">
-      <img src="Queen's Red Logo - Landscape.png" alt="Queen's University Belfast" />
+      <img src="qub-logo.png" alt="Queen's University Belfast" />
       <h1>Prompt Builder</h1>
     </div>
     
@@ -2516,37 +2517,25 @@ function init() {
     $('copyTop').onclick = copyPrompt;
   }
   
-  // FAQ Accordion
-  console.log('Setting up FAQ accordion');
-  const faqItems = $$('.faq-item');
-  console.log('Found FAQ items:', faqItems.length);
-  
-  faqItems.forEach((item, index) => {
-    const question = item.querySelector('.faq-question');
-    if (question) {
-      console.log('Attaching click handler to FAQ item', index);
-      question.addEventListener('click', function(e) {
-        console.log('FAQ item clicked:', index);
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // Close all other items
-        $$('.faq-item').forEach(other => {
-          if (other !== item) {
-            other.classList.remove('open');
+  // FAQ Accordion - using event delegation
+  document.addEventListener('click', function(e) {
+    // Find if click was on or inside a .faq-question
+    const faqQuestion = e.target.closest('.faq-question');
+    if (faqQuestion) {
+      const faqItem = faqQuestion.closest('.faq-item');
+      if (faqItem) {
+        // Close all other FAQ items
+        $$('.faq-item').forEach(item => {
+          if (item !== faqItem) {
+            item.classList.remove('open');
           }
         });
         
-        // Toggle this item
-        item.classList.toggle('open');
-        console.log('FAQ item toggled, now open:', item.classList.contains('open'));
-      });
-    } else {
-      console.error('No question element found for FAQ item', index);
+        // Toggle this FAQ item
+        faqItem.classList.toggle('open');
+      }
     }
   });
-  
-  console.log('FAQ accordion setup complete');
 }
 
 init();
