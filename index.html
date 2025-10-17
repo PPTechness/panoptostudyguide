@@ -267,7 +267,7 @@
     position: relative;
     width: 100%;
     height: 400px;
-    background: linear-gradient(135deg, rgba(124,58,237,0.95) 0%, rgba(236,72,153,0.95) 100%), 
+    background: linear-gradient(135deg, rgba(224,0,27,0.85) 0%, rgba(147,51,234,0.85) 50%, rgba(59,130,246,0.85) 100%), 
                 url('QUB-gallery-image-lanyon-building.jpg') center/cover;
     display: flex;
     align-items: center;
@@ -280,22 +280,22 @@
   }
   
   .hero-banner.quiz-hero {
-    background: linear-gradient(135deg, rgba(59,130,246,0.95) 0%, rgba(147,51,234,0.95) 100%), 
+    background: linear-gradient(135deg, rgba(224,0,27,0.85) 0%, rgba(147,51,234,0.85) 50%, rgba(59,130,246,0.85) 100%), 
                 url('QUB-gallery-image-lanyon-building.jpg') center/cover;
   }
   
   .hero-banner.study-hero {
-    background: linear-gradient(135deg, rgba(16,185,129,0.95) 0%, rgba(59,130,246,0.95) 100%), 
+    background: linear-gradient(135deg, rgba(16,185,129,0.85) 0%, rgba(59,130,246,0.85) 100%), 
                 url('_S6A0583a.jpg') center/cover;
   }
   
   .hero-banner.notes-hero {
-    background: linear-gradient(135deg, rgba(245,158,11,0.95) 0%, rgba(239,68,68,0.95) 100%), 
+    background: linear-gradient(135deg, rgba(245,158,11,0.85) 0%, rgba(239,68,68,0.85) 100%), 
                 url('1cdd84d4-b0ce-4901-9d10-6b47a02ed554.jpg') center/cover;
   }
   
   .hero-banner.help-hero {
-    background: linear-gradient(135deg, rgba(124,58,237,0.95) 0%, rgba(236,72,153,0.95) 100%), 
+    background: linear-gradient(135deg, rgba(124,58,237,0.85) 0%, rgba(236,72,153,0.85) 100%), 
                 url('QUB-gallery-image-lanyon-building.jpg') center/cover;
   }
   
@@ -1686,7 +1686,7 @@
   
   <!-- Help/Getting Started Workflow -->
   <div class="workflow-content help-workflow hidden">
-    <h2 class="gradient-title" style="margin-top: 2rem;">Getting Started with Prompt Builder</h2>
+    <h2 class="gradient-title" style="margin-top: 0;">Getting Started with Prompt Builder</h2>
     
     <div class="quick-start" style="margin-bottom: 4rem; padding: 3rem;">
       <h3 style="font-size: 1.75rem; margin-bottom: 1.5rem; color: var(--text);">Quick Start Guide</h3>
@@ -1721,11 +1721,18 @@
         </div>
         <div class="faq-answer">
           <div class="faq-answer-text">
-            <strong>It's simple!</strong> Open your Panopto video in your browser, then open Microsoft Copilot in the sidebar. Copy the generated prompt from this tool and paste it into Copilot. Copilot will read the captions and slides from your Panopto page to create Canvas-ready quizzes or study guides.
+            <p><strong>Step-by-step (about 2 minutes):</strong></p>
+            <ol>
+              <li>Open your Panopto <em>Watch</em> page in a browser tab (avoid the small Canvas embed).</li>
+              <li>Open the <strong>Captions/Transcript</strong> panel and the <strong>Contents/Slides</strong> panel. Scroll through the transcript once so all captions load.</li>
+              <li>Open <strong>Microsoft Copilot</strong> in the sidebar and allow it to “Use page content”.</li>
+              <li>In Prompt Builder, choose your <strong>Pedagogy preset</strong>, keep <strong>Multiple Choice</strong> as default (or add more types), and set the <strong>Feedback level</strong>.</li>
+              <li>Click <strong>Copy Prompt</strong> and paste it into Copilot. It will read <em>only</em> your Panopto page (captions + slides) and generate the requested files.</li>
+            </ol>
+            <p class="help">Tip: If Copilot returns <code>INSUFFICIENT_PAGE_CONTENT</code>, reload the Panopto page, open both panels, scroll to the bottom of the transcript, and try again.</p>
           </div>
         </div>
       </div>
-      
       <div class="faq-item">
         <div class="faq-question">
           <span class="faq-question-text">What outputs does the Prompt Builder create?</span>
@@ -1733,16 +1740,15 @@
         </div>
         <div class="faq-answer">
           <div class="faq-answer-text">
-            The builder creates three types of outputs:
             <ul>
-              <li><strong>Canvas Quiz:</strong> QTI .zip file for import + lecturer PDF with answer key</li>
-              <li><strong>Study Guide:</strong> Comprehensive study resource with flashcards, problems, and reflection prompts</li>
-              <li><strong>From Notes:</strong> Transform your lecture notes into a structured study pack</li>
+              <li><strong>Canvas Quiz package (QTI .zip):</strong> Standards‑compliant file that imports into Canvas (New or Classic Quizzes). Includes question stems, options, scoring, and optional per‑choice feedback.</li>
+              <li><strong>Lecturer PDF (quiz version):</strong> One page per question with the answer key and concise teaching notes to help during delivery.</li>
+              <li><strong>Study Guide / Notes Pack:</strong> A pedagogy‑first resource (PDF, Word, or PPTX) containing an executive summary, learning outcomes, key concepts, worked examples or cases, a problem set with solutions, 20–40 flashcards, reflection prompts and (optionally) a two‑week study planner.</li>
             </ul>
+            <p class="help">All outputs are created from your lecture materials only—no external sources are introduced.</p>
           </div>
         </div>
       </div>
-      
       <div class="faq-item">
         <div class="faq-question">
           <span class="faq-question-text">What are pedagogy presets and how do I choose one?</span>
@@ -1750,19 +1756,19 @@
         </div>
         <div class="faq-answer">
           <div class="faq-answer-text">
-            Pedagogy presets shape the <strong>tone and structure</strong> of your questions based on Queen's Beyond Blended framework. Choose based on your learning objectives:
+            <p>Presets shape the <strong>tone, structure and feedback style</strong> of what is generated, aligned with Queen’s <em>Beyond Blended</em> approach:</p>
             <ul>
-              <li><strong>Concept Check:</strong> Quick retrieval practice for essential concepts</li>
-              <li><strong>Worked Examples:</strong> Step-by-step problem solving with scaffolding</li>
-              <li><strong>Case-Based:</strong> Apply ideas to realistic scenarios</li>
-              <li><strong>Critical Analysis:</strong> Compare viewpoints with evidence</li>
-              <li><strong>Metacognitive:</strong> Reflection on process and next steps</li>
-              <li><strong>Accessibility-First:</strong> Clear language with UDL principles</li>
+              <li><strong>Concept Check (Retrieval):</strong> Short, focused questions that probe essential ideas and common misconceptions.</li>
+              <li><strong>Worked Examples (Scaffolded):</strong> Step‑by‑step reasoning with “why this step” notes and common slips.</li>
+              <li><strong>Case/Scenario‑Based:</strong> Realistic vignettes that ask students to apply ideas; one answer is most defensible from the lecture.</li>
+              <li><strong>Debate / Critical Analysis:</strong> Contrast positions and justify the preferred option using evidence from slides/captions.</li>
+              <li><strong>Metacognitive Reflection:</strong> Prompts that surface process, limits and next steps (great for short‑answer / essay).</li>
+              <li><strong>Accessibility‑First (UDL):</strong> Plain UK English, clear structure, and inclusive phrasing; avoids jargon and culture‑bound idioms.</li>
             </ul>
+            <p class="help">Choose the preset that matches your intended learning outcome. You can still edit the prompt details before copying.</p>
           </div>
         </div>
       </div>
-      
       <div class="faq-item">
         <div class="faq-question">
           <span class="faq-question-text">How do I import the quiz into Canvas?</span>
@@ -1770,11 +1776,17 @@
         </div>
         <div class="faq-answer">
           <div class="faq-answer-text">
-            In Canvas, go to <strong>Settings → Import Course Content → Content Type: QTI .zip file</strong>. Choose the downloaded ZIP and click Import. After import, the quiz appears under <strong>Quizzes</strong> (and Assignments for New Quizzes). Review points, feedback, and dates before publishing.
+            <ol>
+              <li>In your Canvas course go to <strong>Settings → Import Course Content</strong>.</li>
+              <li>Set <strong>Content Type</strong> to <strong>QTI .zip file</strong>, choose the downloaded file (e.g., <code>Lecture_5_…_quiz_qti.zip</code>) and click <strong>Import</strong>.</li>
+              <li>After processing, check <strong>Quizzes</strong>. For New Quizzes, the item also appears in <strong>Assignments</strong>.</li>
+              <li>If you only see an <strong>Item Bank</strong>, open it and build a quiz from those questions—Canvas sometimes does this automatically.</li>
+              <li>Open the quiz to review points, availability, and <strong>Student Feedback</strong> settings; then <strong>Publish</strong>.</li>
+            </ol>
+            <p class="help">Troubleshooting: If Canvas shows “No question type used…”, the QTI was malformed. Regenerate using this tool’s latest prompt and ensure only Canvas‑supported types are selected.</p>
           </div>
         </div>
       </div>
-      
       <div class="faq-item">
         <div class="faq-question">
           <span class="faq-question-text">Can I customize the generated content?</span>
@@ -1782,17 +1794,18 @@
         </div>
         <div class="faq-answer">
           <div class="faq-answer-text">
-            <strong>Absolutely!</strong> For Study Guides, you can choose:
+            <p><strong>Yes.</strong> The app lets you tailor:</p>
             <ul>
-              <li><strong>Output format:</strong> Word (.docx), PDF, or PowerPoint</li>
-              <li><strong>Depth:</strong> Quick (10-12 pages), Standard (18-25 pages), or Deep (30-40 pages)</li>
-              <li><strong>Components:</strong> Select which sections to include (flashcards, problems, cases, etc.)</li>
+              <li><strong>Question types & counts:</strong> Start with Multiple Choice, then add others as needed.</li>
+              <li><strong>Feedback level:</strong> Off, Brief, or Detailed—controls what students see after answering.</li>
+              <li><strong>Pedagogy preset:</strong> Sets style, depth and feedback tone.</li>
+              <li><strong>Study Guide components:</strong> Toggle concept map, glossary, worked examples, cases, problem set, flashcards, reflections and planner.</li>
+              <li><strong>Output format:</strong> PDF/Word/PPTX for study guides; QTI + PDF for quizzes.</li>
             </ul>
-            The Word format is especially useful as it's fully editable!
+            <p class="help">Everything generated is editable: you can revise wording in the PDF/Word/PPTX and change quiz settings in Canvas.</p>
           </div>
         </div>
       </div>
-      
       <div class="faq-item">
         <div class="faq-question">
           <span class="faq-question-text">Is my content secure and private?</span>
@@ -1800,13 +1813,24 @@
         </div>
         <div class="faq-answer">
           <div class="faq-answer-text">
-            Yes! The Prompt Builder is a <strong>client-side tool</strong> that only generates prompts—no data is sent to external servers. When you use the prompt with Copilot, Microsoft's privacy policies apply. The tool only uses content visible on your Panopto page and never accesses external sources.
+            <p>This tool runs entirely in your browser and only creates a <em>prompt</em>. Your materials are not uploaded to our servers. When you paste the prompt into Microsoft Copilot, your data is handled under Microsoft’s terms and your institutional account settings.</p>
+            <ul>
+              <li>The prompt instructs Copilot to use <strong>only</strong> your Panopto captions/slides or notes and to avoid external sources.</li>
+              <li>No student data is processed.</li>
+              <li>Generated files are saved locally by you.</li>
+            </ul>
+            <p class="help"><strong>Disclaimer:</strong> We aim for accuracy and accessibility, but AI outputs can contain errors or omissions. Always review before sharing with students. If you spot an issue, regenerate or edit the output.</p>
           </div>
         </div>
       </div>
     </div>
   </div>
   
+  <footer style="max-width:1400px;margin:3rem auto 2rem;padding:1.5rem 2rem;border-top:2px solid var(--border);text-align:center;color:var(--text-secondary);">
+    <p style="margin-bottom:0.5rem;"><strong>Teaching & Training Unit – D&IS, Queen’s University Belfast</strong></p>
+    <p style="margin-bottom:0.5rem;">Patrick Phillips • Support & enquiries: <em>please contact via Teams or University email</em></p>
+    <p style="font-size:0.875rem;">We strive to create high‑quality resources aligned with Queen’s pedagogy. However, AI‑generated content may contain inaccuracies. Always review outputs for accuracy, inclusivity and accessibility before use.</p>
+  </footer>
 </main>
 
 <!-- Help Button -->
