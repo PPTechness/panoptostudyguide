@@ -1401,10 +1401,10 @@
     </div>
     
     <div class="workflow-selector">
-      <button class="workflow-btn active" data-tab="quiz">Canvas Quiz</button>
-      <button class="workflow-btn" data-tab="study">Study Guide</button>
-      <button class="workflow-btn" data-tab="notes">From Notes</button>
-      <button class="workflow-btn" data-tab="help">Getting Started</button>
+      <button class="workflow-btn active" data-tab="quiz" onclick="switchWorkflow('quiz')">Canvas Quiz</button>
+      <button class="workflow-btn" data-tab="study" onclick="switchWorkflow('study')">Study Guide</button>
+      <button class="workflow-btn" data-tab="notes" onclick="switchWorkflow('notes')">From Notes</button>
+      <button class="workflow-btn" data-tab="help" onclick="switchWorkflow('help')">Getting Started</button>
     </div>
   </div>
 </header>
@@ -2184,13 +2184,10 @@ Add the same 10-criterion 0–4 table + three actions to lift any 3s to 4s.`;
 
 // Render preview
 function render() {
-  console.log('Rendering for workflow:', state.workflow);
   let prompt = '';
   if (state.workflow === 'quiz') prompt = buildQuizPrompt();
   if (state.workflow === 'study') prompt = buildStudyPrompt();
   if (state.workflow === 'notes') prompt = buildNotesPrompt();
-  
-  console.log('Generated prompt length:', prompt.length);
   const len = prompt.length;
   $('charCount').textContent = len;
   
@@ -2227,17 +2224,11 @@ function render() {
 
 // Copy to clipboard
 function copyPrompt() {
-  console.log('=== COPY BUTTON CLICKED ===');
-  console.log('Current workflow:', state.workflow);
-  
   // Rebuild the prompt right now to ensure it's fresh
   let prompt = '';
   if (state.workflow === 'quiz') prompt = buildQuizPrompt();
   if (state.workflow === 'study') prompt = buildStudyPrompt();
   if (state.workflow === 'notes') prompt = buildNotesPrompt();
-  
-  console.log('Fresh prompt length:', prompt.length);
-  console.log('First 100 chars:', prompt.substring(0, 100));
   
   if (!prompt || prompt.trim() === '') {
     console.error('No prompt generated!');
@@ -2436,55 +2427,52 @@ function init() {
   if (defaultWorkflow) {
     defaultWorkflow.classList.remove('hidden');
   }
+  // Ensure the Quiz tab is visually active on load
+  const quizBtn = document.querySelector('[data-tab="quiz"]');
+  if (quizBtn) quizBtn.classList.add('active');
   
-  // Workflow tabs
+  // Attach progressive enhancement handlers in case inline onClick is stripped
   $$('.workflow-btn').forEach(btn => {
-    btn.onclick = () => {
-      console.log('Workflow button clicked:', btn.dataset.tab);
-      $$('.workflow-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.workflow = btn.dataset.tab;
-      
-      $$('.workflow-content').forEach(w => w.classList.add('hidden'));
-      const targetWorkflow = document.querySelector('.' + btn.dataset.tab + '-workflow');
-      console.log('Target workflow element:', targetWorkflow);
-      if (targetWorkflow) {
-        targetWorkflow.classList.remove('hidden');
-      } else {
-        console.error('Workflow element not found:', '.' + btn.dataset.tab + '-workflow');
-      }
-      
-      // Update hero banner
-      const hero = heroContent[state.workflow];
-      if (hero) {
-        const heroBanner = $('heroBanner');
-        heroBanner.className = 'hero-banner ' + hero.class;
-        $('heroBadgeText').textContent = hero.badge;
-        $('heroTitle').textContent = hero.title;
-        $('heroSubtitle').textContent = hero.subtitle;
-      }
-      
-      // Show/hide preview section based on workflow
-      const previewSection = $('previewSection');
-      if (previewSection) {
-        if (state.workflow === 'help') {
-          previewSection.style.display = 'none';
-        } else {
-          previewSection.style.display = 'block';
-        }
-      }
-      
-      // Re-setup FAQ when switching to help page
-      if (state.workflow === 'help') {
-        setTimeout(() => {
-          if (typeof setupFaqAccordion === 'function') setupFaqAccordion();
-        }, 0);
-      } else {
-        // Only render if not on help page
-        render();
-      }
-    };
+    btn.addEventListener('click', () => switchWorkflow(btn.dataset.tab));
   });
+
+  // Expose switchWorkflow for inline onclick
+  window.switchWorkflow = function(tab) {
+    if (!tab) return;
+    // Update active state
+    $$('.workflow-btn').forEach(b => b.classList.remove('active'));
+    const activeBtn = document.querySelector('[data-tab="' + tab + '"]');
+    if (activeBtn) activeBtn.classList.add('active');
+    state.workflow = tab;
+
+    // Toggle content visibility
+    $$('.workflow-content').forEach(w => w.classList.add('hidden'));
+    const target = document.querySelector('.' + tab + '-workflow');
+    if (target) target.classList.remove('hidden');
+
+    // Update hero banner
+    const hero = heroContent[state.workflow];
+    if (hero) {
+      const heroBanner = $('heroBanner');
+      heroBanner.className = 'hero-banner ' + hero.class;
+      $('heroBadgeText').textContent = hero.badge;
+      $('heroTitle').textContent = hero.title;
+      $('heroSubtitle').textContent = hero.subtitle;
+    }
+
+    // Show/hide preview section
+    const previewSection = $('previewSection');
+    if (previewSection) previewSection.style.display = (state.workflow === 'help') ? 'none' : 'block';
+
+    // Re-setup FAQ when switching to help page
+    if (state.workflow === 'help') {
+      setTimeout(() => {
+        if (typeof setupFaqAccordion === 'function') setupFaqAccordion();
+      }, 0);
+    } else {
+      render();
+    }
+  };
   
   // Pedagogy selector
   $('pedagogy').addEventListener('change', () => {
