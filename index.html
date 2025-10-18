@@ -600,6 +600,122 @@
     border-color: var(--primary);
     color: var(--primary);
   }
+
+  .study-tools-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(220px, 1fr));
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 1300px) {
+    .study-tools-grid {
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(220px, 260px);
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+  }
+
+  .study-tool-card {
+    border: none;
+    min-height: 240px;
+    padding: 2rem 1.75rem;
+    color: #ffffff;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .study-tool-card .preset-desc {
+    color: rgba(255,255,255,0.92);
+  }
+
+  .study-tool-card .tool-badge {
+    background: rgba(255,255,255,0.18);
+    border-color: rgba(255,255,255,0.35);
+    color: #ffffff;
+  }
+
+  .study-tool-card .tool-actions {
+    margin-top: 1.5rem;
+  }
+
+  .study-tool-card .btn-primary {
+    background: rgba(255,255,255,0.22);
+    color: #ffffff;
+    border: none;
+    box-shadow: none;
+  }
+
+  .study-tool-card .btn-primary:hover {
+    background: rgba(255,255,255,0.32);
+  }
+
+  .study-tool-card .btn-ghost {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.6);
+    color: #ffffff;
+  }
+
+  .study-tool-card .btn-ghost:hover {
+    border-color: #ffffff;
+    color: #ffffff;
+    background: rgba(0,0,0,0.3);
+  }
+
+  .study-preview-panel {
+    margin-top: 2rem;
+    background: rgba(255,255,255,0.95);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    padding: 2rem;
+  }
+
+  .study-preview-panel.hidden {
+    display: none;
+  }
+
+  .study-preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .study-preview-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .study-preview-meta {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  .study-preview-body {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: #f9fafb;
+    padding: 1.5rem;
+    max-height: 420px;
+    overflow-y: auto;
+  }
+
+  .study-preview-placeholder {
+    color: var(--text-secondary);
+    font-style: italic;
+    text-align: center;
+    padding: 2rem 1rem;
+  }
+
+  .study-preview-text {
+    font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.925rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    color: var(--text);
+  }
   
   /* Primary Action */
   .primary-action {
@@ -1589,8 +1705,18 @@
         <span>Study Guide Tools</span>
         <span class="help">Pick a tool and copy its pre-built prompt to Copilot</span>
       </div>
-      <div class="preset-cards" id="studyToolsGrid">
+      <div class="preset-cards study-tools-grid" id="studyToolsGrid">
         <!-- Cards populated by JS -->
+      </div>
+    </div>
+    <div class="study-preview-panel hidden" id="studyPreviewPanel">
+      <div class="study-preview-header">
+        <span class="study-preview-title" id="studyPreviewTitle">Preview</span>
+        <span class="study-preview-meta" id="studyPreviewMeta"></span>
+      </div>
+      <div class="study-preview-body">
+        <div class="study-preview-placeholder" id="studyPreviewPlaceholder">Select “Preview” on a tool to view the full prompt here.</div>
+        <pre class="study-preview-text hidden" id="studyPreviewText"></pre>
       </div>
     </div>
   </div>
@@ -2042,158 +2168,6 @@ VALIDATE: (1) ≥300w or "INSUFFICIENT_PAGE_CONTENT", (2) Real title extracted, 
 OUTPUT: [ACTUAL_TITLE_SLUG]_quiz_qti.zip + [ACTUAL_TITLE_SLUG]_quiz.pdf using REAL title from og:title/[data-role="session-title"]/h1/document.title—NOT "Lecture_Quiz" placeholder.`;
 }
 
-function buildStudyPrompt() {
-  const panoptoTitle = detectPanoptoTitle();
-  const title = panoptoTitle || 'Study Pack';
-  const slug = slugify(title);
-  const depth = state.studyDepth;
-  const ped = PEDAGOGY[state.studyPedagogy] || PEDAGOGY["Concept Check (Retrieval)"];
-  const c = state.studyComponents || {};
-  const pedBlock = ped.inject.map(l => `• ${l}`).join('\n');
-
-  const depthNotes = {
-    quick: {
-      planner: 'Keep tasks tight (30–45 minute focus blocks) but still cover every evidence-backed activity.',
-      rubric: 'Highlight rapid review loops and formative feedback hooks for compressed timelines.'
-    },
-    standard: {
-      planner: 'Balance depth with pacing (45–60 minute sessions) so learners iterate through retrieval, application, and reflection.',
-      rubric: 'Emphasise deliberate practice, spaced retrieval, and collaborative checkpoints.'
-    },
-    deep: {
-      planner: 'Expect 60–80 minute sessions with extension readings or peer-led synthesis built in.',
-      rubric: 'Surface opportunities for advanced synthesis, peer teaching, and disciplinary scholarship links.'
-    }
-  };
-  const depthMeta = depthNotes[depth] || depthNotes.standard;
-
-  const include = {
-    conceptMap: !!c.conceptMap,
-    glossary: !!c.glossary,
-    worked: !!c.worked,
-    problems: !!c.problems,
-    cases: !!c.cases,
-    selfcheck: !!c.selfcheck,
-    reflect: !!c.reflect,
-    planner: !!c.planner
-  };
-
-  const makePusher = () => { let n = 0; return (line) => { n += 1; return `${n}) ${line}`; }; };
-
-  // Batch 1 — Foundations (always)
-  const push1 = makePusher();
-  const batch1 = [];
-  batch1.push(push1('Title page — REAL LECTURE TITLE, module/course, date; 90–130 word “How to use this guide”.'));
-  batch1.push(push1('Learning outcomes — 5 outcomes (10–18 words), ≥3 distinct Bloom verbs; 80–120 word “alignment note”.'));
-  batch1.push(push1('Threshold concepts — 3–5 ideas; EACH 70–90 words incl. “what changes in your thinking” + [mm:ss].'));
-  batch1.push(push1('Key concepts — ≥10 concepts; EACH 45–65 words incl. “why it matters” + one [mm:ss].'));
-  if (include.conceptMap) batch1.push(push1('Concept map — 150–220 word narrative + list (10–14 nodes; 10–14 edges). Justify ≥4 edges with [mm:ss].'));
-
-  // Batch 2 — Practice (conditional)
-  const push2 = makePusher();
-  const batch2 = [];
-  if (include.glossary) batch2.push(push2('Glossary — ≥24 terms; EACH 22–35 words with a corpus-based example and [mm:ss]. Two-column table.'));
-  if (include.worked && include.cases) {
-    batch2.push(push2('Worked examples AND mini cases — total 5 items (≈3 worked + 2 cases). EACH 150–200 words with: Steps (ordered) or Scenario; Why this step/teaching point; Common slip; “Check you can…”; [mm:ss].'));
-  } else if (include.worked) {
-    batch2.push(push2('Worked examples — 5 items; EACH 150–200 words with: Steps (ordered); Why this step; Common slip; “Check you can…”; [mm:ss].'));
-  } else if (include.cases) {
-    batch2.push(push2('Mini cases — 5 vignettes; EACH 150–200 words with: Scenario; Questions; Teaching points; Common slip; “Check you can…”; [mm:ss].'));
-  }
-  if (include.problems) batch2.push(push2('Problem set (interleaved) — 16 items: Recall (6), Application (6), Extension/Transfer (4). EACH item: Prompt; Hint (15–30 words); Full solution (50–90 words); “Why this is correct” (25–50 words); [mm:ss].'));
-  if (include.selfcheck) batch2.push(push2('Self-check quiz — 14 items (MC/SA). Answer key for EACH item: Correct answer; 15–30 word rationale; 1 likely misconception; [mm:ss].'));
-
-  // Batch 3 — Extension (conditional; flashcards always included here)
-  const push3 = makePusher();
-  const batch3 = [];
-  if (include.reflect) batch3.push(push3('Self-explanation / reflection prompts — 6–8 prompts linked to outcomes; include [mm:ss].'));
-  if (include.planner) batch3.push(push3(`Two-week study planner — 14 rows (Day 1–14). 1–2 specific tasks/day (e.g., FC-01–10; Problems 1–4; rewatch [12:33–18:10]); include time estimate columns. ${depthMeta.planner}`));
-  batch3.push(push3('Flashcards — 45 cards. For EACH: ID, Q (retrieval), A (precise), 1-sentence explanation (connection), Difficulty (Fdn/Int/Adv), Related IDs, Source [mm:ss]. Include **Appendix B — Flashcards CSV** with all fields.'));
-  batch3.push(push3('Group tasks (seminar-ready) — 3 activities (think-pair-share; jigsaw; mini-debate) tailored to THIS topic; 120–180 words each with outcomes link and [mm:ss].'));
-  batch3.push(push3(`Authentic practice task — 1 realistic ungraded task (150–220 words) with criteria (mini rubric: 3 rows × 3 levels) and feedback timing/method. ${depthMeta.rubric}`));
-
-  // Batch 4 — Support (always)
-  const push4 = makePusher();
-  const batch4 = [];
-  batch4.push(push4('UDL & accessibility audit — ≥7 checkpoints USED with concrete alternatives from THIS content; include two “if you can’t access X, do Y” lines.'));
-  batch4.push(push4('Where to get help — short signposting paragraph (Queen’s links may be placeholders); inclusive phrasing.'));
-  batch4.push(push4('Appendix A — Evidence snippets — ≥24 unique quoted fragments (5–20 words) with [mm:ss], grouped by section.'));
-  batch4.push(push4('Appendix B — Flashcards CSV — full table of all flashcards.'));
-
-  const floors = [];
-  floors.push('Threshold ≥3; Key concepts ≥10;');
-  if (include.glossary) floors.push('Glossary ≥24;');
-  if (include.worked || include.cases) floors.push('Examples/Cases =5;');
-  if (include.problems) floors.push('Problems =16;');
-  if (include.selfcheck) floors.push('Self-check =14;');
-  floors.push('Flashcards =45; Rewatch =8;');
-  if (include.planner) floors.push('Planner has 14 rows;');
-  floors.push('Group tasks =3; UDL checkpoints ≥7;');
-
-  const batches = [];
-  batches.push({ id: 1, key: 'foundations', sections: batch1, suffix: 'part1_foundations', title: 'Foundations' });
-  if (batch2.length) batches.push({ id: 2, key: 'practice', sections: batch2, suffix: 'part2_practice', title: 'Practice' });
-  if (batch3.length) batches.push({ id: 3, key: 'extension', sections: batch3, suffix: 'part3_extension', title: 'Extension' });
-  batches.push({ id: 4, key: 'support', sections: batch4, suffix: 'part4_support', title: 'Support & Appendices' });
-
-  const batchPrompts = batches.map(b => {
-    const filestr = `[REAL_TITLE_SLUG]_study_${b.suffix}.docx`;
-    const structure = `STRUCTURE for this batch (build ONLY these sections; full prose; embed [mm:ss] evidence in each):
-${b.sections.join('\n')}`;
-    const validate = `VALIDATE before returning this batch (FAIL-CLOSED):
-1) Corpus ≥500 words; REAL title in H1 + filename match; NO placeholders.
-2) Evidence: ≥1 timestamp in EVERY section in this batch${b.key === 'support' ? ' + ≥24 in Appendix A' : ''}.
-3) Floors relevant to this batch are met (global floors: ${floors.join(' ')}).
-4) Clear UK English; visually scannable with headings/tables.
-5) Output EXACTLY ONE .docx named ${filestr}.`;
-    return `BATCH ${b.id} — ${b.title}
-Return ONE file only: ${filestr} (Word A4). Do NOT ask questions. Do NOT use external sources. Do NOT include planning/coverage/validation text in the output.
-
-PANOPTO SOURCE (NON-NEGOTIABLE)
-• This is a Panopto Watch page. Use ONLY: (a) full captions/transcript (deduped, time-ordered), (b) visible slides/contents text.
-• Extract REAL lecture title from <meta property="og:title"> OR [data-role="session-title"] OR .session-title OR document.title. Use the ACTUAL title in the document and filename.
-• If combined corpus (captions+slides) < 500 words after dedupe → STOP and return EXACTLY:
-  “INSUFFICIENT_PAGE_CONTENT — Expand captions & slides, scroll transcript fully, then retry.”
-
-TITLE & FILENAME ENFORCEMENT (HARD FAIL)
-• Extract ACTUAL title from the page DOM. Create [REAL_TITLE_SLUG] by ASCII-normalising, replacing non-alphanumerics with underscores, collapsing repeats, trimming.
-• The first H1 MUST equal the ACTUAL title. Add a subtitle line: “${b.title}”.
-• The output filename MUST be “${filestr}”. If mismatch, STOP and return the INSUFFICIENT message.
-
-ANTI-PLACEHOLDER / EVIDENCE RULES (HARD FAIL)
-• No placeholders or boilerplate.
-• Every section in THIS BATCH must include ≥1 quoted evidence snippet (5–20 words) with a [mm:ss] timestamp from THIS lecture.
-
-QUEEN’S PEDAGOGY CONTRACT (APPLY THROUGHOUT)
-${pedBlock}
-• Outcomes alignment (where applicable) and mapping to this batch’s sections.
-• Beyond Blended pillars; participation mix; UDL ≥7 across the full study set (note which are realised in this batch).
-• Assessment & feedback elements relevant to this batch.
-• Style: UK English; student-facing clarity; WCAG-AA contrast; Queen’s red (#E0001B) accents.
-
-WORKFLOW GUARDRAILS (INTERNAL — DO NOT OUTPUT)
-1) PLAN — silently enumerate sections in this batch and item/word floors.
-2) SOURCE — deduped corpus from captions+slides; harvest timestamps.
-3) DRAFT — write and expand until floors met using ONLY lecture evidence.
-4) VALIDATE — compute counts; if any fail, revise and re-check.
-5) NO STREAMING until VALIDATE passes for this batch.
-
-${structure}
-
-FORMAT & LAYOUT
-• Word A4. One major section per page; do NOT split a single problem across pages.
-• Use consistent headings; tables for Glossary, Planner, Flashcards CSV, and Rubric.
-
-${validate}`;
-  });
-
-  const overall = `SYSTEM
-You will generate MULTIPLE files, one batch at a time, to allow deep reasoning and complete coverage. Follow each BATCH block below in order. After finishing one batch and validating it, move on to the next. Do NOT merge files. Use the Panopto on-screen title for all filenames.`;
-
-  const fullPrompt = [overall, ...batchPrompts].join('\n\n' + '-'.repeat(80) + '\n\n');
-  return fullPrompt;
-}
-
 // -------- Study Tool Prompts (v13 with scroll/expand + Bloom intent) --------
 
 function promptCoreConceptsV13(){
@@ -2351,13 +2325,25 @@ const STUDY_TOOLS = [
   { id:'support', icon:'🌐', name:'Extension & Support', desc:'Flashcards, group tasks, UDL audit, and help routes.', builder: promptExtensionSupportV13 },
 ];
 
+const STUDY_TOOL_COLORS = [
+  'linear-gradient(135deg, #FF5F6D 0%, #FFC371 100%)',
+  'linear-gradient(135deg, #7F00FF 0%, #E100FF 100%)',
+  'linear-gradient(135deg, #00C9FF 0%, #92FE9D 100%)',
+  'linear-gradient(135deg, #FF512F 0%, #DD2476 100%)',
+  'linear-gradient(135deg, #43CEA2 0%, #185A9D 100%)'
+];
+
+let currentStudyPrompt = '';
+
 function mountStudyToolCards(){
   const grid = document.getElementById('studyToolsGrid');
   if(!grid) return;
   grid.innerHTML = '';
-  STUDY_TOOLS.forEach(tool=>{
+  STUDY_TOOLS.forEach((tool, index)=>{
     const card = document.createElement('div');
-    card.className = 'preset-card';
+    card.className = 'preset-card study-tool-card';
+    const color = STUDY_TOOL_COLORS[index % STUDY_TOOL_COLORS.length];
+    card.style.background = color;
     card.innerHTML = `
       <div class="tool-badge">${tool.icon} ${tool.name}</div>
       <div class="preset-desc" style="margin:.25rem 0 0;">${tool.desc}</div>
@@ -2374,15 +2360,30 @@ function mountStudyToolCards(){
       const tool = STUDY_TOOLS.find(t=>t.id===id);
       if(!tool) return;
       const prompt = tool.builder();
+      setStudyPreview(prompt, tool.name);
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(prompt).then(()=>{
           showToast();
-          setPreview(prompt);
-        }).catch(()=>{
-          setPreview(prompt);
+        }).catch(err=>{
+          alert('Failed to copy to clipboard: ' + err.message);
         });
       } else {
-        setPreview(prompt);
+        const ta = document.createElement('textarea');
+        ta.value = prompt;
+        ta.style.position = 'fixed';
+        ta.style.top = '0';
+        ta.style.left = '0';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          document.execCommand('copy');
+          showToast();
+        } catch (e) {
+          alert('Failed to copy: ' + e.message);
+        }
+        document.body.removeChild(ta);
       }
     });
   });
@@ -2392,46 +2393,45 @@ function mountStudyToolCards(){
       const tool = STUDY_TOOLS.find(t=>t.id===id);
       if(!tool) return;
       const prompt = tool.builder();
-      setPreview(prompt);
+      setStudyPreview(prompt, tool.name);
     });
   });
 }
 
-function setPreview(text){
-  const placeholder = $('previewPlaceholder');
-  const pre = $('previewText');
-  if(placeholder) placeholder.classList.add('hidden');
-  if(pre){
+function setStudyPreview(text, label){
+  currentStudyPrompt = text || '';
+  const panel = $('studyPreviewPanel');
+  const placeholder = $('studyPreviewPlaceholder');
+  const pre = $('studyPreviewText');
+  const meta = $('studyPreviewMeta');
+  const titleEl = $('studyPreviewTitle');
+  if (!panel) return;
+  panel.classList.remove('hidden');
+  if (titleEl) titleEl.textContent = 'Preview';
+  if (!text) {
+    if (placeholder) {
+      placeholder.textContent = 'Select “Preview” on a tool to view the full prompt here.';
+      placeholder.classList.remove('hidden');
+    }
+    if (pre) pre.classList.add('hidden');
+    if (meta) meta.textContent = '';
+    return;
+  }
+  if (placeholder) placeholder.classList.add('hidden');
+  if (pre) {
     pre.textContent = text;
     pre.classList.remove('hidden');
   }
-  if($('charCount')) $('charCount').textContent = (text||'').length.toString();
-
-  const progress = $('progressBar');
-  const statusBadge = $('statusBadge');
-  const statusText = $('statusText');
-  const len = (text || '').length;
-  const pct = Math.min(100, (len / 8000) * 100);
-  if(progress){
-    progress.style.width = pct + '%';
-    progress.classList.remove('danger', 'warning');
-    if (len >= 8000) {
-      progress.classList.add('danger');
-    } else if (len > 7500) {
-      progress.classList.add('warning');
-    }
+  if (meta) {
+    const count = text.length.toLocaleString();
+    meta.textContent = `${count} chars • ${label}`;
   }
-  if(statusBadge && statusText){
-    statusBadge.className = 'status-badge';
-    statusText.textContent = 'Ready';
-    if (len >= 8000) {
-      statusBadge.className = 'status-badge danger';
-      statusText.textContent = 'Too long';
-    } else if (len > 7500) {
-      statusBadge.className = 'status-badge warning';
-      statusText.textContent = 'Near limit';
-    }
+  if (titleEl && label) {
+    titleEl.textContent = `Preview — ${label}`;
   }
+  setTimeout(()=>{
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
 }
 
 function showToast(){
@@ -2493,8 +2493,22 @@ VALIDATE BEFORE RETURNING
 function render() {
   let prompt = '';
   if (state.workflow === 'quiz') prompt = buildQuizPrompt();
-  if (state.workflow === 'study') prompt = buildStudyPrompt();
   if (state.workflow === 'notes') prompt = buildNotesPrompt();
+
+  if (state.workflow === 'study') {
+    if ($('charCount')) $('charCount').textContent = '0';
+    const progress = $('progressBar');
+    if (progress) {
+      progress.style.width = '0%';
+      progress.classList.remove('danger', 'warning');
+    }
+    if ($('statusBadge')) $('statusBadge').className = 'status-badge';
+    if ($('statusText')) $('statusText').textContent = 'Ready';
+    if ($('previewPlaceholder')) $('previewPlaceholder').classList.remove('hidden');
+    if ($('previewText')) $('previewText').classList.add('hidden');
+    return;
+  }
+
   const len = prompt.length;
   $('charCount').textContent = len;
   
@@ -2531,10 +2545,42 @@ function render() {
 
 // Copy to clipboard
 function copyPrompt() {
+  if (state.workflow === 'study') {
+    if (!currentStudyPrompt) {
+      alert('Select a tool and preview or copy its prompt first.');
+      return;
+    }
+    const text = currentStudyPrompt;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast();
+      }).catch(err => {
+        alert('Failed to copy to clipboard: ' + err.message);
+      });
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.top = '0';
+      ta.style.left = '0';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast();
+      } catch (e) {
+        alert('Failed to copy: ' + e.message);
+      }
+      document.body.removeChild(ta);
+    }
+    return;
+  }
+
   // Rebuild the prompt right now to ensure it's fresh
   let prompt = '';
   if (state.workflow === 'quiz') prompt = buildQuizPrompt();
-  if (state.workflow === 'study') prompt = buildStudyPrompt();
   if (state.workflow === 'notes') prompt = buildNotesPrompt();
   
   if (!prompt || prompt.trim() === '') {
@@ -2607,39 +2653,11 @@ function initQuestionTypes() {
   });
 }
 
-// Init study components chips
-function initStudyComponents() {
-  const container = $('studyComponents');
-  if (!container) {
-    console.warn('studyComponents container not found');
-    return;
-  }
-  console.log('Initializing study components, current state:', state.studyComponents);
-  container.innerHTML = '';
-  STUDY_COMPONENTS.forEach(comp => {
-    const chip = document.createElement('div');
-    chip.className = 'chip' + (state.studyComponents[comp.id] ? ' active' : '');
-    chip.textContent = comp.label;
-    chip.onclick = () => {
-      console.log('Component clicked:', comp.id, 'was:', state.studyComponents[comp.id]);
-      state.studyComponents[comp.id] = !state.studyComponents[comp.id];
-      chip.classList.toggle('active');
-      console.log('Component now:', state.studyComponents[comp.id]);
-  render();
-    };
-    container.appendChild(chip);
-  });
-}
-
 // Init
 function init() {
   // Update pedagogy brief on load (quiz)
   const p = PEDAGOGY[state.pedagogy];
   if (p) $('pedBrief').textContent = p.brief;
-  
-  // Update pedagogy brief on load (study guide)
-  const sp = PEDAGOGY[state.studyPedagogy];
-  if (sp && $('studyPedBrief')) $('studyPedBrief').textContent = sp.brief;
   
   // Update pedagogy brief on load (notes)
   const np = PEDAGOGY[state.notesPedagogy];
@@ -2724,7 +2742,6 @@ function init() {
   }
   
   initQuestionTypes();
-  initStudyComponents();
   render();
   
   // Show the quiz workflow by default on page load
@@ -2786,14 +2803,25 @@ function init() {
 
     // Show/hide preview section
     const previewSection = $('previewSection');
-    if (previewSection) previewSection.style.display = (state.workflow === 'help') ? 'none' : 'block';
+    if (previewSection) previewSection.style.display = (state.workflow === 'help' || state.workflow === 'study') ? 'none' : 'block';
+
+    const studyPanel = $('studyPreviewPanel');
+    if (studyPanel) {
+      if (state.workflow === 'study') {
+        studyPanel.classList.remove('hidden');
+        setStudyPreview('', '');
+      } else {
+        studyPanel.classList.add('hidden');
+        currentStudyPrompt = '';
+      }
+    }
 
     // Re-setup FAQ when switching to help page
     if (state.workflow === 'help') {
       setTimeout(() => {
         if (typeof setupFaqAccordion === 'function') setupFaqAccordion();
       }, 0);
-    } else {
+    } else if (state.workflow !== 'study') {
       render();
     }
   };
@@ -2804,17 +2832,6 @@ function init() {
     const p = PEDAGOGY[state.pedagogy];
     $('pedBrief').textContent = p?.brief || '';
     render();
-  });
-  
-  // Preset cards - Study
-  $$('.study-workflow .preset-card').forEach(card => {
-    if (card.closest('#studyToolsDeck')) return;
-    card.onclick = () => {
-      $$('.study-workflow .preset-card').forEach(c => c.classList.remove('active'));
-      card.classList.add('active');
-      state.format = card.dataset.format;
-      render();
-    };
   });
   
   // Preset cards - Notes
@@ -2832,13 +2849,6 @@ function init() {
     $('advancedContent').classList.toggle('open');
     $('advancedToggle').querySelector('.advanced-toggle').classList.toggle('open');
   };
-  
-  if ($('studyAdvancedToggle')) {
-  $('studyAdvancedToggle').onclick = () => {
-    $('studyAdvancedContent').classList.toggle('open');
-    $('studyAdvancedToggle').querySelector('.advanced-toggle').classList.toggle('open');
-  };
-  }
   
   if ($('notesAdvancedToggle')) {
     $('notesAdvancedToggle').onclick = () => {
@@ -2875,10 +2885,6 @@ function init() {
   if ($('generateQuiz')) {
     console.log('Wiring generateQuiz button');
   $('generateQuiz').onclick = copyPrompt;
-  }
-  if ($('generateStudy')) {
-    console.log('Wiring generateStudy button');
-  $('generateStudy').onclick = copyPrompt;
   }
   if ($('generateNotes')) {
     console.log('Wiring generateNotes button');
