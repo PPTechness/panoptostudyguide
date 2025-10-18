@@ -2434,12 +2434,19 @@ function init() {
   // Workflow tabs
   $$('.workflow-btn').forEach(btn => {
     btn.onclick = () => {
+      console.log('Workflow button clicked:', btn.dataset.tab);
       $$('.workflow-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       state.workflow = btn.dataset.tab;
       
       $$('.workflow-content').forEach(w => w.classList.add('hidden'));
-      document.querySelector('.' + btn.dataset.tab + '-workflow').classList.remove('hidden');
+      const targetWorkflow = document.querySelector('.' + btn.dataset.tab + '-workflow');
+      console.log('Target workflow element:', targetWorkflow);
+      if (targetWorkflow) {
+        targetWorkflow.classList.remove('hidden');
+      } else {
+        console.error('Workflow element not found:', '.' + btn.dataset.tab + '-workflow');
+      }
       
       // Update hero banner
       const hero = heroContent[state.workflow];
