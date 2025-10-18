@@ -1857,6 +1857,33 @@
 </div>
 
 <script>
+<script>
+function exposePanoptoTranscriptForCopilot() {
+  try {
+    // Gather candidate text fragments
+    const nodes = document.querySelectorAll('.transcript * , .caption, .caption-text, [class*="transcript"] span, [class*="caption"] span');
+    const texts = Array.from(nodes).map(n => (n.innerText || '').trim()).filter(Boolean);
+    const full = texts.join(' ').replace(/\s+/g, ' ').trim();
+    // Only expose if sufficiently long and not already present
+    if (full.length > 300 && !document.getElementById('copilot-visible-transcript')) {
+      const helper = document.createElement('div');
+      helper.id = 'copilot-visible-transcript';
+      helper.textContent = full;
+      helper.style.cssText = 'position:fixed;left:-99999px;top:-99999px;white-space:pre-wrap;visibility:visible;height:auto;width:1px;';
+      document.body.appendChild(helper);
+    }
+  } catch(e) {
+    console.warn('Transcript expose failed:', e);
+  }
+}
+</script>
+<script>
+// Make Panopto transcript text visible to Copilot's DOM reader (no UI impact)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', exposePanoptoTranscriptForCopilot);
+} else {
+  exposePanoptoTranscriptForCopilot();
+}
 // Pedagogy presets (QUB-aligned)
 const PEDAGOGY = {
   "Concept Check (Retrieval)": {
@@ -2051,16 +2078,33 @@ function buildStudyPrompt() {
   const format = state.sgFormat;
   const depth = state.studyDepth;
   const ped = PEDAGOGY[state.studyPedagogy] || PEDAGOGY["Concept Check (Retrieval)"];
+  const c = state.studyComponents;
   const ext = format === 'pptx' ? 'pptx' : (format === 'docx' ? 'docx' : 'pdf');
   const fmt = format === 'pptx' ? 'PPTX 16:9' : (format === 'docx' ? 'Word A4' : 'PDF A4');
-
+  
+  // Depth profiles
+  const depthProfiles = {
+    quick: { flashcards: 25, problems: 8, pages: 12, timestamps: 20 },
+    standard: { flashcards: 35, problems: 12, pages: 22, timestamps: 28 },
+    deep: { flashcards: 45, problems: 16, pages: 34, timestamps: 36 }
+  };
+  const prof = depthProfiles[depth] || depthProfiles.standard;
   return `SYSTEM
-Return ONE complete file only: ${slug}_study.${ext} (use the exact format I requested: ${fmt}).
-Do NOT ask questions. Do NOT use external sources. Use ONLY the open Panopto Watch page: captions/transcript + visible slide text.
-
-TITLE & SOURCE (MANDATORY)
-• Extract the REAL lecture title from <meta property="og:title">, [data-role="session-title"], h1, or document.title. Use that in the document and filename.
-• Read the FULL transcript (deduped) and ALL slide headings/bullets. If total usable text < 500 words, STOP and return exactly: "INSUFFICIENT_PAGE_CONTENT — Open captions & slides, scroll the transcript to the bottom, then retry."
+SYSTEM SAFEGUARD
+Before writing anything else, confirm transcript+slides text were successfully read (>500 words). 
+If not, stop and output only the “INSUFFICIENT_PAGE_CONTENT” message.
+SOURCE VERIFICATION & CAPTION EXTRACTION (NON-NEGOTIABLE)
+• Confirm this page is a full Panopto Watch view (not Canvas embed). 
+• Read the complete visible transcript: scroll to the bottom before parsing so all captions load into the DOM. 
+• Extract every <div>, <span>, or <p> inside any container with class names matching “transcript”, “caption”, or “caption-text”; concatenate them in time order (deduped). 
+• Extract slide/contents text from elements containing class names “slide”, “content-item”, “tab-slides”, “tab-contents”, or aria-labelled equivalents. 
+• Combine captions + slide text into a single coherent lecture text corpus. Use ONLY this text corpus as content.
+• If the combined text corpus < 500 words after deduplication, RETURN EXACTLY:
+  “INSUFFICIENT_PAGE_CONTENT — Expand captions & slides, scroll transcript fully, then retry.”
+• Extract the real lecture title from:
+  <meta property="og:title"> OR [data-role="session-title"] OR .session-title OR document.title.
+  Use the extracted title (e.g., “Week 5: Digital Systems”) in the document heading and filenames.
+• Confirm that the title appears in both the first page heading AND the exported filename.
 
 QUEEN'S PEDAGOGY CONTRACT (apply everywhere)
 • Learning outcomes & alignment: write 4–6 outcomes with level-appropriate verbs; map each section and any task back to outcomes.
@@ -2078,15 +2122,8 @@ STRUCTURE & COUNTS (include slide/clip timestamps [mm:ss] where relevant)
 1) Title page — [REAL LECTURE TITLE], module/course, date, 80–120 word "How to use this guide".
 2) Learning outcomes — 4–6 outcomes with verbs; short alignment note.
 3) Key concepts — 6–12 concepts; each = 2–3 sentences + one "why it matters" line + [mm:ss].
-4) Concept map (text description + simple list of nodes/links) + [mm:ss] reference.
-5) Glossary — 18–35 terms with plain-English definitions and an example from the lecture; tag slide/time.
-6) Worked examples OR mini cases — 4–6 items: steps, "why this step", common slips, and "check you can…" line; [mm:ss].
-7) Problem set — 10–15 items that progress recall → application → extension; each with hint, full solution, and "why this is correct"; [mm:ss].
-8) Self-check quiz — 12–16 mixed MC/SA; answer key with brief rationale and common misconception; [mm:ss].
-9) Flashcards — 25–40 cards; for each include: ID, Q (retrieval), A (precise), short explanation (connection to a concept), Difficulty (Fdn/Int/Adv), Related IDs, Source [mm:ss]. Also output a CSV appendix.
-10) Reflection prompts — 6–8 metacognitive questions (confidence, uncertainties, connections, next steps).
-11) Two-week study planner — day-by-day tasks (e.g., FC-01–12, problems 1–4, self-check review).
-12) Rewatch guide — 5–8 clip intervals [mm:ss–mm:ss], "watch for…", and suggested active task.
+${c.conceptMap ? '4) Concept map (text description + simple list of nodes/links) + [mm:ss] reference.\n' : ''}${c.glossary ? '5) Glossary — 18–35 terms with plain-English definitions and an example from the lecture; tag slide/time.\n' : ''}${c.worked ? '6) Worked examples OR mini cases — 4–6 items: steps, "why this step", common slips, and "check you can…" line; [mm:ss].\n' : ''}${c.problems ? `7) Problem set — ${prof.problems} items that progress recall → application → extension; each with hint, full solution, and "why this is correct"; [mm:ss].\n` : ''}${c.selfcheck ? '8) Self-check quiz — 12–16 mixed MC/SA; answer key with brief rationale and common misconception; [mm:ss].\n' : ''}9) Flashcards — ${prof.flashcards} cards; for each include: ID, Q (retrieval), A (precise), short explanation (connection to a concept), Difficulty (Fdn/Int/Adv), Related IDs, Source [mm:ss]. Also output a CSV appendix.
+${c.reflect ? '10) Reflection prompts — 6–8 metacognitive questions (confidence, uncertainties, connections, next steps).\n' : ''}${c.planner ? '11) Two-week study planner — day-by-day tasks (e.g., FC-01–12, problems 1–4, self-check review).\n' : ''}12) Rewatch guide — 5–8 clip intervals [mm:ss–mm:ss], "watch for…", and suggested active task.
 13) Accessibility & alternatives — list the UDL checkpoints covered; provide alt-text suggestions for any figures referenced.
 
 FORMAT RULES
@@ -2108,12 +2145,15 @@ function buildNotesPrompt() {
   const fmt = format === 'pptx' ? 'PPTX 16:9' : (format === 'docx' ? 'Word A4' : 'PDF A4');
   
   return `SYSTEM
-Return ONE complete file only: ${slug}_notes_pack.${ext} (use the exact format I requested: ${fmt}).
-Use ONLY the pasted notes. Do NOT use external sources. If usable text < 400 words, STOP and return: "INSUFFICIENT_PAGE_CONTENT — Add more notes (≥400 words with headings) and retry."
-
+SYSTEM SAFEGUARD
+Before writing anything else, confirm transcript+slides text were successfully read (>500 words). 
+If not, stop and output only the “INSUFFICIENT_PAGE_CONTENT” message.
 TITLE & SOURCE
 • Extract the title from the first H1/line of the notes (or “Notes Pack” if absent). Use in the document and filename.
 • Parse headings, bullets, and tables; dedupe near-duplicates; keep key wording from the notes.
+• Do NOT use external sources.
+• If usable text < 400 words after cleaning, RETURN EXACTLY:
+  “INSUFFICIENT_PAGE_CONTENT — Add more notes (≥400 words with headings) and retry.”
 
 QUEEN'S PEDAGOGY CONTRACT
 • Same as Study Guide contract; apply it using the content of the notes.
@@ -2487,48 +2527,11 @@ function init() {
   $('quizCount').oninput = e => { state.quizCount = +e.target.value; render(); };
   $('quizFeedback').onchange = e => { state.quizFeedback = e.target.value; render(); };
   
-  // Form inputs - Study Guide
-  if ($('studyPedagogy')) {
-    console.log('Wiring studyPedagogy');
-    $('studyPedagogy').onchange = e => {
-      console.log('Study pedagogy changed to:', e.target.value);
-      state.studyPedagogy = e.target.value;
-      const p = PEDAGOGY[state.studyPedagogy];
-      if (p && $('studyPedBrief')) $('studyPedBrief').textContent = p.brief;
-      render();
-    };
-  }
-  if ($('studyDepth')) {
-    console.log('Wiring studyDepth');
-    $('studyDepth').onchange = e => {
-      console.log('Study depth changed to:', e.target.value);
-      state.studyDepth = e.target.value;
-      render();
-    };
-  }
-  console.log('Found sgFormat radios:', $$('input[name="sgFormat"]').length);
-  $$('input[name="sgFormat"]').forEach(radio => {
-    radio.onchange = e => {
-      console.log('Study format changed to:', e.target.value);
-      state.sgFormat = e.target.value;
-      render();
-    };
-  });
+  // Form inputs - Study Guide (using inline handlers, no duplicates needed)
   
-  // Form inputs - From Notes
-  if ($('notesPedagogy')) {
-    $('notesPedagogy').onchange = e => {
-      state.notesPedagogy = e.target.value;
-      const p = PEDAGOGY[state.notesPedagogy];
-      if (p && $('notesPedBrief')) $('notesPedBrief').textContent = p.brief;
-      render();
-    };
-  }
-  $$('input[name="notesFormat"]').forEach(radio => {
-    radio.onchange = e => { state.notesFormat = e.target.value; render(); };
-  });
+  // Form inputs - From Notes (using inline handlers, no duplicates needed)
   if ($('notesInput')) {
-  $('notesInput').oninput = e => { state.notesInput = e.target.value; render(); };
+    $('notesInput').oninput = e => { state.notesInput = e.target.value; render(); };
   }
   
   // Copy buttons
