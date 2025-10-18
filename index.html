@@ -2051,40 +2051,52 @@ function buildStudyPrompt() {
   const format = state.sgFormat;
   const depth = state.studyDepth;
   const ped = PEDAGOGY[state.studyPedagogy] || PEDAGOGY["Concept Check (Retrieval)"];
-  const pedBlock = ped.inject.map(l => `• ${l}`).join('\n');
-  const c = state.studyComponents;
   const ext = format === 'pptx' ? 'pptx' : (format === 'docx' ? 'docx' : 'pdf');
   const fmt = format === 'pptx' ? 'PPTX 16:9' : (format === 'docx' ? 'Word A4' : 'PDF A4');
-  const pg = depth==='quick'?'10-12':depth==='standard'?'18-25':'30-40';
-  const ts = depth==='quick'?'12':depth==='standard'?'20':'30';
-  const fc = depth==='quick'?'20-30':depth==='standard'?'25-40':'35-50';
-  const pr = depth==='quick'?'6-8':depth==='standard'?'10-15':'12-18';
-  
-  return `SYSTEM: Return ONE complete file: ${slug}_study.${ext}
-Use ONLY Panopto page (captions+slides). Language=${state.quizLang}. Do NOT stop partway or ask to continue. Generate ALL sections in ONE output. ${pg}p guide now.
-Extract REAL video title from og:title/[data-role="session-title"]/h1/document.title. Use it (NOT placeholder) in title+filename.
-Source: transcript+slides+notes. Dedupe. Keep [mm:ss]. ≥500w or "INSUFFICIENT_CONTENT".
-Brand: QUB red #E0001B; white bg; WCAG AA.
-PEDAGOGY: ${pedBlock}
-HE STANDARDS: Cognitive rigor (why not what); precise terminology; connections across topics; metacognition; ${ts}+ timestamps; university register; formative feedback.
 
-STRUCTURE (omit unticked):
-1) Title=[REAL_VIDEO_TITLE], module, date
-2) How to use (≤150w): active recall, spaced, timestamps
-3) Outcomes (4-8): Bloom-tagged
-4) Key concepts (6-12): 2-3 sentences, links, IDs, [mm:ss]
-${c.conceptMap?`5) Concept map: hierarchical, relationships, [mm:ss]\n`:''}${c.glossary?`6) Glossary (15-35): plain English, examples, [mm:ss]\n`:''}${c.worked?`7) Worked (3-6): steps, "why", errors, thinking, [mm:ss]\n`:''}${c.problems?`8) Problems (8-15): recall→extend; hints+solutions+rationale+[mm:ss]\n`:''}${c.cases?`9) Cases (3-5): scenarios, 4-6Q, teaching points, [mm:ss]\n`:''}10) Flashcards (${fc}): ID, Q (understanding not recall), A (precise), Explanation (connections), Source [mm:ss], Difficulty (Fdn/Int/Adv), Related. Appendix: CSV
-${c.selfcheck?`11) Self-check (10-15): mixed; key=answer+rationale+misconceptions+[mm:ss]\n`:''}${c.reflect?`12) Reflection: confident/unclear/connections/approach\n`:''}${c.planner?`13) Planner (2-3wk): Day1 FC-01..15+prob1-4; Day3 self-test; Day7 quiz; Day14 full\n`:''}14) Rewatch (5-8 segments [mm:ss]+why+active)
-15) Independent (150w): resources, self-assess, help
-16) Accessibility: headings, contrast, plain English
+  return `SYSTEM
+Return ONE complete file only: ${slug}_study.${ext} (use the exact format I requested: ${fmt}).
+Do NOT ask questions. Do NOT use external sources. Use ONLY the open Panopto Watch page: captions/transcript + visible slide text.
 
-FORMAT: ${fmt}; section/page; H1/H2; no splits; ${ts}+ [mm:ss]${format==='docx'?'; H1/H2 styles, TOC, editable':''}
-DEPTH: ${fc} flashcards, ${pr} problems, ${pg}p, ${ts}+ [mm:ss]
+TITLE & SOURCE (MANDATORY)
+• Extract the REAL lecture title from <meta property="og:title">, [data-role="session-title"], h1, or document.title. Use that in the document and filename.
+• Read the FULL transcript (deduped) and ALL slide headings/bullets. If total usable text < 500 words, STOP and return exactly: "INSUFFICIENT_PAGE_CONTENT — Open captions & slides, scroll the transcript to the bottom, then retry."
 
-VALIDATE: (1) ≥500w or INSUFFICIENT, (2) Real title extracted, (3) All sections, (4) ${ts}+ timestamps, (5) Flashcards: 7 fields + quality, (6) Expert reasoning, (7) Progress Fdn→Adv, (8) Metacognitive, (9) HE register, (10) Accessible, (11) ONE complete file—ALL sections
-QUALITY: Lecturer-approvable? HE-level? Independent learning?
+QUEEN'S PEDAGOGY CONTRACT (apply everywhere)
+• Learning outcomes & alignment: write 4–6 outcomes with level-appropriate verbs; map each section and any task back to outcomes.
+• Beyond Blended pillars: Place, Platform, Pace, Blend, Flex, Support — state your choices, value to students, likely barriers and fixes.
+• Participation mix: use all four modes (live in place, live online, async in place, async online) and sketch a typical flow/pacing.
+• UDL: cover 6+ checkpoints across Engagement, Representation, and Action/Expression with concrete examples and alternatives.
+• Assessment & feedback: propose one authentic practice task (not graded) and the feedback timing/methods; include a mini rubric excerpt.
+• Student engagement & support: collaboration prompts, progress signposting, and clear help routes with Queen's links/placeholders.
+• Platform/tools: map tools to activities; offer simple alternatives if access fails.
+• Evidence/QA: state any assumptions and trace decisions to the lecture evidence (timestamps) or stakeholder input if visible in slides.
+• PSF/QA fit: briefly map to relevant PSF areas and any Queen's approval/QA docs (placeholders allowed).
+• Clarity: UK English, student-facing copy, consistent headings, and assets ready for Canvas.
 
-OUTPUT NOW: Complete ${ext} with REAL title (e.g., Lecture_5_Photosynthesis_Dr_Martinez_study.${ext}). ALL sections. No partials. Downloadable immediately.`;
+STRUCTURE & COUNTS (include slide/clip timestamps [mm:ss] where relevant)
+1) Title page — [REAL LECTURE TITLE], module/course, date, 80–120 word "How to use this guide".
+2) Learning outcomes — 4–6 outcomes with verbs; short alignment note.
+3) Key concepts — 6–12 concepts; each = 2–3 sentences + one "why it matters" line + [mm:ss].
+4) Concept map (text description + simple list of nodes/links) + [mm:ss] reference.
+5) Glossary — 18–35 terms with plain-English definitions and an example from the lecture; tag slide/time.
+6) Worked examples OR mini cases — 4–6 items: steps, "why this step", common slips, and "check you can…" line; [mm:ss].
+7) Problem set — 10–15 items that progress recall → application → extension; each with hint, full solution, and "why this is correct"; [mm:ss].
+8) Self-check quiz — 12–16 mixed MC/SA; answer key with brief rationale and common misconception; [mm:ss].
+9) Flashcards — 25–40 cards; for each include: ID, Q (retrieval), A (precise), short explanation (connection to a concept), Difficulty (Fdn/Int/Adv), Related IDs, Source [mm:ss]. Also output a CSV appendix.
+10) Reflection prompts — 6–8 metacognitive questions (confidence, uncertainties, connections, next steps).
+11) Two-week study planner — day-by-day tasks (e.g., FC-01–12, problems 1–4, self-check review).
+12) Rewatch guide — 5–8 clip intervals [mm:ss–mm:ss], "watch for…", and suggested active task.
+13) Accessibility & alternatives — list the UDL checkpoints covered; provide alt-text suggestions for any figures referenced.
+
+FORMAT RULES
+• Use the requested format consistently (${fmt}). One section per page/slide; avoid splitting questions across pages. Use Queen's red (#E0001B) for accents; WCAG AA contrast.
+
+VALIDATE BEFORE RETURNING (fail-closed if not met)
+1) ≥500 words captured; 2) REAL title extracted and used in document + filename; 3) All 13 sections present; 4) ≥20 timestamps embedded; 5) 6+ UDL checkpoints with examples; 6) Problem set has hint+solution+rationale; 7) Flashcards have all 7 fields; 8) Clear UK English; 9) Output ONE complete file only — no partials.
+
+SELF-SCORE (append at the end)
+Add a 10-row table scoring 0–4 for: Outcomes & alignment; Beyond Blended pillars; Participation mix; UDL; Assessment & feedback; Engagement & support; Platform/tools; Evidence base; PSF/QA fit; Clarity & student usability — with 1-sentence evidence for each. Then list 3 actions that would lift any 3s to 4s.`;
 }
 
 function buildNotesPrompt() {
@@ -2095,38 +2107,39 @@ function buildNotesPrompt() {
   const ext = format === 'pptx' ? 'pptx' : (format === 'docx' ? 'docx' : 'pdf');
   const fmt = format === 'pptx' ? 'PPTX 16:9' : (format === 'docx' ? 'Word A4' : 'PDF A4');
   
-  return `SYSTEM: Return ONE complete file: ${slug}.${ext}
-Use ONLY notes below. Language=${state.quizLang}. Do NOT stop partway or ask to continue. Generate ALL 13 sections in ONE output. 25-35p guide now.
-Parse headings/bullets; dedupe. Extract title (first heading). ≥400w or "INSUFFICIENT_CONTENT".
+  return `SYSTEM
+Return ONE complete file only: ${slug}_notes_pack.${ext} (use the exact format I requested: ${fmt}).
+Use ONLY the pasted notes. Do NOT use external sources. If usable text < 400 words, STOP and return: "INSUFFICIENT_PAGE_CONTENT — Add more notes (≥400 words with headings) and retry."
 
-NOTES: ${state.notesInput || '[PASTE HERE]'}
+TITLE & SOURCE
+• Extract the title from the first H1/line of the notes (or “Notes Pack” if absent). Use in the document and filename.
+• Parse headings, bullets, and tables; dedupe near-duplicates; keep key wording from the notes.
 
-PEDAGOGY: ${pedBlock}
-HE STANDARDS + SOURCE FIDELITY: Every concept from notes (no invention); match lecturer terminology exactly; understanding not recall; scaffold accessible→advanced; connections; precise terms; inference limits; metacognition; HE depth.
+QUEEN'S PEDAGOGY CONTRACT
+• Same as Study Guide contract; apply it using the content of the notes.
 
-STRUCTURE (all 13):
-1) Title (from notes or "Notes Pack"), module, date
-2) How to use (≤150w): active recall, spaced
-3) Outcomes (4-8): Bloom-tagged
-4) Key concepts (6-12): 2-3 sentences, links, IDs
-5) Concept map: hierarchical, relationships
-6) Glossary (12-30): plain English, examples
-7) Worked (3-6) OR Cases (3-5): steps+"why", errors, thinking OR scenarios+Q+points
-8) Problems (8-12): recall→extend; hints+solutions+rationale
-9) Flashcards (25-45): ID, Q (retrieval), A, Explanation (why/connect), Difficulty (Fdn/Int/Adv), Related. Appendix: CSV
-10) Self-check (10-15): mixed; key=correct+rationale+misconceptions
-11) Reflection: confident/unclear/connections/approach
-12) Independent (≤200w): resources, self-assess, help
-13) Accessibility: headings, contrast, plain English
+STRUCTURE & COUNTS (build all sections; add [section anchors] for easy navigation)
+1) Title + “How to use this pack” (≤120 words)
+2) Learning outcomes — 4–6 outcomes + alignment note
+3) Key concepts — 6–12 concepts (2–3 sentences each)
+4) Concept map (text + list of nodes/links)
+5) Glossary — 15–30 terms with examples from the notes
+6) Worked examples / cases — 4–6 items with steps/why/slips OR scenario/questions/teaching points
+7) Problem set — 8–12 items with hint + full solution + rationale
+8) Self-check quiz — 10–14 items; concise rationale in answer key
+9) Flashcards — 25–45 cards with: ID, Q, A, Explanation (connection), Difficulty, Related IDs; output a CSV appendix
+10) Reflection prompts — 5–7 metacognitive questions
+11) Independent study (≤180 words) — how to practise safely; where to seek help (Queen’s links placeholders)
+12) Accessibility & alternatives — list UDL checkpoints and specific alternatives
 
-FORMAT: ${fmt}; section/page; H1/H2; no splits${format==='docx'?'; H1/H2 styles, TOC, editable':''}
-DEPTH: 25-35p, 25-45 flashcards, 8-12 problems, 3-6 examples/cases
+FORMAT RULES
+• Use ${fmt}. Headings and section order must match above; UK English; Queen’s red (#E0001B) for accents; WCAG AA.
 
-VALIDATE: (1) ≥400w or INSUFFICIENT, (2) Title from notes, (3) All 13 sections, (4) Flashcards: 6 fields + quality, (5) Progress Fdn→Adv, (6) Reasoning not just steps, (7) Metacognitive, (8) Register matches notes, (9) Accessible, (10) ONE complete file—ALL sections
-SOURCE CHECK: Trace every concept to notes? No fabrication?
-QUALITY: HE-level? Lecturer recognizes content? Thinking not recall?
+VALIDATE BEFORE RETURNING
+1) ≥400 words in notes; 2) Title extracted; 3) All sections present; 4) 6+ UDL checkpoints; 5) Problem set has hint+solution+rationale; 6) Flashcards have all fields; 7) Self-check has rationale; 8) Student-facing clarity and alignment visible.
 
-OUTPUT NOW: Complete ${ext}. ALL 13 sections. No partials. Downloadable immediately.`;
+SELF-SCORE (append)
+Add the same 10-criterion 0–4 table + three actions to lift any 3s to 4s.`;
 }
 
 // Render preview
