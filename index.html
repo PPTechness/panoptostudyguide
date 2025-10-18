@@ -1972,6 +1972,48 @@ const STUDY_COMPONENTS = [
   { id: 'planner', label: 'Study Planner' }
 ];
 
+/* ---------- Study Components Chips (dynamic, reacts to UI) ---------- */
+function mountStudyComponents() {
+  const host = document.getElementById('studyComponents');
+  if (!host) return;
+  host.innerHTML = '';
+
+  STUDY_COMPONENTS.forEach(comp => {
+    // Determine active state from global 'state.studyComponents'
+    const active = !!(state.studyComponents && state.studyComponents[comp.id]);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'chip' + (active ? ' active' : '');
+    btn.setAttribute('data-id', comp.id);
+    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    btn.textContent = comp.label;
+
+    btn.addEventListener('click', () => {
+      // Toggle state
+      state.studyComponents[comp.id] = !state.studyComponents[comp.id];
+      // Reflect UI
+      btn.classList.toggle('active');
+      btn.setAttribute('aria-pressed', btn.classList.contains('active') ? 'true' : 'false');
+      // Re-render prompt preview
+      if (typeof render === 'function') render();
+    });
+
+    host.appendChild(btn);
+  });
+}
+
+// Rebuild chips if the preset changes (in case state resets elsewhere)
+function refreshStudyComponentsFromState() {
+  // Ensure all keys exist (defensive)
+  STUDY_COMPONENTS.forEach(comp => {
+    if (typeof state.studyComponents[comp.id] === 'undefined') {
+      state.studyComponents[comp.id] = true;
+    }
+  });
+  mountStudyComponents();
+}
+
 const QUESTION_TYPES = [
   { id: 'multiple_choice_question', label: 'Multiple Choice' },
   { id: 'multiple_answers_question', label: 'Multiple Answers' },
@@ -1981,6 +2023,15 @@ const QUESTION_TYPES = [
   { id: 'numerical_question', label: 'Numerical' },
   { id: 'matching_question', label: 'Matching' }
 ];
+
+/* ---------- Initialisation: mount chips once DOM is ready ---------- */
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    refreshStudyComponentsFromState();
+  } catch (e) {
+    console.warn('Study components init failed:', e);
+  }
+});
 
 // DOM helpers
 const $ = id => document.getElementById(id);
@@ -2076,8 +2127,10 @@ function buildStudyPrompt() {
   const slug = slugify(title);
   const depth = state.studyDepth;
   const ped = PEDAGOGY[state.studyPedagogy] || PEDAGOGY["Concept Check (Retrieval)"];
-  const c = state.studyComponents;
+  const c = state.studyComponents || {};
   const pedBlock = ped.inject.map(l => `• ${l}`).join('\n');
+
+  // Depth notes (used in planner/rubric phrasing)
   const depthNotes = {
     quick: {
       planner: 'Keep tasks tight (30–45 minute focus blocks) but still cover every evidence-backed activity.',
@@ -2093,6 +2146,85 @@ function buildStudyPrompt() {
     }
   };
   const depthMeta = depthNotes[depth] || depthNotes.standard;
+
+  // --- Build component-aware STRUCTURE & VALIDATION text dynamically ---
+  const include = {
+    conceptMap: !!c.conceptMap,
+    glossary: !!c.glossary,
+    worked: !!c.worked,
+    problems: !!c.problems,
+    cases: !!c.cases,
+    selfcheck: !!c.selfcheck,
+    reflect: !!c.reflect,
+    planner: !!c.planner
+  };
+
+  // Helper: push numbered section lines in order
+  const sections = [];
+  let num = 0;
+  const push = (line) => { num += 1; sections.push(`${num}) ${line}`); };
+
+  // Core sections (always on)
+  push('Title page — REAL LECTURE TITLE, module/course, date; 90–130 word “How to use this guide”.');
+  push('Learning outcomes — 5 outcomes (10–18 words), ≥3 distinct Bloom verbs; 80–120 word “alignment note”.');
+  push('Threshold concepts — 3–5 ideas; EACH 70–90 words incl. “what changes in your thinking” + [mm:ss].');
+  push('Key concepts — ≥10 concepts; EACH 45–65 words incl. “why it matters” + one [mm:ss].');
+
+  if (include.conceptMap) {
+    push('Concept map — 150–220 word narrative + list (10–14 nodes; 10–14 edges). Justify ≥4 edges with [mm:ss].');
+  }
+  if (include.glossary) {
+    push('Glossary — ≥24 terms; EACH 22–35 words with a corpus-based example and [mm:ss]. Two-column table.');
+  }
+  if (include.worked && include.cases) {
+    push('Worked examples AND mini cases — total 5 items (≈3 worked + 2 cases). EACH 150–200 words with: Steps (ordered) or Scenario; Why this step/teaching point; Common slip; “Check you can…”; [mm:ss].');
+  } else if (include.worked) {
+    push('Worked examples — 5 items; EACH 150–200 words with: Steps (ordered); Why this step; Common slip; “Check you can…”; [mm:ss].');
+  } else if (include.cases) {
+    push('Mini cases — 5 vignettes; EACH 150–200 words with: Scenario; Questions; Teaching points; Common slip; “Check you can…”; [mm:ss].');
+  }
+  if (include.problems) {
+    push('Problem set (interleaved) — 16 items: Recall (6), Application (6), Extension/Transfer (4). EACH item: Prompt; Hint (15–30 words); Full solution (50–90 words); “Why this is correct” (25–50 words); [mm:ss].');
+  }
+  if (include.selfcheck) {
+    push('Self‑check quiz — 14 items (MC/SA). Answer key for EACH item: Correct answer; 15–30 word rationale; 1 likely misconception; [mm:ss].');
+  }
+  if (include.reflect) {
+    push('Self‑explanation / reflection prompts — 6–8 prompts linked to outcomes; include [mm:ss].');
+  }
+  // Rewatch guide always included for evidence-led revision
+  push('Rewatch guide — 8 clip intervals [mm:ss–mm:ss]; EACH with “watch for…”, an active task, and links to relevant concept/flashcard IDs.');
+  if (include.planner) {
+    push(`Two‑week study planner — 14 rows (Day 1–14). 1–2 specific tasks/day (e.g., FC‑01–10; Problems 1–4; rewatch [12:33–18:10]); include time estimate columns. ${depthMeta.planner}`);
+  }
+  // Flashcards always included
+  push('Flashcards — 45 cards. For EACH: ID, Q (retrieval), A (precise), 1‑sentence explanation (connection), Difficulty (Fdn/Int/Adv), Related IDs, Source [mm:ss]. Include **Appendix B — Flashcards CSV** with all fields.');
+  // Group task & authentic practice always included
+  push('Group tasks (seminar‑ready) — 3 activities (think‑pair‑share; jigsaw; mini‑debate) tailored to THIS topic; 120–180 words each with outcomes link and [mm:ss].');
+  push(`Authentic practice task — 1 realistic ungraded task (150–220 words) with criteria (mini rubric: 3 rows × 3 levels) and feedback timing/method. ${depthMeta.rubric}`);
+  // UDL + Help always included
+  push('UDL & accessibility audit — ≥7 checkpoints USED with concrete alternatives from THIS content; include two “if you can’t access X, do Y” lines.');
+  push('Where to get help — short signposting paragraph (Queen’s links may be placeholders); inclusive phrasing.');
+  // Evidence appendix always included
+  push('Appendix A — Evidence snippets — ≥24 unique quoted fragments (5–20 words) with [mm:ss], grouped by section.');
+  push('Appendix B — Flashcards CSV — full table of all flashcards.');
+
+  // Dynamic validation floors (only for included components)
+  const floors = [];
+  floors.push('Threshold ≥3; Key concepts ≥10;');
+  if (include.glossary) floors.push('Glossary ≥24;');
+  if (include.worked || include.cases) floors.push('Examples/Cases =5;');
+  if (include.problems) floors.push('Problems =16;');
+  if (include.selfcheck) floors.push('Self‑check =14;');
+  floors.push('Flashcards =45; Rewatch =8;');
+  if (include.planner) floors.push('Planner has 14 rows;');
+  floors.push('Group tasks =3; UDL checkpoints ≥7;');
+
+  // Build component list string for clarity
+  const includedList = Object.entries(include)
+    .filter(([_, val]) => val)
+    .map(([k]) => k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()))
+    .join(', ') || 'All core sections only';
 
   return `SYSTEM
 Return ONE file only: \${slug}_study.docx (Word A4). Do NOT ask questions. Do NOT use external sources. Do NOT include planning/coverage/validation text in the output.
@@ -2115,7 +2247,7 @@ ANTI‑PLACEHOLDER / EVIDENCE RULES (HARD FAIL)
 • Add **Appendix A — Evidence Snippets** with ≥24 unique quoted fragments (5–20 words), grouped by section, each with [mm:ss].
 
 QUEEN’S PEDAGOGY CONTRACT (APPLY THROUGHOUT)
-\${pedBlock}
+${pedBlock}
 • Outcomes alignment (4–6 outcomes with Bloom‑appropriate verbs) + a brief note mapping sections to outcomes.
 • Beyond Blended pillars: Place, Platform, Pace, Blend, Flex, Support — state choices, student value, barriers + fixes.
 • Participation mix: use live in‑place, live online, async in‑place, async online; sketch a typical week flow.
@@ -2133,42 +2265,23 @@ WORKFLOW GUARDRAILS (INTERNAL — DO NOT OUTPUT)
 4) VALIDATE — compute section word counts and item counts. If ANY floor fails, revise and re‑check. Only when ALL checks pass, render the .docx.
 5) NO STREAMING until VALIDATE passes. Do NOT include your plan/coverage/validation text in the output.
 
-STRUCTURE (ALL SECTIONS REQUIRED). Populate with full prose; embed [mm:ss] evidence in each section.
-1) Title page — REAL LECTURE TITLE, module/course, date; 90–130 word “How to use this guide”.
-2) Learning outcomes — 5 outcomes (10–18 words), ≥3 distinct Bloom verbs; 80–120 word “alignment note”.
-3) Threshold concepts — 3–5 ideas; EACH 70–90 words incl. “what changes in your thinking” + [mm:ss].
-4) Key concepts — ≥10 concepts; EACH 45–65 words incl. “why it matters” + one [mm:ss].
-5) Concept map — 150–220 word narrative + list (10–14 nodes; 10–14 edges). Justify ≥4 edges with [mm:ss].
-6) Glossary — ≥24 terms; EACH 22–35 words with a corpus‑based example and [mm:ss]. Two‑column table.
-7) Worked examples OR mini cases — 5 items; EACH 150–200 words with: Steps (ordered); Why this step; Common slip; “Check you can…”; [mm:ss].
-8) Common misconceptions & fixes — table with ≥8 rows: Misconception | Why it’s wrong | Better way to think | Where to review [mm:ss] (40–80 words/row combined).
-9) Problem set (interleaved) — 16 items: Recall (6), Application (6), Extension/Transfer (4).
-   EACH item: Prompt; Hint (15–30 words); Full solution (50–90 words); “Why this is correct” (25–50 words); [mm:ss].
-10) Self‑check quiz — 14 items (MC/SA). Answer key for EACH item: Correct answer; 15–30 word rationale; 1 likely misconception; [mm:ss].
-11) Self‑explanation prompts — 6–8 prompts linked to outcomes; include [mm:ss].
-12) Rewatch guide — 8 clip intervals [mm:ss–mm:ss]; EACH with “watch for…”, an active task, and links to relevant concept/flashcard IDs.
-13) Two‑week study planner — 14 rows (Day 1–14). 1–2 specific tasks/day (e.g., FC‑01–10; Problems 1–4; rewatch [12:33–18:10]); include time estimate columns. \${depthMeta.planner}
-14) Flashcards — 45 cards. For EACH: ID, Q (retrieval), A (precise), 1‑sentence explanation (connection), Difficulty (Fdn/Int/Adv), Related IDs, Source [mm:ss].
-    Include **Appendix B — Flashcards CSV** with all fields.
-15) Group tasks (seminar‑ready) — 3 activities (think‑pair‑share; jigsaw; mini‑debate) tailored to THIS topic; 120–180 words each with outcomes link and [mm:ss].
-16) Authentic practice task — 1 realistic ungraded task (150–220 words) with criteria (mini rubric: 3 rows × 3 levels) and feedback timing/method. \${depthMeta.rubric}
-17) UDL & accessibility audit — ≥7 checkpoints USED with concrete alternatives from THIS content; include two “if you can’t access X, do Y” lines.
-18) Where to get help — short signposting paragraph (Queen’s links may be placeholders); inclusive phrasing.
-19) Appendix A — Evidence snippets — ≥24 unique quoted fragments (5–20 words) with [mm:ss], grouped by section.
-20) Appendix B — Flashcards CSV — full table of all flashcards.
+INCLUDED COMPONENTS (FROM UI): ${includedList}
+
+STRUCTURE (ONLY build the sections listed below; omit any others). Populate with full prose; embed [mm:ss] evidence in each section.
+${sections.join('\n')}
 
 FORMAT & LAYOUT
 • Word A4. One major section per page where possible; do NOT split a single problem across pages.
-• Use consistent headings; tables for Glossary, Misconceptions, Planner, Flashcards CSV, and Rubric.
+• Use consistent headings; tables for Glossary, Misconceptions (if present), Planner, Flashcards CSV, and Rubric.
 • Use Queen’s red (#E0001B) for accents; maintain WCAG‑AA contrast; UK English; define first use of terms.
 
 VALIDATE BEFORE RETURNING (FAIL‑CLOSED)
 1) Corpus ≥500 words; REAL title in H1 + filename match; NO placeholders.
-2) Evidence quotas: ≥1 timestamp in EVERY major section + ≥24 in Appendix A.
-3) Floors met: Threshold ≥3; Key concepts ≥10; Glossary ≥24; Examples/Cases =5; Misconceptions ≥8; Problems =16; Self‑check =14; Flashcards =45; Rewatch =8; Planner has 14 rows; Group tasks =3; UDL checkpoints ≥7.
-4) Each Problem has Prompt + Hint + Solution + Why + [mm:ss]; each Quiz item has rationale + misconception.
+2) Evidence quotas: ≥1 timestamp in EVERY included major section + ≥24 in Appendix A.
+3) Floors met for included components: ${floors.join(' ')}
+4) Each Problem (if included) has Prompt + Hint + Solution + Why + [mm:ss]; each Quiz item (if included) has rationale + misconception.
 5) Flashcards contain ALL 7 fields; CSV included.
-6) Clear UK English; section order preserved; visually scannable with headings and tables.
+6) Clear UK English; section order preserved as above; visually scannable with headings and tables.
 7) Output EXACTLY ONE .docx file; no extra commentary.`;
 }
 function buildNotesPrompt() {
