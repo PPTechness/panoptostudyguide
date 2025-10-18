@@ -1516,7 +1516,7 @@
   
     <!-- Primary Action -->
     <div class="primary-action">
-      <button class="btn-primary" id="generateQuiz" onclick="alert('Quiz button clicked!'); copyPrompt();">
+      <button class="btn-primary" id="generateQuiz" onclick="copyPrompt();">
         📋 Copy Prompt to Clipboard
       </button>
     </div>
@@ -1598,7 +1598,7 @@
         
     <!-- Primary Action -->
     <div class="primary-action">
-      <button class="btn-primary" id="generateStudy" onclick="alert('Button clicked!'); copyPrompt();">
+      <button class="btn-primary" id="generateStudy" onclick="copyPrompt();">
         📋 Copy Prompt to Clipboard
       </button>
       <p class="help" style="margin-top: 0.5rem;">Paste into Copilot with your Panopto Watch page (captions & contents open).</p>
@@ -1654,7 +1654,7 @@
     
     <!-- Primary Action -->
     <div class="primary-action">
-      <button class="btn-primary" id="generateNotes" onclick="alert('Notes button clicked!'); copyPrompt();">
+      <button class="btn-primary" id="generateNotes" onclick="copyPrompt();">
         📋 Copy Prompt to Clipboard
       </button>
       <p class="help" style="margin-top: 0.5rem;">Paste into Copilot (no Panopto page needed for this workflow).</p>
@@ -1683,7 +1683,7 @@
     
     <div class="preview-actions" style="margin: 1rem 0; justify-content: space-between;">
       <span class="help">Paste into Copilot with your Panopto Watch page open. Ensure preflight steps are done.</span>
-      <button class="btn-primary" id="copyTop" title="Copy the prompt" onclick="alert('copyTop clicked!'); copyPrompt();">📋 Copy Prompt</button>
+      <button class="btn-primary" id="copyTop" title="Copy the prompt" onclick="copyPrompt();">📋 Copy Prompt</button>
     </div>
     
     <div class="preview-box">
@@ -1856,7 +1856,6 @@
   <span>Prompt copied to clipboard!</span>
 </div>
 
-<script>
 <script>
 function exposePanoptoTranscriptForCopilot() {
   try {
@@ -2075,67 +2074,89 @@ function buildStudyPrompt() {
   const panoptoTitle = detectPanoptoTitle();
   const title = panoptoTitle || 'Study Pack';
   const slug = slugify(title);
-  const format = state.sgFormat;
   const depth = state.studyDepth;
   const ped = PEDAGOGY[state.studyPedagogy] || PEDAGOGY["Concept Check (Retrieval)"];
   const c = state.studyComponents;
-  const ext = format === 'pptx' ? 'pptx' : (format === 'docx' ? 'docx' : 'pdf');
-  const fmt = format === 'pptx' ? 'PPTX 16:9' : (format === 'docx' ? 'Word A4' : 'PDF A4');
-  
-  // Depth profiles
-  const depthProfiles = {
-    quick: { flashcards: 25, problems: 8, pages: 12, timestamps: 20 },
-    standard: { flashcards: 35, problems: 12, pages: 22, timestamps: 28 },
-    deep: { flashcards: 45, problems: 16, pages: 34, timestamps: 36 }
+  const pedBlock = ped.inject.map(l => `• ${l}`).join('\n');
+  const depthNotes = {
+    quick: {
+      planner: 'Keep tasks tight (30–45 minute focus blocks) but still cover every evidence-backed activity.',
+      rubric: 'Highlight rapid review loops and formative feedback hooks for compressed timelines.'
+    },
+    standard: {
+      planner: 'Balance depth with pacing (45–60 minute sessions) so learners iterate through retrieval, application, and reflection.',
+      rubric: 'Emphasise deliberate practice, spaced retrieval, and collaborative checkpoints.'
+    },
+    deep: {
+      planner: 'Expect 60–80 minute sessions with extension readings or peer-led synthesis built in.',
+      rubric: 'Surface opportunities for advanced synthesis, peer teaching, and disciplinary scholarship links.'
+    }
   };
-  const prof = depthProfiles[depth] || depthProfiles.standard;
+  const depthMeta = depthNotes[depth] || depthNotes.standard;
   return `SYSTEM
-SYSTEM SAFEGUARD
-Before writing anything else, confirm transcript+slides text were successfully read (>500 words). 
-If not, stop and output only the “INSUFFICIENT_PAGE_CONTENT” message.
-SOURCE VERIFICATION & CAPTION EXTRACTION (NON-NEGOTIABLE)
-• Confirm this page is a full Panopto Watch view (not Canvas embed). 
-• Read the complete visible transcript: scroll to the bottom before parsing so all captions load into the DOM. 
-• Extract every <div>, <span>, or <p> inside any container with class names matching “transcript”, “caption”, or “caption-text”; concatenate them in time order (deduped). 
-• Extract slide/contents text from elements containing class names “slide”, “content-item”, “tab-slides”, “tab-contents”, or aria-labelled equivalents. 
-• Combine captions + slide text into a single coherent lecture text corpus. Use ONLY this text corpus as content.
-• If the combined text corpus < 500 words after deduplication, RETURN EXACTLY:
+Return ONE file only: ${slug}_study.docx (Word A4). Do NOT ask questions. Do NOT use external sources.
+
+PANOPTO SOURCE (NON-NEGOTIABLE)
+• This is a Panopto Watch page. Use ONLY: (a) full captions/transcript (deduped, time-ordered), (b) visible slides/contents text.
+• Extract REAL lecture title from <meta property="og:title"> OR [data-role="session-title"] OR .session-title OR document.title.
+• If combined corpus (captions+slides) < 500 words after dedupe → STOP and return EXACTLY:
   “INSUFFICIENT_PAGE_CONTENT — Expand captions & slides, scroll transcript fully, then retry.”
-• Extract the real lecture title from:
-  <meta property="og:title"> OR [data-role="session-title"] OR .session-title OR document.title.
-  Use the extracted title (e.g., “Week 5: Digital Systems”) in the document heading and filenames.
-• Confirm that the title appears in both the first page heading AND the exported filename.
 
-QUEEN'S PEDAGOGY CONTRACT (apply everywhere)
-• Learning outcomes & alignment: write 4–6 outcomes with level-appropriate verbs; map each section and any task back to outcomes.
-• Beyond Blended pillars: Place, Platform, Pace, Blend, Flex, Support — state your choices, value to students, likely barriers and fixes.
-• Participation mix: use all four modes (live in place, live online, async in place, async online) and sketch a typical flow/pacing.
-• UDL: cover 6+ checkpoints across Engagement, Representation, and Action/Expression with concrete examples and alternatives.
-• Assessment & feedback: propose one authentic practice task (not graded) and the feedback timing/methods; include a mini rubric excerpt.
-• Student engagement & support: collaboration prompts, progress signposting, and clear help routes with Queen's links/placeholders.
-• Platform/tools: map tools to activities; offer simple alternatives if access fails.
-• Evidence/QA: state any assumptions and trace decisions to the lecture evidence (timestamps) or stakeholder input if visible in slides.
-• PSF/QA fit: briefly map to relevant PSF areas and any Queen's approval/QA docs (placeholders allowed).
-• Clarity: UK English, student-facing copy, consistent headings, and assets ready for Canvas.
+ANTI-PLACEHOLDER / EVIDENCE RULES (HARD FAIL)
+• No placeholders (e.g., “add content”, “TBD”), no generic boilerplate.
+• Every MAJOR section below must include ≥1 quoted evidence snippet (5–20 words) with [mm:ss].
+• Add an **Appendix A — Evidence Snippets** with ≥24 unique quoted fragments grouped by section, each with a timestamp.
 
-STRUCTURE & COUNTS (include slide/clip timestamps [mm:ss] where relevant)
-1) Title page — [REAL LECTURE TITLE], module/course, date, 80–120 word "How to use this guide".
-2) Learning outcomes — 4–6 outcomes with verbs; short alignment note.
-3) Key concepts — 6–12 concepts; each = 2–3 sentences + one "why it matters" line + [mm:ss].
-${c.conceptMap ? '4) Concept map (text description + simple list of nodes/links) + [mm:ss] reference.\n' : ''}${c.glossary ? '5) Glossary — 18–35 terms with plain-English definitions and an example from the lecture; tag slide/time.\n' : ''}${c.worked ? '6) Worked examples OR mini cases — 4–6 items: steps, "why this step", common slips, and "check you can…" line; [mm:ss].\n' : ''}${c.problems ? `7) Problem set — ${prof.problems} items that progress recall → application → extension; each with hint, full solution, and "why this is correct"; [mm:ss].\n` : ''}${c.selfcheck ? '8) Self-check quiz — 12–16 mixed MC/SA; answer key with brief rationale and common misconception; [mm:ss].\n' : ''}9) Flashcards — ${prof.flashcards} cards; for each include: ID, Q (retrieval), A (precise), short explanation (connection to a concept), Difficulty (Fdn/Int/Adv), Related IDs, Source [mm:ss]. Also output a CSV appendix.
-${c.reflect ? '10) Reflection prompts — 6–8 metacognitive questions (confidence, uncertainties, connections, next steps).\n' : ''}${c.planner ? '11) Two-week study planner — day-by-day tasks (e.g., FC-01–12, problems 1–4, self-check review).\n' : ''}12) Rewatch guide — 5–8 clip intervals [mm:ss–mm:ss], "watch for…", and suggested active task.
-13) Accessibility & alternatives — list the UDL checkpoints covered; provide alt-text suggestions for any figures referenced.
+QUEEN’S PEDAGOGY CONTRACT (APPLY THROUGHOUT)
+${pedBlock}
+• Outcomes alignment (4–6 outcomes with Bloom-appropriate verbs) + a brief note mapping sections to outcomes.
+• Beyond Blended pillars: Place, Platform, Pace, Blend, Flex, Support — state choices, student value, barriers + fixes.
+• Participation mix: use live in-place, live online, async in-place, async online; sketch a typical week flow.
+• UDL: ≥7 checkpoints across Engagement, Representation, Action/Expression with concrete alternatives tied to THIS topic.
+• Assessment & feedback: one authentic practice task (ungraded), feedback timing/methods, mini rubric excerpt.
+• Engagement & support: collaboration prompts, signposting, help routes (Queen’s links as placeholders allowed).
+• Tools & fallbacks: map platforms to activities; give a simple no-frills alternative for access issues.
+• QA trace: note assumptions; tie key decisions to timestamps/slide cues; brief PSF/QA mapping (placeholders allowed).
+• Style: UK English; student-facing clarity; WCAG-AA contrast; Queen’s red (#E0001B) accents.
 
-FORMAT RULES
-• Use the requested format consistently (${fmt}). One section per page/slide; avoid splitting questions across pages. Use Queen's red (#E0001B) for accents; WCAG AA contrast.
+STRUCTURE (ALL SECTIONS REQUIRED UNLESS MARKED OPTIONAL). Populate with full prose; embed [mm:ss] evidence in each section.
+1) Title page — REAL LECTURE TITLE, module/course, date; 90–130 word “How to use this guide”.
+2) Learning outcomes — 5 outcomes (10–18 words), ≥3 distinct Bloom verbs; 80–120 word “alignment note”.
+3) Threshold concepts — 3–5 ideas that transform understanding; each 60–90 words + “what changes in your thinking” + [mm:ss].
+4) Key concepts — ≥10 concepts; each 35–65 words + “why it matters” + one [mm:ss].
+${c.conceptMap ? '5) Concept map — 150–220 word narrative + list (10–14 nodes; 10–14 edges). Justify ≥4 edges with [mm:ss].' : ''}
+${c.glossary ? '6) Glossary — ≥24 terms; each 20–35 words with a corpus-based example and [mm:ss]. Present as a two-column table.' : ''}
+${c.worked ? '7) Worked examples OR mini cases — 5 items (each 140–200 words) with: Steps (ordered); Why this step; Common slip; “Check you can…”; [mm:ss].' : ''}
+8) Common misconceptions & fixes — table with ≥8 rows: Misconception (from captions/slides) | Why it’s wrong | Better way to think | Where to review [mm:ss].
+${c.problems ? `9) Problem set (interleaved) — 16 items across Recall (6), Application (6), Extension/Transfer (4).
+   EACH item must have: Prompt; Hint (15–30 words); Full solution (50–90 words); “Why this is correct” (25–50 words); [mm:ss].` : ''}
+${c.selfcheck ? '10) Self-check quiz — 14 items (MC/SA). Answer key includes for EACH item: Correct answer; 15–30 word rationale; 1 likely misconception; [mm:ss].' : ''}
+${c.reflect ? '11) Self-explanation prompts — 6–8 prompts that ask learners to explain steps/choices; connect to outcomes; include [mm:ss].' : ''}
+12) Rewatch guide — 8 clip intervals [mm:ss–mm:ss]; each with “watch for…”, an active task (annotate/compare/compute), and links to relevant concept IDs/flashcards.
+${c.planner ? ("13) Two-week study planner — 14 rows (Day 1–14). 1–2 specific tasks/day (e.g., FC-01–10; Problems 1–4; rewatch [12:33–18:10]); include time estimate columns. " + depthMeta.planner) : ''}
+14) Flashcards set — 45 cards. For each: ID, Q (retrieval), A (precise), 1-sentence explanation (connection), Difficulty (Fdn/Int/Adv), Related IDs, Source [mm:ss].
+    Also include **Appendix B — Flashcards CSV** table with all fields.
+15) Group tasks (seminar-ready) — 3 activities (think-pair-share; jigsaw; mini-debate) tailored to THIS topic; each 120–180 words with outcomes link and [mm:ss].
+16) Authentic practice task — 1 realistic ungraded task (150–220 words) with criteria (mini rubric: 3 rows × 3 levels) and feedback timing/method. ${depthMeta.rubric}
+17) UDL & accessibility audit — list ≥7 UDL checkpoints USED with concrete examples/alternatives taken from THIS content; include an “if you can’t access X, do Y” line for two key points.
+18) Where to get help — short signposting paragraph (Queen’s links as placeholders); include inclusive wording.
+19) Appendix A — Evidence snippets — ≥24 unique quoted fragments (5–20 words) with [mm:ss], grouped by section.
+20) Appendix B — Flashcards CSV — as noted in section 14.
 
-VALIDATE BEFORE RETURNING (fail-closed if not met)
-1) ≥500 words captured; 2) REAL title extracted and used in document + filename; 3) All 13 sections present; 4) ≥20 timestamps embedded; 5) 6+ UDL checkpoints with examples; 6) Problem set has hint+solution+rationale; 7) Flashcards have all 7 fields; 8) Clear UK English; 9) Output ONE complete file only — no partials.
+FORMAT & LAYOUT
+• Word A4. One major section per page where possible; do NOT split a single problem across pages.
+• Use consistent headings; tables for Glossary, Misconceptions, Planner, Flashcards CSV, and Rubric.
+• Use Queen’s red (#E0001B) for accents; maintain WCAG-AA contrast; UK English; define first use of terms.
 
-SELF-SCORE (append at the end)
-Add a 10-row table scoring 0–4 for: Outcomes & alignment; Beyond Blended pillars; Participation mix; UDL; Assessment & feedback; Engagement & support; Platform/tools; Evidence base; PSF/QA fit; Clarity & student usability — with 1-sentence evidence for each. Then list 3 actions that would lift any 3s to 4s.`;
+VALIDATE BEFORE RETURNING (FAIL-CLOSED)
+1) Corpus ≥500 words; REAL title in heading + filename; NO placeholders.
+2) Evidence quotas met: ≥1 timestamp in EVERY major section above + ≥24 in Appendix A.
+3) Floors met: Threshold ≥3; Key concepts ≥10; Glossary ≥24; Examples/Cases =5; Misconceptions ≥8; Problems =16; Self-check =14; Flashcards =45; Rewatch =8; Planner has 14 rows; Group tasks =3; UDL checkpoints ≥7.
+4) Each Problem has Prompt + Hint + Solution + Why + [mm:ss]; each Quiz item has rationale + misconception.
+5) Flashcards contain ALL 7 fields; CSV included.
+6) Clear UK English; section order preserved; visually scannable with headings and tables.
+7) Output EXACTLY ONE .docx file; no extra commentary.`;
 }
-
 function buildNotesPrompt() {
   const slug = 'Lecture_Notes_Pack';
   const format = state.notesFormat;
@@ -2245,7 +2266,6 @@ function copyPrompt() {
       // Show toast
       $('toast').classList.add('show');
       setTimeout(() => $('toast').classList.remove('show'), 2000);
-      alert('Copied successfully! (' + prompt.length + ' characters)');
     }).catch(err => {
       console.error('Clipboard API failed:', err);
       alert('Failed to copy to clipboard: ' + err.message);
@@ -2266,10 +2286,9 @@ function copyPrompt() {
       const success = document.execCommand('copy');
       console.log('execCommand copy result:', success);
       if (success) {
-  // Show toast
-  $('toast').classList.add('show');
-  setTimeout(() => $('toast').classList.remove('show'), 2000);
-        alert('Copied successfully! (' + prompt.length + ' characters)');
+        // Show toast
+        $('toast').classList.add('show');
+        setTimeout(() => $('toast').classList.remove('show'), 2000);
       } else {
         alert('Copy failed. Please try manually selecting and copying the text below.');
       }
@@ -2532,10 +2551,21 @@ function init() {
   }
   
   // Form inputs - Quiz
-  $('quizTitle').oninput = e => { state.quizTitle = e.target.value; render(); };
-  $('quizLang').onchange = e => { state.quizLang = e.target.value; render(); };
-  $('quizCount').oninput = e => { state.quizCount = +e.target.value; render(); };
-  $('quizFeedback').onchange = e => { state.quizFeedback = e.target.value; render(); };
+  if ($('quizTitle')) {
+    $('quizTitle').oninput = e => { state.quizTitle = e.target.value; render(); };
+  }
+  const quizLangEl = $('quizLang');
+  if (quizLangEl) {
+    quizLangEl.onchange = e => { state.quizLang = e.target.value; render(); };
+  }
+  const quizCountEl = $('quizCount');
+  if (quizCountEl) {
+    quizCountEl.oninput = e => { state.quizCount = +e.target.value; render(); };
+  }
+  const quizFeedbackEl = $('quizFeedback');
+  if (quizFeedbackEl) {
+    quizFeedbackEl.onchange = e => { state.quizFeedback = e.target.value; render(); };
+  }
   
   // Form inputs - Study Guide (using inline handlers, no duplicates needed)
   
