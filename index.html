@@ -1432,7 +1432,7 @@
   </div>
   
   <!-- Quiz Workflow -->
-  <div class="workflow-content quiz-workflow">
+  <div class="workflow-content quiz-workflow hidden">
     <h2 class="gradient-title" style="margin-top: 2rem; margin-bottom: 3rem;">Canvas Quiz Maker</h2>
     
     <div class="info" id="preflight">
@@ -2430,6 +2430,12 @@ function init() {
   initQuestionTypes();
   initStudyComponents();
   render();
+  
+  // Show the quiz workflow by default on page load
+  const defaultWorkflow = document.querySelector('.quiz-workflow');
+  if (defaultWorkflow) {
+    defaultWorkflow.classList.remove('hidden');
+  }
   
   // Workflow tabs
   $$('.workflow-btn').forEach(btn => {
