@@ -2436,6 +2436,15 @@ function init() {
     btn.addEventListener('click', () => switchWorkflow(btn.dataset.tab));
   });
 
+  // Last-resort: delegate clicks anywhere in the document to catch edge cases
+  document.addEventListener('click', (ev) => {
+    const btn = ev.target && ev.target.closest && ev.target.closest('.workflow-btn');
+    if (btn && btn.dataset && btn.dataset.tab) {
+      ev.preventDefault();
+      switchWorkflow(btn.dataset.tab);
+    }
+  }, true);
+
   // Expose switchWorkflow for inline onclick
   window.switchWorkflow = function(tab) {
     if (!tab) return;
