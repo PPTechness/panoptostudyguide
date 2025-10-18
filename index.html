@@ -569,6 +569,37 @@
     position: relative;
     z-index: 1;
   }
+
+  .tool-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(224,0,27,0.08);
+    border: 1px solid rgba(224,0,27,0.2);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    color: #E0001B;
+    margin-bottom: 0.75rem;
+  }
+  
+  .tool-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+  
+  .btn-ghost {
+    background: transparent;
+    border: 2px solid var(--border);
+  }
+  
+  .btn-ghost:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
   
   /* Primary Action */
   .primary-action {
@@ -1595,6 +1626,17 @@
         
       </div>
         </div>
+
+    <!-- Five Study Tools (Glasmorphic Cards) -->
+    <div class="quick-start" id="studyToolsDeck" style="margin-top:1.5rem;">
+      <div class="section-title">
+        <span>Study Guide Tools</span>
+        <span class="help">Pick a tool and copy its pre-built prompt to Copilot</span>
+      </div>
+      <div class="preset-cards" id="studyToolsGrid">
+        <!-- Cards populated by JS -->
+      </div>
+    </div>
         
     <!-- Primary Action -->
     <div class="primary-action">
@@ -2031,6 +2073,11 @@ document.addEventListener('DOMContentLoaded', () => {
   } catch (e) {
     console.warn('Study components init failed:', e);
   }
+  try {
+    mountStudyToolCards();
+  } catch (e) {
+    console.warn('Study tools deck failed:', e);
+  }
 });
 
 // DOM helpers
@@ -2130,7 +2177,6 @@ function buildStudyPrompt() {
   const c = state.studyComponents || {};
   const pedBlock = ped.inject.map(l => `• ${l}`).join('\n');
 
-  // Depth notes (used in planner/rubric phrasing)
   const depthNotes = {
     quick: {
       planner: 'Keep tasks tight (30–45 minute focus blocks) but still cover every evidence-backed activity.',
@@ -2147,7 +2193,6 @@ function buildStudyPrompt() {
   };
   const depthMeta = depthNotes[depth] || depthNotes.standard;
 
-  // --- Build component-aware STRUCTURE & VALIDATION text dynamically ---
   const include = {
     conceptMap: !!c.conceptMap,
     glossary: !!c.glossary,
@@ -2159,131 +2204,369 @@ function buildStudyPrompt() {
     planner: !!c.planner
   };
 
-  // Helper: push numbered section lines in order
-  const sections = [];
-  let num = 0;
-  const push = (line) => { num += 1; sections.push(`${num}) ${line}`); };
+  const makePusher = () => { let n = 0; return (line) => { n += 1; return `${n}) ${line}`; }; };
 
-  // Core sections (always on)
-  push('Title page — REAL LECTURE TITLE, module/course, date; 90–130 word “How to use this guide”.');
-  push('Learning outcomes — 5 outcomes (10–18 words), ≥3 distinct Bloom verbs; 80–120 word “alignment note”.');
-  push('Threshold concepts — 3–5 ideas; EACH 70–90 words incl. “what changes in your thinking” + [mm:ss].');
-  push('Key concepts — ≥10 concepts; EACH 45–65 words incl. “why it matters” + one [mm:ss].');
+  // Batch 1 — Foundations (always)
+  const push1 = makePusher();
+  const batch1 = [];
+  batch1.push(push1('Title page — REAL LECTURE TITLE, module/course, date; 90–130 word “How to use this guide”.'));
+  batch1.push(push1('Learning outcomes — 5 outcomes (10–18 words), ≥3 distinct Bloom verbs; 80–120 word “alignment note”.'));
+  batch1.push(push1('Threshold concepts — 3–5 ideas; EACH 70–90 words incl. “what changes in your thinking” + [mm:ss].'));
+  batch1.push(push1('Key concepts — ≥10 concepts; EACH 45–65 words incl. “why it matters” + one [mm:ss].'));
+  if (include.conceptMap) batch1.push(push1('Concept map — 150–220 word narrative + list (10–14 nodes; 10–14 edges). Justify ≥4 edges with [mm:ss].'));
 
-  if (include.conceptMap) {
-    push('Concept map — 150–220 word narrative + list (10–14 nodes; 10–14 edges). Justify ≥4 edges with [mm:ss].');
-  }
-  if (include.glossary) {
-    push('Glossary — ≥24 terms; EACH 22–35 words with a corpus-based example and [mm:ss]. Two-column table.');
-  }
+  // Batch 2 — Practice (conditional)
+  const push2 = makePusher();
+  const batch2 = [];
+  if (include.glossary) batch2.push(push2('Glossary — ≥24 terms; EACH 22–35 words with a corpus-based example and [mm:ss]. Two-column table.'));
   if (include.worked && include.cases) {
-    push('Worked examples AND mini cases — total 5 items (≈3 worked + 2 cases). EACH 150–200 words with: Steps (ordered) or Scenario; Why this step/teaching point; Common slip; “Check you can…”; [mm:ss].');
+    batch2.push(push2('Worked examples AND mini cases — total 5 items (≈3 worked + 2 cases). EACH 150–200 words with: Steps (ordered) or Scenario; Why this step/teaching point; Common slip; “Check you can…”; [mm:ss].'));
   } else if (include.worked) {
-    push('Worked examples — 5 items; EACH 150–200 words with: Steps (ordered); Why this step; Common slip; “Check you can…”; [mm:ss].');
+    batch2.push(push2('Worked examples — 5 items; EACH 150–200 words with: Steps (ordered); Why this step; Common slip; “Check you can…”; [mm:ss].'));
   } else if (include.cases) {
-    push('Mini cases — 5 vignettes; EACH 150–200 words with: Scenario; Questions; Teaching points; Common slip; “Check you can…”; [mm:ss].');
+    batch2.push(push2('Mini cases — 5 vignettes; EACH 150–200 words with: Scenario; Questions; Teaching points; Common slip; “Check you can…”; [mm:ss].'));
   }
-  if (include.problems) {
-    push('Problem set (interleaved) — 16 items: Recall (6), Application (6), Extension/Transfer (4). EACH item: Prompt; Hint (15–30 words); Full solution (50–90 words); “Why this is correct” (25–50 words); [mm:ss].');
-  }
-  if (include.selfcheck) {
-    push('Self‑check quiz — 14 items (MC/SA). Answer key for EACH item: Correct answer; 15–30 word rationale; 1 likely misconception; [mm:ss].');
-  }
-  if (include.reflect) {
-    push('Self‑explanation / reflection prompts — 6–8 prompts linked to outcomes; include [mm:ss].');
-  }
-  // Rewatch guide always included for evidence-led revision
-  push('Rewatch guide — 8 clip intervals [mm:ss–mm:ss]; EACH with “watch for…”, an active task, and links to relevant concept/flashcard IDs.');
-  if (include.planner) {
-    push(`Two‑week study planner — 14 rows (Day 1–14). 1–2 specific tasks/day (e.g., FC‑01–10; Problems 1–4; rewatch [12:33–18:10]); include time estimate columns. ${depthMeta.planner}`);
-  }
-  // Flashcards always included
-  push('Flashcards — 45 cards. For EACH: ID, Q (retrieval), A (precise), 1‑sentence explanation (connection), Difficulty (Fdn/Int/Adv), Related IDs, Source [mm:ss]. Include **Appendix B — Flashcards CSV** with all fields.');
-  // Group task & authentic practice always included
-  push('Group tasks (seminar‑ready) — 3 activities (think‑pair‑share; jigsaw; mini‑debate) tailored to THIS topic; 120–180 words each with outcomes link and [mm:ss].');
-  push(`Authentic practice task — 1 realistic ungraded task (150–220 words) with criteria (mini rubric: 3 rows × 3 levels) and feedback timing/method. ${depthMeta.rubric}`);
-  // UDL + Help always included
-  push('UDL & accessibility audit — ≥7 checkpoints USED with concrete alternatives from THIS content; include two “if you can’t access X, do Y” lines.');
-  push('Where to get help — short signposting paragraph (Queen’s links may be placeholders); inclusive phrasing.');
-  // Evidence appendix always included
-  push('Appendix A — Evidence snippets — ≥24 unique quoted fragments (5–20 words) with [mm:ss], grouped by section.');
-  push('Appendix B — Flashcards CSV — full table of all flashcards.');
+  if (include.problems) batch2.push(push2('Problem set (interleaved) — 16 items: Recall (6), Application (6), Extension/Transfer (4). EACH item: Prompt; Hint (15–30 words); Full solution (50–90 words); “Why this is correct” (25–50 words); [mm:ss].'));
+  if (include.selfcheck) batch2.push(push2('Self-check quiz — 14 items (MC/SA). Answer key for EACH item: Correct answer; 15–30 word rationale; 1 likely misconception; [mm:ss].'));
 
-  // Dynamic validation floors (only for included components)
+  // Batch 3 — Extension (conditional; flashcards always included here)
+  const push3 = makePusher();
+  const batch3 = [];
+  if (include.reflect) batch3.push(push3('Self-explanation / reflection prompts — 6–8 prompts linked to outcomes; include [mm:ss].'));
+  if (include.planner) batch3.push(push3(`Two-week study planner — 14 rows (Day 1–14). 1–2 specific tasks/day (e.g., FC-01–10; Problems 1–4; rewatch [12:33–18:10]); include time estimate columns. ${depthMeta.planner}`));
+  batch3.push(push3('Flashcards — 45 cards. For EACH: ID, Q (retrieval), A (precise), 1-sentence explanation (connection), Difficulty (Fdn/Int/Adv), Related IDs, Source [mm:ss]. Include **Appendix B — Flashcards CSV** with all fields.'));
+  batch3.push(push3('Group tasks (seminar-ready) — 3 activities (think-pair-share; jigsaw; mini-debate) tailored to THIS topic; 120–180 words each with outcomes link and [mm:ss].'));
+  batch3.push(push3(`Authentic practice task — 1 realistic ungraded task (150–220 words) with criteria (mini rubric: 3 rows × 3 levels) and feedback timing/method. ${depthMeta.rubric}`));
+
+  // Batch 4 — Support (always)
+  const push4 = makePusher();
+  const batch4 = [];
+  batch4.push(push4('UDL & accessibility audit — ≥7 checkpoints USED with concrete alternatives from THIS content; include two “if you can’t access X, do Y” lines.'));
+  batch4.push(push4('Where to get help — short signposting paragraph (Queen’s links may be placeholders); inclusive phrasing.'));
+  batch4.push(push4('Appendix A — Evidence snippets — ≥24 unique quoted fragments (5–20 words) with [mm:ss], grouped by section.'));
+  batch4.push(push4('Appendix B — Flashcards CSV — full table of all flashcards.'));
+
   const floors = [];
   floors.push('Threshold ≥3; Key concepts ≥10;');
   if (include.glossary) floors.push('Glossary ≥24;');
   if (include.worked || include.cases) floors.push('Examples/Cases =5;');
   if (include.problems) floors.push('Problems =16;');
-  if (include.selfcheck) floors.push('Self‑check =14;');
+  if (include.selfcheck) floors.push('Self-check =14;');
   floors.push('Flashcards =45; Rewatch =8;');
   if (include.planner) floors.push('Planner has 14 rows;');
   floors.push('Group tasks =3; UDL checkpoints ≥7;');
 
-  // Build component list string for clarity
-  const includedList = Object.entries(include)
-    .filter(([_, val]) => val)
-    .map(([k]) => k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()))
-    .join(', ') || 'All core sections only';
+  const batches = [];
+  batches.push({ id: 1, key: 'foundations', sections: batch1, suffix: 'part1_foundations', title: 'Foundations' });
+  if (batch2.length) batches.push({ id: 2, key: 'practice', sections: batch2, suffix: 'part2_practice', title: 'Practice' });
+  if (batch3.length) batches.push({ id: 3, key: 'extension', sections: batch3, suffix: 'part3_extension', title: 'Extension' });
+  batches.push({ id: 4, key: 'support', sections: batch4, suffix: 'part4_support', title: 'Support & Appendices' });
 
-  return `SYSTEM
-Return ONE file only: \${slug}_study.docx (Word A4). Do NOT ask questions. Do NOT use external sources. Do NOT include planning/coverage/validation text in the output.
+  const batchPrompts = batches.map(b => {
+    const filestr = `[REAL_TITLE_SLUG]_study_${b.suffix}.docx`;
+    const structure = `STRUCTURE for this batch (build ONLY these sections; full prose; embed [mm:ss] evidence in each):
+${b.sections.join('\n')}`;
+    const validate = `VALIDATE before returning this batch (FAIL-CLOSED):
+1) Corpus ≥500 words; REAL title in H1 + filename match; NO placeholders.
+2) Evidence: ≥1 timestamp in EVERY section in this batch${b.key === 'support' ? ' + ≥24 in Appendix A' : ''}.
+3) Floors relevant to this batch are met (global floors: ${floors.join(' ')}).
+4) Clear UK English; visually scannable with headings/tables.
+5) Output EXACTLY ONE .docx named ${filestr}.`;
+    return `BATCH ${b.id} — ${b.title}
+Return ONE file only: ${filestr} (Word A4). Do NOT ask questions. Do NOT use external sources. Do NOT include planning/coverage/validation text in the output.
 
 PANOPTO SOURCE (NON-NEGOTIABLE)
-• This is a Panopto Watch page. Use ONLY: (a) full captions/transcript (deduped, time‑ordered), (b) visible slides/contents text.
+• This is a Panopto Watch page. Use ONLY: (a) full captions/transcript (deduped, time-ordered), (b) visible slides/contents text.
 • Extract REAL lecture title from <meta property="og:title"> OR [data-role="session-title"] OR .session-title OR document.title. Use the ACTUAL title in the document and filename.
 • If combined corpus (captions+slides) < 500 words after dedupe → STOP and return EXACTLY:
   “INSUFFICIENT_PAGE_CONTENT — Expand captions & slides, scroll transcript fully, then retry.”
 
 TITLE & FILENAME ENFORCEMENT (HARD FAIL)
-• Extract ACTUAL title from the page DOM. Create [REAL_TITLE_SLUG] by ASCII-normalising, replacing non-alphanumerics with underscores, collapsing repeats, and trimming.
-• The first H1 in the document MUST equal the ACTUAL title.
-• The output filename MUST be “[REAL_TITLE_SLUG]_study.docx”.
-• If the H1 or filename do not match the ACTUAL title, STOP and return the INSUFFICIENT message above.
+• Extract ACTUAL title from the page DOM. Create [REAL_TITLE_SLUG] by ASCII-normalising, replacing non-alphanumerics with underscores, collapsing repeats, trimming.
+• The first H1 MUST equal the ACTUAL title. Add a subtitle line: “${b.title}”.
+• The output filename MUST be “${filestr}”. If mismatch, STOP and return the INSUFFICIENT message.
 
-ANTI‑PLACEHOLDER / EVIDENCE RULES (HARD FAIL)
-• No placeholders (e.g., “add content”, “TBD”), no generic boilerplate.
-• Every MAJOR section below must include ≥1 quoted evidence snippet (5–20 words) with a [mm:ss] timestamp taken from THIS lecture.
-• Add **Appendix A — Evidence Snippets** with ≥24 unique quoted fragments (5–20 words), grouped by section, each with [mm:ss].
+ANTI-PLACEHOLDER / EVIDENCE RULES (HARD FAIL)
+• No placeholders or boilerplate.
+• Every section in THIS BATCH must include ≥1 quoted evidence snippet (5–20 words) with a [mm:ss] timestamp from THIS lecture.
 
 QUEEN’S PEDAGOGY CONTRACT (APPLY THROUGHOUT)
 ${pedBlock}
-• Outcomes alignment (4–6 outcomes with Bloom‑appropriate verbs) + a brief note mapping sections to outcomes.
-• Beyond Blended pillars: Place, Platform, Pace, Blend, Flex, Support — state choices, student value, barriers + fixes.
-• Participation mix: use live in‑place, live online, async in‑place, async online; sketch a typical week flow.
-• UDL: ≥7 checkpoints across Engagement, Representation, Action/Expression with concrete alternatives tied to THIS topic.
-• Assessment & feedback: one authentic practice task (ungraded), feedback timing/methods, mini rubric excerpt.
-• Engagement & support: collaboration prompts, signposting, help routes (Queen’s links as placeholders allowed).
-• Tools & fallbacks: map platforms to activities; give a simple no‑frills alternative for access issues.
-• QA trace: note assumptions; tie key decisions to timestamps/slide cues (brief PSF/QA mapping allowed).
-• Style: UK English; student‑facing clarity; WCAG‑AA contrast; Queen’s red (#E0001B) accents.
+• Outcomes alignment (where applicable) and mapping to this batch’s sections.
+• Beyond Blended pillars; participation mix; UDL ≥7 across the full study set (note which are realised in this batch).
+• Assessment & feedback elements relevant to this batch.
+• Style: UK English; student-facing clarity; WCAG-AA contrast; Queen’s red (#E0001B) accents.
 
 WORKFLOW GUARDRAILS (INTERNAL — DO NOT OUTPUT)
-1) PLAN — silently enumerate ALL required sections and floors below; set target counts.
-2) SOURCE — silently build a deduped corpus from captions+slides; harvest candidate timestamps.
-3) DRAFT — write each section to meet floors. If a section is light, loop and expand using ONLY lecture evidence.
-4) VALIDATE — compute section word counts and item counts. If ANY floor fails, revise and re‑check. Only when ALL checks pass, render the .docx.
-5) NO STREAMING until VALIDATE passes. Do NOT include your plan/coverage/validation text in the output.
+1) PLAN — silently enumerate sections in this batch and item/word floors.
+2) SOURCE — deduped corpus from captions+slides; harvest timestamps.
+3) DRAFT — write and expand until floors met using ONLY lecture evidence.
+4) VALIDATE — compute counts; if any fail, revise and re-check.
+5) NO STREAMING until VALIDATE passes for this batch.
 
-INCLUDED COMPONENTS (FROM UI): ${includedList}
-
-STRUCTURE (ONLY build the sections listed below; omit any others). Populate with full prose; embed [mm:ss] evidence in each section.
-${sections.join('\n')}
+${structure}
 
 FORMAT & LAYOUT
-• Word A4. One major section per page where possible; do NOT split a single problem across pages.
-• Use consistent headings; tables for Glossary, Misconceptions (if present), Planner, Flashcards CSV, and Rubric.
-• Use Queen’s red (#E0001B) for accents; maintain WCAG‑AA contrast; UK English; define first use of terms.
+• Word A4. One major section per page; do NOT split a single problem across pages.
+• Use consistent headings; tables for Glossary, Planner, Flashcards CSV, and Rubric.
 
-VALIDATE BEFORE RETURNING (FAIL‑CLOSED)
-1) Corpus ≥500 words; REAL title in H1 + filename match; NO placeholders.
-2) Evidence quotas: ≥1 timestamp in EVERY included major section + ≥24 in Appendix A.
-3) Floors met for included components: ${floors.join(' ')}
-4) Each Problem (if included) has Prompt + Hint + Solution + Why + [mm:ss]; each Quiz item (if included) has rationale + misconception.
-5) Flashcards contain ALL 7 fields; CSV included.
-6) Clear UK English; section order preserved as above; visually scannable with headings and tables.
-7) Output EXACTLY ONE .docx file; no extra commentary.`;
+${validate}`;
+  });
+
+  const overall = `SYSTEM
+You will generate MULTIPLE files, one batch at a time, to allow deep reasoning and complete coverage. Follow each BATCH block below in order. After finishing one batch and validating it, move on to the next. Do NOT merge files. Use the Panopto on-screen title for all filenames.`;
+
+  const fullPrompt = [overall, ...batchPrompts].join('\n\n' + '-'.repeat(80) + '\n\n');
+  return fullPrompt;
 }
+
+// -------- Study Tool Prompts (v13 with scroll/expand + Bloom intent) --------
+
+function promptCoreConceptsV13(){
+  return `SYSTEM
+Return ONE file only: [REAL_TITLE_SLUG]_study_core_concepts.docx (Word A4).
+Use only the Panopto Watch page. No external sources.
+
+SOURCE PREPARATION
+1. Confirm this is a Panopto “Watch” page.
+2. Virtually scroll through and fully expand:
+   – “Captions” / “Transcript” tab → bottom
+   – “Contents” / “Slides” tabs → expand all
+3. Wait until no new lines appear.
+4. Extract and dedupe all caption + slide text (preserve [mm:ss]).
+If corpus < 500 words →
+“INSUFFICIENT_PAGE_CONTENT — Expand captions & slides, scroll fully, then retry.”
+
+TITLE & FILENAME
+Extract REAL title from <meta property="og:title"> or [data-role="session-title"] or .session-title or document.title.
+Use that title for H1 and filename [REAL_TITLE_SLUG]_study_core_concepts.docx.
+
+TASK
+Run all phases (collect → analyse → write → validate → output) automatically.
+Do NOT pause or ask questions.
+
+PURPOSE
+Produce a timestamp-based conceptual study guide that explains key ideas and how they connect, using clear language and evidence.
+
+STRUCTURE
+1. Title page — REAL title, module, date + 120-word “How to use this guide”.
+2. Learning outcomes — 5 outcomes (10–18 words, ≥ 3 Bloom levels) + 120-word alignment note.
+3. Threshold concepts — 3–5 ideas (80–110 words + [mm:ss]).
+4. Key concepts — ≥ 12 concepts (55–75 words + [mm:ss]).
+5. Concept map — ≈ 200 words (10–14 nodes/edges, ≥ 6 timestamp links).
+6. Appendix A — ≥ 24 quoted fragments (5–20 words + [mm:ss]).
+
+BLOOM GUIDANCE (Student-friendly)
+• Remember = recall a definition or law
+• Understand = explain the idea in your own words
+• Apply = use the principle to solve a new problem
+• Analyse = break down parts and relationships
+• Evaluate = judge the best approach or solution
+• Create = design or combine ideas into something new
+
+PEDAGOGY
+Link concepts to outcomes; embed Beyond Blended pillars; apply ≥7 UDL checkpoints; UK English; QUB red #E0001B; WCAG-AA.
+
+VALIDATION
+Corpus ≥ 500 words; ≥ 3 thresholds; ≥ 12 key concepts; ≥ 24 timestamps; no placeholders; one .docx output.`;
+}
+
+function promptKnowledgeToolsV13(){
+  return `SYSTEM
+Return ONE file only: [REAL_TITLE_SLUG]_study_knowledge_tools.docx (Word A4).
+
+SOURCE PREPARATION — same scroll/expand steps as Prompt 1; fail if < 500 words.
+
+PURPOSE
+Turn lecture content into usable terminology and reasoning patterns that model expert thinking.
+
+STRUCTURE
+1. Glossary — ≥ 28 terms (25–35 words + authentic example + [mm:ss]).
+2. Worked examples — 3 (180–220 words): Context; Steps; Why; Common slip; “Check you can…” + [mm:ss] and a short intent note (e.g., apply/analyse).
+3. Mini cases — 2 (180–220 words) with decision-making analysis + [mm:ss].
+4. Appendix A — ≥ 24 timestamped quotes.
+
+PEDAGOGY
+Link each term/example to outcomes; Bloom Apply/Analyse via intent phrasing; ≥7 UDL checkpoints; Beyond Blended alignment; UK English.
+
+VALIDATION
+Glossary ≥ 28; Examples = 3; Cases = 2; ≥ 24 timestamps; no duplicates; one .docx output.`;
+}
+
+function promptPracticeTestingV13(){
+  return `SYSTEM
+Return ONE file only: [REAL_TITLE_SLUG]_study_practice_testing.docx (Word A4).
+
+SOURCE PREPARATION — scroll and expand captions & slides; fail if < 500 words.
+
+TASK
+Auto-run (collect → topic-seed → draft → validate → output). Do not ask for confirmation.
+
+PURPOSE
+Build a practice and testing section that develops retrieval and reasoning with clear feedback and Bloom-intent explanations.
+
+STRUCTURE
+1. Intro — 100-word “How to use this section” explaining that each task targets a different thinking skill.
+2. Problem set — 16 unique items (6 Recall, 6 Apply/Analyse, 4 Evaluate/Create).
+   Each: Prompt ≤25 words; Hint 20–35; Solution 60–110 + [mm:ss];
+   Why Correct 40–60; Common Misconception ≤25; short cognitive intent phrase.
+3. Self-check quiz — 14 MC/SA items on different topics; each with answer, 20–35 word rationale, misconception, [mm:ss], and cognitive intent note.
+4. Mini-rubric excerpt (3 criteria × 3 levels).
+5. Appendix A — ≥ 24 timestamped quotes.
+
+PEDAGOGY
+Use ≥5 distinct lecture topics; Balance Bloom levels; Beyond Blended (Pace, Flex, Support); ≥7 UDL checkpoints; UK English.
+
+VALIDATION
+16 unique problems (≥5 topics); 14 quiz items; ≥24 timestamps; no duplicates; one .docx output.`;
+}
+
+function promptReflectionPlanningV13(){
+  return `SYSTEM
+Return ONE file only: [REAL_TITLE_SLUG]_study_reflection_planning.docx (Word A4).
+
+SOURCE PREPARATION — scroll & expand captions/slides fully; fail if < 500 words.
+
+PURPOSE
+Develop self-reflection and study planning skills based on timestamped lecture evidence and awareness of thinking levels.
+
+STRUCTURE
+1. Reflection prompts — 6–8 questions (each with a brief intent phrase like “This helps you evaluate …” + [mm:ss]).
+2. Rewatch guide — 8 clip intervals [mm:ss–mm:ss] with “watch for…” and an active task + intent note.
+3. Two-week planner — 14 rows with task, time estimate, and thinking skill column.
+4. Appendix A — ≥ 24 timestamped quotes.
+
+PEDAGOGY
+Link to outcomes; Beyond Blended (Pace & Flex); ≥7 UDL checkpoints; inclusive UK English.
+
+VALIDATION
+≥6 reflections; 8 rewatch segments; 14-day planner; ≥24 timestamps; one .docx output.`;
+}
+
+function promptExtensionSupportV13(){
+  return `SYSTEM
+Return ONE file only: [REAL_TITLE_SLUG]_study_extension_support.docx (Word A4).
+
+SOURCE PREPARATION — scroll and expand captions/slides to bottom; fail if < 500 words.
+
+PURPOSE
+Provide long-term retrieval, collaboration, and inclusive learning support based on lecture evidence.
+
+STRUCTURE
+1. Flashcards — 45 items across ≥6 topics; each = ID; Question; Answer; 1-sentence connection; Difficulty (Fdn/Int/Adv + brief intent phrase); Related IDs; [mm:ss].
+   Include Appendix B — CSV table (all fields).
+2. Group tasks — 3 activities (think-pair-share, jigsaw, mini-debate) 140–180 words + [mm:ss] and intent descriptions.
+3. Authentic practice task — 1 task (170–220 words + 3×3 rubric & feedback plan).
+4. UDL & Accessibility audit — ≥9 checkpoints with practical alternatives.
+5. Where to get help — inclusive signposting (QUB links ok).
+6. Appendix A — ≥24 timestamped quotes.
+
+PEDAGOGY
+Spaced retrieval + social learning; map items to outcomes; Beyond Blended (Flex, Support); ≥9 UDL checkpoints; UK English.
+
+VALIDATION
+45 flashcards (all fields complete); 3 group tasks; UDL ≥9; ≥24 timestamps; no placeholders; one .docx output.`;
+}
+
+// Registry for tool cards
+const STUDY_TOOLS = [
+  { id:'core', icon:'📚', name:'Core Concepts', desc:'Foundational understanding, thresholds, key concepts, concept map, evidence appendix.', builder: promptCoreConceptsV13 },
+  { id:'knowledge', icon:'🛠️', name:'Knowledge Tools', desc:'Glossary + worked examples and mini cases with timestamped evidence.', builder: promptKnowledgeToolsV13 },
+  { id:'practice', icon:'🧠', name:'Practice & Testing', desc:'Interleaved problems + self-check quiz with feedback and misconceptions.', builder: promptPracticeTestingV13 },
+  { id:'reflect', icon:'🔁', name:'Reflection & Planning', desc:'Metacognitive prompts, rewatch guide, and a two-week study planner.', builder: promptReflectionPlanningV13 },
+  { id:'support', icon:'🌐', name:'Extension & Support', desc:'Flashcards, group tasks, UDL audit, and help routes.', builder: promptExtensionSupportV13 },
+];
+
+function mountStudyToolCards(){
+  const grid = document.getElementById('studyToolsGrid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  STUDY_TOOLS.forEach(tool=>{
+    const card = document.createElement('div');
+    card.className = 'preset-card';
+    card.innerHTML = `
+      <div class="tool-badge">${tool.icon} ${tool.name}</div>
+      <div class="preset-desc" style="margin:.25rem 0 0;">${tool.desc}</div>
+      <div class="tool-actions">
+        <button class="btn-primary" data-tool="${tool.id}">📋 Copy Prompt</button>
+        <button class="btn btn-ghost" data-preview="${tool.id}">👁 Preview</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  grid.querySelectorAll('button[data-tool]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.getAttribute('data-tool');
+      const tool = STUDY_TOOLS.find(t=>t.id===id);
+      if(!tool) return;
+      const prompt = tool.builder();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(prompt).then(()=>{
+          showToast();
+          setPreview(prompt);
+        }).catch(()=>{
+          setPreview(prompt);
+        });
+      } else {
+        setPreview(prompt);
+      }
+    });
+  });
+  grid.querySelectorAll('button[data-preview]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.getAttribute('data-preview');
+      const tool = STUDY_TOOLS.find(t=>t.id===id);
+      if(!tool) return;
+      const prompt = tool.builder();
+      setPreview(prompt);
+    });
+  });
+}
+
+function setPreview(text){
+  const placeholder = $('previewPlaceholder');
+  const pre = $('previewText');
+  if(placeholder) placeholder.classList.add('hidden');
+  if(pre){
+    pre.textContent = text;
+    pre.classList.remove('hidden');
+  }
+  if($('charCount')) $('charCount').textContent = (text||'').length.toString();
+
+  const progress = $('progressBar');
+  const statusBadge = $('statusBadge');
+  const statusText = $('statusText');
+  const len = (text || '').length;
+  const pct = Math.min(100, (len / 8000) * 100);
+  if(progress){
+    progress.style.width = pct + '%';
+    progress.classList.remove('danger', 'warning');
+    if (len >= 8000) {
+      progress.classList.add('danger');
+    } else if (len > 7500) {
+      progress.classList.add('warning');
+    }
+  }
+  if(statusBadge && statusText){
+    statusBadge.className = 'status-badge';
+    statusText.textContent = 'Ready';
+    if (len >= 8000) {
+      statusBadge.className = 'status-badge danger';
+      statusText.textContent = 'Too long';
+    } else if (len > 7500) {
+      statusBadge.className = 'status-badge warning';
+      statusText.textContent = 'Near limit';
+    }
+  }
+}
+
+function showToast(){
+  const t = $('toast');
+  if(!t) return;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 1800);
+}
+
 function buildNotesPrompt() {
   const slug = 'Lecture_Notes_Pack';
   const format = state.notesFormat;
@@ -2617,6 +2900,16 @@ function init() {
       $('heroSubtitle').textContent = hero.subtitle;
     }
 
+    if (state.workflow === 'study') {
+      setTimeout(() => {
+        try {
+          mountStudyToolCards();
+        } catch (e) {
+          console.warn('Study tools deck failed:', e);
+        }
+      }, 0);
+    }
+
     // Show/hide preview section
     const previewSection = $('previewSection');
     if (previewSection) previewSection.style.display = (state.workflow === 'help') ? 'none' : 'block';
@@ -2641,6 +2934,7 @@ function init() {
   
   // Preset cards - Study
   $$('.study-workflow .preset-card').forEach(card => {
+    if (card.closest('#studyToolsDeck')) return;
     card.onclick = () => {
       $$('.study-workflow .preset-card').forEach(c => c.classList.remove('active'));
       card.classList.add('active');
