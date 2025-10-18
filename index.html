@@ -2093,65 +2093,79 @@ function buildStudyPrompt() {
     }
   };
   const depthMeta = depthNotes[depth] || depthNotes.standard;
+
   return `SYSTEM
-Return ONE file only: ${slug}_study.docx (Word A4). Do NOT ask questions. Do NOT use external sources.
+Return ONE file only: \${slug}_study.docx (Word A4). Do NOT ask questions. Do NOT use external sources. Do NOT include planning/coverage/validation text in the output.
 
 PANOPTO SOURCE (NON-NEGOTIABLE)
-• This is a Panopto Watch page. Use ONLY: (a) full captions/transcript (deduped, time-ordered), (b) visible slides/contents text.
-• Extract REAL lecture title from <meta property="og:title"> OR [data-role="session-title"] OR .session-title OR document.title.
+• This is a Panopto Watch page. Use ONLY: (a) full captions/transcript (deduped, time‑ordered), (b) visible slides/contents text.
+• Extract REAL lecture title from <meta property="og:title"> OR [data-role="session-title"] OR .session-title OR document.title. Use the ACTUAL title in the document and filename.
 • If combined corpus (captions+slides) < 500 words after dedupe → STOP and return EXACTLY:
   “INSUFFICIENT_PAGE_CONTENT — Expand captions & slides, scroll transcript fully, then retry.”
 
-ANTI-PLACEHOLDER / EVIDENCE RULES (HARD FAIL)
+TITLE & FILENAME ENFORCEMENT (HARD FAIL)
+• Extract ACTUAL title from the page DOM. Create [REAL_TITLE_SLUG] by ASCII-normalising, replacing non-alphanumerics with underscores, collapsing repeats, and trimming.
+• The first H1 in the document MUST equal the ACTUAL title.
+• The output filename MUST be “[REAL_TITLE_SLUG]_study.docx”.
+• If the H1 or filename do not match the ACTUAL title, STOP and return the INSUFFICIENT message above.
+
+ANTI‑PLACEHOLDER / EVIDENCE RULES (HARD FAIL)
 • No placeholders (e.g., “add content”, “TBD”), no generic boilerplate.
-• Every MAJOR section below must include ≥1 quoted evidence snippet (5–20 words) with [mm:ss].
-• Add an **Appendix A — Evidence Snippets** with ≥24 unique quoted fragments grouped by section, each with a timestamp.
+• Every MAJOR section below must include ≥1 quoted evidence snippet (5–20 words) with a [mm:ss] timestamp taken from THIS lecture.
+• Add **Appendix A — Evidence Snippets** with ≥24 unique quoted fragments (5–20 words), grouped by section, each with [mm:ss].
 
 QUEEN’S PEDAGOGY CONTRACT (APPLY THROUGHOUT)
-${pedBlock}
-• Outcomes alignment (4–6 outcomes with Bloom-appropriate verbs) + a brief note mapping sections to outcomes.
+\${pedBlock}
+• Outcomes alignment (4–6 outcomes with Bloom‑appropriate verbs) + a brief note mapping sections to outcomes.
 • Beyond Blended pillars: Place, Platform, Pace, Blend, Flex, Support — state choices, student value, barriers + fixes.
-• Participation mix: use live in-place, live online, async in-place, async online; sketch a typical week flow.
+• Participation mix: use live in‑place, live online, async in‑place, async online; sketch a typical week flow.
 • UDL: ≥7 checkpoints across Engagement, Representation, Action/Expression with concrete alternatives tied to THIS topic.
 • Assessment & feedback: one authentic practice task (ungraded), feedback timing/methods, mini rubric excerpt.
 • Engagement & support: collaboration prompts, signposting, help routes (Queen’s links as placeholders allowed).
-• Tools & fallbacks: map platforms to activities; give a simple no-frills alternative for access issues.
-• QA trace: note assumptions; tie key decisions to timestamps/slide cues; brief PSF/QA mapping (placeholders allowed).
-• Style: UK English; student-facing clarity; WCAG-AA contrast; Queen’s red (#E0001B) accents.
+• Tools & fallbacks: map platforms to activities; give a simple no‑frills alternative for access issues.
+• QA trace: note assumptions; tie key decisions to timestamps/slide cues (brief PSF/QA mapping allowed).
+• Style: UK English; student‑facing clarity; WCAG‑AA contrast; Queen’s red (#E0001B) accents.
 
-STRUCTURE (ALL SECTIONS REQUIRED UNLESS MARKED OPTIONAL). Populate with full prose; embed [mm:ss] evidence in each section.
+WORKFLOW GUARDRAILS (INTERNAL — DO NOT OUTPUT)
+1) PLAN — silently enumerate ALL required sections and floors below; set target counts.
+2) SOURCE — silently build a deduped corpus from captions+slides; harvest candidate timestamps.
+3) DRAFT — write each section to meet floors. If a section is light, loop and expand using ONLY lecture evidence.
+4) VALIDATE — compute section word counts and item counts. If ANY floor fails, revise and re‑check. Only when ALL checks pass, render the .docx.
+5) NO STREAMING until VALIDATE passes. Do NOT include your plan/coverage/validation text in the output.
+
+STRUCTURE (ALL SECTIONS REQUIRED). Populate with full prose; embed [mm:ss] evidence in each section.
 1) Title page — REAL LECTURE TITLE, module/course, date; 90–130 word “How to use this guide”.
 2) Learning outcomes — 5 outcomes (10–18 words), ≥3 distinct Bloom verbs; 80–120 word “alignment note”.
-3) Threshold concepts — 3–5 ideas that transform understanding; each 60–90 words + “what changes in your thinking” + [mm:ss].
-4) Key concepts — ≥10 concepts; each 35–65 words + “why it matters” + one [mm:ss].
-${c.conceptMap ? '5) Concept map — 150–220 word narrative + list (10–14 nodes; 10–14 edges). Justify ≥4 edges with [mm:ss].' : ''}
-${c.glossary ? '6) Glossary — ≥24 terms; each 20–35 words with a corpus-based example and [mm:ss]. Present as a two-column table.' : ''}
-${c.worked ? '7) Worked examples OR mini cases — 5 items (each 140–200 words) with: Steps (ordered); Why this step; Common slip; “Check you can…”; [mm:ss].' : ''}
-8) Common misconceptions & fixes — table with ≥8 rows: Misconception (from captions/slides) | Why it’s wrong | Better way to think | Where to review [mm:ss].
-${c.problems ? `9) Problem set (interleaved) — 16 items across Recall (6), Application (6), Extension/Transfer (4).
-   EACH item must have: Prompt; Hint (15–30 words); Full solution (50–90 words); “Why this is correct” (25–50 words); [mm:ss].` : ''}
-${c.selfcheck ? '10) Self-check quiz — 14 items (MC/SA). Answer key includes for EACH item: Correct answer; 15–30 word rationale; 1 likely misconception; [mm:ss].' : ''}
-${c.reflect ? '11) Self-explanation prompts — 6–8 prompts that ask learners to explain steps/choices; connect to outcomes; include [mm:ss].' : ''}
-12) Rewatch guide — 8 clip intervals [mm:ss–mm:ss]; each with “watch for…”, an active task (annotate/compare/compute), and links to relevant concept IDs/flashcards.
-${c.planner ? ("13) Two-week study planner — 14 rows (Day 1–14). 1–2 specific tasks/day (e.g., FC-01–10; Problems 1–4; rewatch [12:33–18:10]); include time estimate columns. " + depthMeta.planner) : ''}
-14) Flashcards set — 45 cards. For each: ID, Q (retrieval), A (precise), 1-sentence explanation (connection), Difficulty (Fdn/Int/Adv), Related IDs, Source [mm:ss].
-    Also include **Appendix B — Flashcards CSV** table with all fields.
-15) Group tasks (seminar-ready) — 3 activities (think-pair-share; jigsaw; mini-debate) tailored to THIS topic; each 120–180 words with outcomes link and [mm:ss].
-16) Authentic practice task — 1 realistic ungraded task (150–220 words) with criteria (mini rubric: 3 rows × 3 levels) and feedback timing/method. ${depthMeta.rubric}
-17) UDL & accessibility audit — list ≥7 UDL checkpoints USED with concrete examples/alternatives taken from THIS content; include an “if you can’t access X, do Y” line for two key points.
-18) Where to get help — short signposting paragraph (Queen’s links as placeholders); include inclusive wording.
+3) Threshold concepts — 3–5 ideas; EACH 70–90 words incl. “what changes in your thinking” + [mm:ss].
+4) Key concepts — ≥10 concepts; EACH 45–65 words incl. “why it matters” + one [mm:ss].
+5) Concept map — 150–220 word narrative + list (10–14 nodes; 10–14 edges). Justify ≥4 edges with [mm:ss].
+6) Glossary — ≥24 terms; EACH 22–35 words with a corpus‑based example and [mm:ss]. Two‑column table.
+7) Worked examples OR mini cases — 5 items; EACH 150–200 words with: Steps (ordered); Why this step; Common slip; “Check you can…”; [mm:ss].
+8) Common misconceptions & fixes — table with ≥8 rows: Misconception | Why it’s wrong | Better way to think | Where to review [mm:ss] (40–80 words/row combined).
+9) Problem set (interleaved) — 16 items: Recall (6), Application (6), Extension/Transfer (4).
+   EACH item: Prompt; Hint (15–30 words); Full solution (50–90 words); “Why this is correct” (25–50 words); [mm:ss].
+10) Self‑check quiz — 14 items (MC/SA). Answer key for EACH item: Correct answer; 15–30 word rationale; 1 likely misconception; [mm:ss].
+11) Self‑explanation prompts — 6–8 prompts linked to outcomes; include [mm:ss].
+12) Rewatch guide — 8 clip intervals [mm:ss–mm:ss]; EACH with “watch for…”, an active task, and links to relevant concept/flashcard IDs.
+13) Two‑week study planner — 14 rows (Day 1–14). 1–2 specific tasks/day (e.g., FC‑01–10; Problems 1–4; rewatch [12:33–18:10]); include time estimate columns. \${depthMeta.planner}
+14) Flashcards — 45 cards. For EACH: ID, Q (retrieval), A (precise), 1‑sentence explanation (connection), Difficulty (Fdn/Int/Adv), Related IDs, Source [mm:ss].
+    Include **Appendix B — Flashcards CSV** with all fields.
+15) Group tasks (seminar‑ready) — 3 activities (think‑pair‑share; jigsaw; mini‑debate) tailored to THIS topic; 120–180 words each with outcomes link and [mm:ss].
+16) Authentic practice task — 1 realistic ungraded task (150–220 words) with criteria (mini rubric: 3 rows × 3 levels) and feedback timing/method. \${depthMeta.rubric}
+17) UDL & accessibility audit — ≥7 checkpoints USED with concrete alternatives from THIS content; include two “if you can’t access X, do Y” lines.
+18) Where to get help — short signposting paragraph (Queen’s links may be placeholders); inclusive phrasing.
 19) Appendix A — Evidence snippets — ≥24 unique quoted fragments (5–20 words) with [mm:ss], grouped by section.
-20) Appendix B — Flashcards CSV — as noted in section 14.
+20) Appendix B — Flashcards CSV — full table of all flashcards.
 
 FORMAT & LAYOUT
 • Word A4. One major section per page where possible; do NOT split a single problem across pages.
 • Use consistent headings; tables for Glossary, Misconceptions, Planner, Flashcards CSV, and Rubric.
-• Use Queen’s red (#E0001B) for accents; maintain WCAG-AA contrast; UK English; define first use of terms.
+• Use Queen’s red (#E0001B) for accents; maintain WCAG‑AA contrast; UK English; define first use of terms.
 
-VALIDATE BEFORE RETURNING (FAIL-CLOSED)
-1) Corpus ≥500 words; REAL title in heading + filename; NO placeholders.
-2) Evidence quotas met: ≥1 timestamp in EVERY major section above + ≥24 in Appendix A.
-3) Floors met: Threshold ≥3; Key concepts ≥10; Glossary ≥24; Examples/Cases =5; Misconceptions ≥8; Problems =16; Self-check =14; Flashcards =45; Rewatch =8; Planner has 14 rows; Group tasks =3; UDL checkpoints ≥7.
+VALIDATE BEFORE RETURNING (FAIL‑CLOSED)
+1) Corpus ≥500 words; REAL title in H1 + filename match; NO placeholders.
+2) Evidence quotas: ≥1 timestamp in EVERY major section + ≥24 in Appendix A.
+3) Floors met: Threshold ≥3; Key concepts ≥10; Glossary ≥24; Examples/Cases =5; Misconceptions ≥8; Problems =16; Self‑check =14; Flashcards =45; Rewatch =8; Planner has 14 rows; Group tasks =3; UDL checkpoints ≥7.
 4) Each Problem has Prompt + Hint + Solution + Why + [mm:ss]; each Quiz item has rationale + misconception.
 5) Flashcards contain ALL 7 fields; CSV included.
 6) Clear UK English; section order preserved; visually scannable with headings and tables.
@@ -2164,43 +2178,45 @@ function buildNotesPrompt() {
   const pedBlock = ped.inject.map(l => `• ${l}`).join('\n');
   const ext = format === 'pptx' ? 'pptx' : (format === 'docx' ? 'docx' : 'pdf');
   const fmt = format === 'pptx' ? 'PPTX 16:9' : (format === 'docx' ? 'Word A4' : 'PDF A4');
-  
+
   return `SYSTEM
-SYSTEM SAFEGUARD
-Before writing anything else, confirm transcript+slides text were successfully read (>500 words). 
-If not, stop and output only the “INSUFFICIENT_PAGE_CONTENT” message.
-TITLE & SOURCE
-• Extract the title from the first H1/line of the notes (or “Notes Pack” if absent). Use in the document and filename.
-• Parse headings, bullets, and tables; dedupe near-duplicates; keep key wording from the notes.
-• Do NOT use external sources.
-• If usable text < 400 words after cleaning, RETURN EXACTLY:
+Return ONE file only: \${slug}.\${ext}. Do NOT ask questions. Do NOT use external sources. Do NOT include planning/coverage/validation text in the output.
+
+SOURCE (NOTES ONLY)
+• Parse the pasted notes: headings, bullets, tables; dedupe; keep author wording.
+• TITLE: Extract from the first H1/line of the notes (or “Notes Pack” if absent). Use in the document and filename.
+• If usable note text < 400 words after cleaning → STOP and return EXACTLY:
   “INSUFFICIENT_PAGE_CONTENT — Add more notes (≥400 words with headings) and retry.”
 
-QUEEN'S PEDAGOGY CONTRACT
-• Same as Study Guide contract; apply it using the content of the notes.
+QUEEN’S PEDAGOGY CONTRACT
+\${pedBlock}
+• Outcomes alignment, Beyond Blended pillars, participation mix, UDL (≥6 checkpoints), assessment & feedback, engagement & support, tools & fallbacks, QA trace, UK English & WCAG‑AA.
 
-STRUCTURE & COUNTS (build all sections; add [section anchors] for easy navigation)
+WORKFLOW GUARDRAILS (INTERNAL — DO NOT OUTPUT)
+1) PLAN — silently enumerate ALL required sections and floors below.
+2) DRAFT — generate each section to meet floors; expand thin sections using ONLY the provided notes.
+3) VALIDATE — compute section word counts and item counts; if any fail, revise and re‑check. Only then render the final file.
+4) NO STREAMING until VALIDATE passes. Do NOT include plan/coverage/validation text in the output.
+
+STRUCTURE & FLOORS (build ALL sections; add [section anchors] for easy navigation)
 1) Title + “How to use this pack” (≤120 words)
 2) Learning outcomes — 4–6 outcomes + alignment note
 3) Key concepts — 6–12 concepts (2–3 sentences each)
-4) Concept map (text + list of nodes/links)
+4) Concept map — short narrative + list of nodes/links
 5) Glossary — 15–30 terms with examples from the notes
 6) Worked examples / cases — 4–6 items with steps/why/slips OR scenario/questions/teaching points
 7) Problem set — 8–12 items with hint + full solution + rationale
-8) Self-check quiz — 10–14 items; concise rationale in answer key
-9) Flashcards — 25–45 cards with: ID, Q, A, Explanation (connection), Difficulty, Related IDs; output a CSV appendix
+8) Self‑check quiz — 10–14 items; concise rationale in answer key
+9) Flashcards — 25–45 cards with: ID, Q, A, Explanation (connection), Difficulty, Related IDs; include a CSV appendix
 10) Reflection prompts — 5–7 metacognitive questions
-11) Independent study (≤180 words) — how to practise safely; where to seek help (Queen’s links placeholders)
+11) Independent study (≤180 words) — safe practice; help routes (QUB placeholders)
 12) Accessibility & alternatives — list UDL checkpoints and specific alternatives
 
 FORMAT RULES
-• Use ${fmt}. Headings and section order must match above; UK English; Queen’s red (#E0001B) for accents; WCAG AA.
+• Use \${fmt}. Headings and section order must match above; UK English; Queen’s red (#E0001B) accents; WCAG AA.
 
 VALIDATE BEFORE RETURNING
-1) ≥400 words in notes; 2) Title extracted; 3) All sections present; 4) 6+ UDL checkpoints; 5) Problem set has hint+solution+rationale; 6) Flashcards have all fields; 7) Self-check has rationale; 8) Student-facing clarity and alignment visible.
-
-SELF-SCORE (append)
-Add the same 10-criterion 0–4 table + three actions to lift any 3s to 4s.`;
+1) Notes ≥400 words; 2) Title extracted; 3) ALL sections present; 4) ≥6 UDL checkpoints; 5) Problem set has hint+solution+rationale; 6) Flashcards have all fields; 7) Self‑check has rationales; 8) Student‑facing clarity.`;
 }
 
 // Render preview
