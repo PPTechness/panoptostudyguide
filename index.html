@@ -1574,58 +1574,14 @@
   <!-- Study Guide Workflow -->
   <div class="workflow-content study-workflow hidden">
     <h2 class="gradient-title" style="margin-top: 2rem; margin-bottom: 3rem;">Study Guide Builder</h2>
-    
-    <!-- Study Guide Options -->
-    <div class="advanced-options" style="margin-bottom: 2rem;">
-      <div class="advanced-header" id="studyAdvancedToggle">
-        <span class="advanced-title">Customise Study Guide</span>
-        <span class="advanced-toggle open">▼</span>
+
+    <!-- Study Guide Quick Intro (no customiser) -->
+    <div class="helper-message" style="margin-top: -0.5rem; margin-bottom: 1.5rem;">
+      <div class="helper-message-icon">🧭</div>
+      <div class="helper-message-text">
+        <strong>Pick a Study Guide Tool below</strong> — each card contains a complete, QUB‑aligned prompt. Click <em>Copy Prompt</em>, paste into Copilot with your Panopto <em>Watch</em> page open, and it will auto‑scroll captions &amp; slides, extract evidence, and generate a Word file. Use <em>Preview</em> to check the prompt first.
       </div>
-      <div class="advanced-content open" id="studyAdvancedContent">
-        
-        <div class="form-group">
-          <label class="form-label">Pedagogy Preset</label>
-          <select id="studyPedagogy" title="Sets tone and structure across disciplines." onchange="state.studyPedagogy = this.value; document.getElementById('studyPedBrief').textContent = PEDAGOGY[this.value].brief; render();">
-            <option>Concept Check (Retrieval)</option>
-            <option>Worked Examples (Scaffolded)</option>
-            <option>Case/Scenario-Based</option>
-            <option>Debate / Critical Analysis</option>
-            <option>Metacognitive Reflection</option>
-            <option>Accessibility-First (UDL)</option>
-          </select>
-          <p class="help" id="studyPedBrief"></p>
-        </div>
-        
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Output Format</label>
-            <div class="radio-group" style="gap:14px;">
-              <label><input type="radio" name="sgFormat" value="pdf" onchange="state.sgFormat = this.value; render();"> PDF (A4)</label>
-              <label><input type="radio" name="sgFormat" value="docx" checked onchange="state.sgFormat = this.value; render();"> Word (.docx)</label>
-              <label><input type="radio" name="sgFormat" value="pptx" onchange="state.sgFormat = this.value; render();"> PPTX (16:9)</label>
-            </div>
-            <p class="help">Choose Word for editable study guides you can customise before distributing to students.</p>
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label" for="studyDepth">Depth</label>
-            <select id="studyDepth" onchange="state.studyDepth = this.value; render();">
-              <option value="quick">Quick (10–12 pages) — 20–30 flashcards, 6–8 problems, concise explanations</option>
-              <option value="standard" selected>Standard (18–25 pages) — 25–40 flashcards, 10–15 problems, fuller detail</option>
-              <option value="deep">Deep (30–40 pages) — 35–50 flashcards, 12–18 problems, extensive explanations</option>
-            </select>
-            <p class="help">Depth controls thoroughness and quantity. Use Components below to choose which sections to include.</p>
-          </div>
-        </div>
-        
-        <div class="form-group mt-1half">
-          <label class="form-label">Components (untick to exclude)</label>
-          <div class="chip-group" id="studyComponents"></div>
-          <p class="help">All ticked components will be included regardless of depth. Depth only affects detail level and quantity.</p>
-        </div>
-        
-      </div>
-        </div>
+    </div>
 
     <!-- Five Study Tools (Glasmorphic Cards) -->
     <div class="quick-start" id="studyToolsDeck" style="margin-top:1.5rem;">
@@ -1636,14 +1592,6 @@
       <div class="preset-cards" id="studyToolsGrid">
         <!-- Cards populated by JS -->
       </div>
-    </div>
-        
-    <!-- Primary Action -->
-    <div class="primary-action">
-      <button class="btn-primary" id="generateStudy" onclick="copyPrompt();">
-        📋 Copy Prompt to Clipboard
-      </button>
-      <p class="help" style="margin-top: 0.5rem;">Paste into Copilot with your Panopto Watch page (captions & contents open).</p>
     </div>
   </div>
   
@@ -1981,80 +1929,11 @@ let state = {
   quizCount: 3,
   quizFeedback: 'brief',
   questionTypes: ['multiple_choice_question'],
-  
-  // Study Guide
-  studyPedagogy: 'Concept Check (Retrieval)',
-  sgFormat: 'docx',
-  studyDepth: 'standard',
-  studyComponents: {
-    conceptMap: true,
-    glossary: true,
-    worked: true,
-    problems: true,
-    cases: true,
-    selfcheck: true,
-    reflect: true,
-    planner: true
-  },
-  
   // From Notes
   notesPedagogy: 'Concept Check (Retrieval)',
   notesFormat: 'docx',
   notesInput: ''
 };
-
-const STUDY_COMPONENTS = [
-  { id: 'conceptMap', label: 'Concept Map' },
-  { id: 'glossary', label: 'Glossary' },
-  { id: 'worked', label: 'Worked Examples' },
-  { id: 'problems', label: 'Problem Set' },
-  { id: 'cases', label: 'Case Vignettes' },
-  { id: 'selfcheck', label: 'Self-Check Quiz' },
-  { id: 'reflect', label: 'Reflection Prompts' },
-  { id: 'planner', label: 'Study Planner' }
-];
-
-/* ---------- Study Components Chips (dynamic, reacts to UI) ---------- */
-function mountStudyComponents() {
-  const host = document.getElementById('studyComponents');
-  if (!host) return;
-  host.innerHTML = '';
-
-  STUDY_COMPONENTS.forEach(comp => {
-    // Determine active state from global 'state.studyComponents'
-    const active = !!(state.studyComponents && state.studyComponents[comp.id]);
-
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'chip' + (active ? ' active' : '');
-    btn.setAttribute('data-id', comp.id);
-    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-    btn.textContent = comp.label;
-
-    btn.addEventListener('click', () => {
-      // Toggle state
-      state.studyComponents[comp.id] = !state.studyComponents[comp.id];
-      // Reflect UI
-      btn.classList.toggle('active');
-      btn.setAttribute('aria-pressed', btn.classList.contains('active') ? 'true' : 'false');
-      // Re-render prompt preview
-      if (typeof render === 'function') render();
-    });
-
-    host.appendChild(btn);
-  });
-}
-
-// Rebuild chips if the preset changes (in case state resets elsewhere)
-function refreshStudyComponentsFromState() {
-  // Ensure all keys exist (defensive)
-  STUDY_COMPONENTS.forEach(comp => {
-    if (typeof state.studyComponents[comp.id] === 'undefined') {
-      state.studyComponents[comp.id] = true;
-    }
-  });
-  mountStudyComponents();
-}
 
 const QUESTION_TYPES = [
   { id: 'multiple_choice_question', label: 'Multiple Choice' },
@@ -2068,11 +1947,6 @@ const QUESTION_TYPES = [
 
 /* ---------- Initialisation: mount chips once DOM is ready ---------- */
 document.addEventListener('DOMContentLoaded', () => {
-  try {
-    refreshStudyComponentsFromState();
-  } catch (e) {
-    console.warn('Study components init failed:', e);
-  }
   try {
     mountStudyToolCards();
   } catch (e) {
