@@ -618,16 +618,28 @@
 
   .study-tool-card {
     border: none;
-    min-height: 240px;
+    min-height: 260px;
     padding: 2rem 1.75rem;
     color: #ffffff;
     box-shadow: var(--shadow-lg);
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
 
-  .study-tool-card .preset-desc {
-    color: rgba(255,255,255,0.92);
+  .study-tool-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.05);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .study-tool-card:hover::after {
+    opacity: 1;
   }
 
   .study-tool-card .tool-badge {
@@ -636,15 +648,44 @@
     color: #ffffff;
   }
 
+  .tool-points {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    color: rgba(255,255,255,0.95);
+    font-size: 0.95rem;
+    line-height: 1.45;
+    flex: 1 1 auto;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .tool-points li {
+    background: rgba(0,0,0,0.18);
+    border-radius: 12px;
+    padding: 0.55rem 0.75rem;
+    backdrop-filter: blur(8px);
+  }
+
   .study-tool-card .tool-actions {
-    margin-top: 1.5rem;
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
   }
 
   .study-tool-card .btn-primary {
+    width: 100%;
+    justify-content: center;
     background: rgba(255,255,255,0.22);
     color: #ffffff;
     border: none;
     box-shadow: none;
+    font-weight: 700;
   }
 
   .study-tool-card .btn-primary:hover {
@@ -652,15 +693,28 @@
   }
 
   .study-tool-card .btn-ghost {
+    width: 100%;
+    justify-content: center;
     background: rgba(0,0,0,0.2);
     border: 1px solid rgba(255,255,255,0.6);
     color: #ffffff;
+    font-weight: 600;
   }
 
   .study-tool-card .btn-ghost:hover {
     border-color: #ffffff;
     color: #ffffff;
     background: rgba(0,0,0,0.3);
+  }
+
+  .study-tool-card .btn-primary,
+  .study-tool-card .btn-ghost {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    font-size: 1rem;
+    white-space: nowrap;
   }
 
   .study-preview-panel {
@@ -2318,11 +2372,66 @@ VALIDATION
 
 // Registry for tool cards
 const STUDY_TOOLS = [
-  { id:'core', icon:'📚', name:'Core Concepts', desc:'Foundational understanding, thresholds, key concepts, concept map, evidence appendix.', builder: promptCoreConceptsV13 },
-  { id:'knowledge', icon:'🛠️', name:'Knowledge Tools', desc:'Glossary + worked examples and mini cases with timestamped evidence.', builder: promptKnowledgeToolsV13 },
-  { id:'practice', icon:'🧠', name:'Practice & Testing', desc:'Interleaved problems + self-check quiz with feedback and misconceptions.', builder: promptPracticeTestingV13 },
-  { id:'reflect', icon:'🔁', name:'Reflection & Planning', desc:'Metacognitive prompts, rewatch guide, and a two-week study planner.', builder: promptReflectionPlanningV13 },
-  { id:'support', icon:'🌐', name:'Extension & Support', desc:'Flashcards, group tasks, UDL audit, and help routes.', builder: promptExtensionSupportV13 },
+  {
+    id:'core',
+    icon:'📚',
+    name:'Core Concepts',
+    points:[
+      'Surface the key thresholds and big ideas',
+      'Summarise 12+ core concepts with timestamps',
+      'Map relationships in a concept map',
+      'Evidence every section with ≥24 snippets'
+    ],
+    builder: promptCoreConceptsV13
+  },
+  {
+    id:'knowledge',
+    icon:'🛠️',
+    name:'Knowledge Tools',
+    points:[
+      'Build a 28-term glossary with authentic examples',
+      'Model 3 worked examples plus 2 mini cases',
+      'Explain slips, fixes, and Bloom intent',
+      'Bundle an evidence appendix for QA'
+    ],
+    builder: promptKnowledgeToolsV13
+  },
+  {
+    id:'practice',
+    icon:'🧠',
+    name:'Practice & Testing',
+    points:[
+      'Create 16 interleaved problems with feedback',
+      'Add a 14-item self-check quiz with rationales',
+      'Flag misconceptions and Bloom focus per item',
+      'Include a mini rubric for rapid marking'
+    ],
+    builder: promptPracticeTestingV13
+  },
+  {
+    id:'reflect',
+    icon:'🔁',
+    name:'Reflection & Planning',
+    points:[
+      'Prompt 6–8 metacognitive check-ins',
+      'Serve 8 timestamped rewatch tasks',
+      'Lay out a 14-day plan with time estimates',
+      'Tie actions to outcomes and thinking levels'
+    ],
+    builder: promptReflectionPlanningV13
+  },
+  {
+    id:'support',
+    icon:'🌐',
+    name:'Extension & Support',
+    points:[
+      'Generate 45 flashcards with difficulty + links',
+      'Offer 3 collaborative group tasks with cues',
+      'Design an authentic task with a 3×3 rubric',
+      'Audit ≥9 UDL checkpoints and help routes'
+    ],
+    builder: promptExtensionSupportV13
+  },
 ];
 
 const STUDY_TOOL_COLORS = [
@@ -2344,9 +2453,10 @@ function mountStudyToolCards(){
     card.className = 'preset-card study-tool-card';
     const color = STUDY_TOOL_COLORS[index % STUDY_TOOL_COLORS.length];
     card.style.background = color;
+    const points = (tool.points || []).map(point => `<li>${point}</li>`).join('');
     card.innerHTML = `
       <div class="tool-badge">${tool.icon} ${tool.name}</div>
-      <div class="preset-desc" style="margin:.25rem 0 0;">${tool.desc}</div>
+      <ul class="tool-points">${points}</ul>
       <div class="tool-actions">
         <button class="btn-primary" data-tool="${tool.id}">📋 Copy Prompt</button>
         <button class="btn btn-ghost" data-preview="${tool.id}">👁 Preview</button>
