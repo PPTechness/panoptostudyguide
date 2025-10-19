@@ -616,7 +616,7 @@
     }
   }
 
-  .study-tool-card {
+  .tool-card {
     min-height: 260px;
     padding: 2rem 1.75rem;
     background: #ffffff;
@@ -629,13 +629,13 @@
     gap: 1.25rem;
   }
 
-  .study-tool-card:hover {
+  .tool-card:hover {
     transform: none;
     box-shadow: 0 18px 45px rgba(17,24,39,0.12);
     border-color: var(--tool-accent, var(--primary));
   }
 
-  .study-tool-card .tool-badge {
+  .tool-card .tool-badge {
     background: var(--tool-badge-bg, rgba(224,0,27,0.12));
     border-color: var(--tool-accent, var(--primary));
     color: var(--tool-accent, var(--primary));
@@ -661,14 +661,14 @@
     padding: 0.6rem 0.85rem;
   }
 
-  .study-tool-card .tool-actions {
+  .tool-card .tool-actions {
     display: flex;
     flex-direction: column;
     gap: 0.7rem;
     width: 100%;
   }
 
-  .study-tool-card .btn-primary {
+  .tool-card .btn-primary {
     width: 100%;
     justify-content: center;
     background: var(--tool-accent, var(--primary));
@@ -678,11 +678,11 @@
     font-weight: 700;
   }
 
-  .study-tool-card .btn-primary:hover {
+  .tool-card .btn-primary:hover {
     background: var(--tool-accent-hover, var(--primary-hover));
   }
 
-  .study-tool-card .btn-ghost {
+  .tool-card .btn-ghost {
     width: 100%;
     justify-content: center;
     background: #ffffff;
@@ -691,13 +691,13 @@
     font-weight: 600;
   }
 
-  .study-tool-card .btn-ghost:hover {
+  .tool-card .btn-ghost:hover {
     background: var(--tool-accent, var(--primary));
     color: #ffffff;
   }
 
-  .study-tool-card .btn-primary,
-  .study-tool-card .btn-ghost {
+  .tool-card .btn-primary,
+  .tool-card .btn-ghost {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1772,51 +1772,35 @@
     <div class="quick-start">
       <div class="section-title">Paste your notes</div>
       <textarea id="notesInput" placeholder="Paste your lecture notes here (plain text, headings, bullets)..." class="w-100 min-h-200"></textarea>
-      <p class="help">Minimum 400 words recommended. Include headings and structure where possible.</p>
+      <p class="help">Aim for 400–2000 words. Keep headings and key ideas — we’ll combine your notes with the selected tool and ensure the prompt stays under 8000 characters.</p>
     </div>
-    
-    <!-- Notes Options -->
-    <div class="advanced-options" style="margin-bottom: 2rem;">
-      <div class="advanced-header" id="notesAdvancedToggle">
-        <span class="advanced-title">Customise Output</span>
-        <span class="advanced-toggle open">▼</span>
-        </div>
-      <div class="advanced-content open" id="notesAdvancedContent">
-        
-        <div class="form-group">
-          <label class="form-label">Pedagogy Preset</label>
-          <select id="notesPedagogy" title="Sets tone and structure." onchange="state.notesPedagogy = this.value; document.getElementById('notesPedBrief').textContent = PEDAGOGY[this.value].brief; render();">
-            <option>Concept Check (Retrieval)</option>
-            <option>Worked Examples (Scaffolded)</option>
-            <option>Case/Scenario-Based</option>
-            <option>Debate / Critical Analysis</option>
-            <option>Metacognitive Reflection</option>
-            <option>Accessibility-First (UDL)</option>
-          </select>
-          <p class="help" id="notesPedBrief"></p>
-        </div>
-        
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Output Format</label>
-            <div class="radio-group" style="gap:14px;">
-              <label><input type="radio" name="notesFormat" value="pdf" onchange="state.notesFormat = this.value; render();"> PDF (A4)</label>
-              <label><input type="radio" name="notesFormat" value="docx" checked onchange="state.notesFormat = this.value; render();"> Word (.docx)</label>
-              <label><input type="radio" name="notesFormat" value="pptx" onchange="state.notesFormat = this.value; render();"> PPTX (16:9)</label>
-        </div>
-            <p class="help">Choose Word to edit and customise the study materials before sharing.</p>
-          </div>
-        </div>
-        
+
+    <div class="helper-message" style="margin-bottom: 1.5rem;">
+      <div class="helper-message-icon">🗂️</div>
+      <div class="helper-message-text">
+        <strong>Select a Notes Tool</strong> — each card wraps your pasted notes in a ready-to-copy prompt. Preview first to confirm the output and character count.
       </div>
     </div>
-    
-    <!-- Primary Action -->
-    <div class="primary-action">
-      <button class="btn-primary" id="generateNotes" onclick="copyPrompt();">
-        📋 Copy Prompt to Clipboard
-      </button>
-      <p class="help" style="margin-top: 0.5rem;">Paste into Copilot (no Panopto page needed for this workflow).</p>
+
+    <div class="quick-start" id="notesToolsDeck" style="margin-top:1rem;">
+      <div class="section-title">
+        <span>Notes Tools</span>
+        <span class="help">Choose an output style, then copy or preview the prompt.</span>
+      </div>
+      <div class="preset-cards study-tools-grid" id="notesToolsGrid">
+        <!-- Cards populated by JS -->
+      </div>
+    </div>
+
+    <div class="study-preview-panel hidden" id="notesPreviewPanel">
+      <div class="study-preview-header">
+        <span class="study-preview-title" id="notesPreviewTitle">Preview</span>
+        <span class="study-preview-meta" id="notesPreviewMeta"></span>
+      </div>
+      <div class="study-preview-body">
+        <div class="study-preview-placeholder" id="notesPreviewPlaceholder">Paste notes and choose “Preview” to check the final prompt.</div>
+        <pre class="study-preview-text hidden" id="notesPreviewText"></pre>
+      </div>
     </div>
   </div>
   
@@ -2091,16 +2075,13 @@ const PEDAGOGY = {
 
 // State
 let state = {
-  workflow: 'quiz',
+  workflow: 'help',
   pedagogy: 'Concept Check (Retrieval)',
   quizTitle: '',
   quizLang: 'en-GB',
   quizCount: 3,
   quizFeedback: 'brief',
   questionTypes: ['multiple_choice_question'],
-  // From Notes
-  notesPedagogy: 'Concept Check (Retrieval)',
-  notesFormat: 'docx',
   notesInput: ''
 };
 
@@ -2118,8 +2099,9 @@ const QUESTION_TYPES = [
 document.addEventListener('DOMContentLoaded', () => {
   try {
     mountStudyToolCards();
+    mountNotesToolCards();
   } catch (e) {
-    console.warn('Study tools deck failed:', e);
+    console.warn('Tool deck init failed:', e);
   }
 });
 
@@ -2143,11 +2125,17 @@ function slugify(s) {
 }
 
 // Panopto source block (compact)
-const PANOPTO_BLOCK = `SOURCE: Read THIS Panopto page DOM: (1) Full captions/transcript, (2) Slides/contents, (3) Notes panel.
+const PANOPTO_BLOCK = `SOURCE PREPARATION
+1) Confirm this is a Panopto Watch page (not the Canvas embed).
+2) Open Captions/Transcript and Contents/Slides panels; expand any collapsed sections.
+3) Scroll the transcript to the very bottom once so every caption loads.
+4) Wait until no new lines appear, then read the DOM for captions + slides only (no external sources).
 
-TITLE EXTRACTION (MANDATORY): Extract real video title from: <meta property="og:title">, [data-role="session-title"], h1, or document.title. Use ACTUAL title (e.g., "Week 5: Cell Division") NOT "Lecture Quiz" or placeholders. Use in filenames and file content.
+TITLE EXTRACTION (MANDATORY): Extract real video title from <meta property="og:title">, [data-role="session-title"], .session-title, or document.title. Use the real title (e.g., "Week 5: Cell Division") — never "Lecture Quiz" or placeholders.
 
-FAIL-CLOSED: If <300 words after dedupe, return: "INSUFFICIENT_PAGE_CONTENT — Open captions+slides panels, scroll transcript, then retry." No files.`;
+FAIL-CLOSED: If the combined captions/slides corpus < 300 words after dedupe, return exactly:
+  "INSUFFICIENT_PAGE_CONTENT — Expand captions & slides, scroll transcript fully, then retry."
+`;
 
 // Prompt builders
 function buildQuizPrompt() {
@@ -2423,7 +2411,7 @@ const STUDY_TOOLS = [
   },
 ];
 
-const STUDY_TOOL_STYLES = [
+const TOOL_STYLE_PALETTE = [
   { accent: '#F97316', badge: 'rgba(249,115,22,0.12)', chip: 'rgba(249,115,22,0.08)', chipBorder: 'rgba(249,115,22,0.25)', accentHover: '#ea580c' },
   { accent: '#8B5CF6', badge: 'rgba(139,92,246,0.12)', chip: 'rgba(139,92,246,0.08)', chipBorder: 'rgba(139,92,246,0.25)', accentHover: '#7c3aed' },
   { accent: '#0EA5E9', badge: 'rgba(14,165,233,0.12)', chip: 'rgba(14,165,233,0.08)', chipBorder: 'rgba(14,165,233,0.25)', accentHover: '#0284c7' },
@@ -2432,6 +2420,8 @@ const STUDY_TOOL_STYLES = [
 ];
 
 let currentStudyPrompt = '';
+let currentNotesTemplate = null;
+let currentNotesPrompt = '';
 
 function mountStudyToolCards(){
   const grid = document.getElementById('studyToolsGrid');
@@ -2439,8 +2429,8 @@ function mountStudyToolCards(){
   grid.innerHTML = '';
   STUDY_TOOLS.forEach((tool, index)=>{
     const card = document.createElement('div');
-    card.className = 'preset-card study-tool-card';
-    const style = STUDY_TOOL_STYLES[index % STUDY_TOOL_STYLES.length] || STUDY_TOOL_STYLES[0];
+    card.className = 'preset-card tool-card';
+    const style = TOOL_STYLE_PALETTE[index % TOOL_STYLE_PALETTE.length] || TOOL_STYLE_PALETTE[0];
     card.style.setProperty('--tool-accent', style.accent);
     card.style.setProperty('--tool-accent-hover', style.accentHover || style.accent);
     card.style.setProperty('--tool-badge-bg', style.badge);
@@ -2464,30 +2454,7 @@ function mountStudyToolCards(){
       if(!tool) return;
       const prompt = tool.builder();
       setStudyPreview(prompt, tool.name);
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(prompt).then(()=>{
-          showToast();
-        }).catch(err=>{
-          alert('Failed to copy to clipboard: ' + err.message);
-        });
-      } else {
-        const ta = document.createElement('textarea');
-        ta.value = prompt;
-        ta.style.position = 'fixed';
-        ta.style.top = '0';
-        ta.style.left = '0';
-        ta.style.opacity = '0';
-        document.body.appendChild(ta);
-        ta.focus();
-        ta.select();
-        try {
-          document.execCommand('copy');
-          showToast();
-        } catch (e) {
-          alert('Failed to copy: ' + e.message);
-        }
-        document.body.removeChild(ta);
-      }
+      copyTextToClipboard(prompt);
     });
   });
   grid.querySelectorAll('button[data-preview]').forEach(btn=>{
@@ -2509,6 +2476,7 @@ function setStudyPreview(text, label){
   const meta = $('studyPreviewMeta');
   const titleEl = $('studyPreviewTitle');
   if (!panel) return;
+  setCharStatus(text ? text.length : 0);
   panel.classList.remove('hidden');
   if (titleEl) titleEl.textContent = 'Preview';
   if (!text) {
@@ -2544,98 +2512,272 @@ function showToast(){
   setTimeout(()=> t.classList.remove('show'), 1800);
 }
 
-function buildNotesPrompt() {
-  const slug = 'Lecture_Notes_Pack';
-  const format = state.notesFormat;
-  const ped = PEDAGOGY[state.notesPedagogy] || PEDAGOGY["Concept Check (Retrieval)"];
-  const pedBlock = ped.inject.map(l => `• ${l}`).join('\n');
-  const ext = format === 'pptx' ? 'pptx' : (format === 'docx' ? 'docx' : 'pdf');
-  const fmt = format === 'pptx' ? 'PPTX 16:9' : (format === 'docx' ? 'Word A4' : 'PDF A4');
+function copyTextToClipboard(text){
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast();
+    }).catch(err => {
+      alert('Failed to copy to clipboard: ' + err.message);
+    });
+    return;
+  }
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.top = '0';
+  ta.style.left = '0';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try {
+    document.execCommand('copy');
+    showToast();
+  } catch (e) {
+    alert('Failed to copy: ' + e.message);
+  }
+  document.body.removeChild(ta);
+}
 
-  return `SYSTEM
-Return ONE file only: \${slug}.\${ext}. Do NOT ask questions. Do NOT use external sources. Do NOT include planning/coverage/validation text in the output.
+const NOTES_TEMPLATES = [
+  {
+    id: 'summary',
+    icon: '📝',
+    name: 'Structured Summary',
+    points: [
+      'Surface the key arguments and evidence in the notes',
+      'Group related concepts with timestamp or heading cues',
+      'Highlight misconceptions, clarifications, and next steps',
+      'Compile an evidence appendix for quality assurance'
+    ],
+    build: (notes, meta) => `SYSTEM
+Return ONE file only: ${meta.slug}_notes_summary.docx (Word A4). Do NOT ask questions. Do NOT use external sources.
 
-SOURCE (NOTES ONLY)
-• Parse the pasted notes: headings, bullets, tables; dedupe; keep author wording.
-• TITLE: Extract from the first H1/line of the notes (or “Notes Pack” if absent). Use in the document and filename.
-• If usable note text < 400 words after cleaning → STOP and return EXACTLY:
-  “INSUFFICIENT_PAGE_CONTENT — Add more notes (≥400 words with headings) and retry.”
+NOTES SAFEGUARD
+• Use only the supplied notes. If cleaned text < 400 words, return “INSUFFICIENT_NOTES — add more detail and retry.”
+• Auto-run collect → analyse → write → validate (no user confirmation).
+• Use UK English, WCAG-AA contrast, Queen’s red (#E0001B).
 
-QUEEN’S PEDAGOGY CONTRACT
-\${pedBlock}
-• Outcomes alignment, Beyond Blended pillars, participation mix, UDL (≥6 checkpoints), assessment & feedback, engagement & support, tools & fallbacks, QA trace, UK English & WCAG‑AA.
+OUTPUT STRUCTURE
+1) Title page — use "${meta.title}" + module, date, and a 90–120 word “How to use this guide”.
+2) Key outcomes — 4–6 outcome statements linked directly to the notes.
+3) Section summaries — 5–8 sections: heading, what it covers, why it matters, evidence snippet.
+4) Concept connectors — bullets for links, misconceptions, follow-up actions.
+5) Appendix A — ≥18 quoted evidence snippets (5–20 words + source/heading).
 
-WORKFLOW GUARDRAILS (INTERNAL — DO NOT OUTPUT)
-1) PLAN — silently enumerate ALL required sections and floors below.
-2) DRAFT — generate each section to meet floors; expand thin sections using ONLY the provided notes.
-3) VALIDATE — compute section word counts and item counts; if any fail, revise and re‑check. Only then render the final file.
-4) NO STREAMING until VALIDATE passes. Do NOT include plan/coverage/validation text in the output.
+NOTES (verbatim — analyse only this text):
+${notes}
+`
+  },
+  {
+    id: 'revision',
+    icon: '🎯',
+    name: 'Revision Deck',
+    points: [
+      'Build 30 flashcards with answers and difficulty tags',
+      'Add a 10-question self-check quiz with rationales',
+      'Surface common slips and suggestions for next study moves',
+      'Keep everything grounded in timestamped note evidence'
+    ],
+    build: (notes, meta) => `SYSTEM
+Return ONE file only: ${meta.slug}_notes_revision.docx (Word A4). Do NOT ask questions. Do NOT use external sources.
 
-STRUCTURE & FLOORS (build ALL sections; add [section anchors] for easy navigation)
-1) Title + “How to use this pack” (≤120 words)
-2) Learning outcomes — 4–6 outcomes + alignment note
-3) Key concepts — 6–12 concepts (2–3 sentences each)
-4) Concept map — short narrative + list of nodes/links
-5) Glossary — 15–30 terms with examples from the notes
-6) Worked examples / cases — 4–6 items with steps/why/slips OR scenario/questions/teaching points
-7) Problem set — 8–12 items with hint + full solution + rationale
-8) Self‑check quiz — 10–14 items; concise rationale in answer key
-9) Flashcards — 25–45 cards with: ID, Q, A, Explanation (connection), Difficulty, Related IDs; include a CSV appendix
-10) Reflection prompts — 5–7 metacognitive questions
-11) Independent study (≤180 words) — safe practice; help routes (QUB placeholders)
-12) Accessibility & alternatives — list UDL checkpoints and specific alternatives
+NOTES SAFEGUARD
+• Use only the supplied notes. If cleaned text < 400 words, return “INSUFFICIENT_NOTES — add more detail and retry.”
+• Auto-run collect → analyse → write → validate.
+• Use UK English, WCAG-AA, Queen’s red accents.
 
-FORMAT RULES
-• Use \${fmt}. Headings and section order must match above; UK English; Queen’s red (#E0001B) accents; WCAG AA.
+OUTPUT STRUCTURE
+1) Orientation — ≤120 words on how to revise with this pack.
+2) Flashcards — table of 30 cards: ID, Question, Answer, Connection to notes, Difficulty (Fdn/Int/Adv), Source [heading/time].
+3) Quick quiz — 10 items (MC/SA mix) with answer, 20–30 word rationale, likely misconception, source.
+4) Study tips — 6 bullet recommendations linked to upcoming assessments.
+5) Appendix A — ≥18 quoted evidence snippets (5–20 words + source/heading).
 
-VALIDATE BEFORE RETURNING
-1) Notes ≥400 words; 2) Title extracted; 3) ALL sections present; 4) ≥6 UDL checkpoints; 5) Problem set has hint+solution+rationale; 6) Flashcards have all fields; 7) Self‑check has rationales; 8) Student‑facing clarity.`;
+NOTES (verbatim — analyse only this text):
+${notes}
+`
+  },
+  {
+    id: 'workshop',
+    icon: '🗺️',
+    name: 'Workshop Plan',
+    points: [
+      'Draft a ready-to-run session plan from the notes',
+      'Sequence activities with timings and participation modes',
+      'Provide reflection prompts and follow-up support routes',
+      'Evidence every section with note references'
+    ],
+    build: (notes, meta) => `SYSTEM
+Return ONE file only: ${meta.slug}_notes_plan.docx (Word A4). Do NOT ask questions. Do NOT use external sources.
+
+NOTES SAFEGUARD
+• Use only the supplied notes. If cleaned text < 400 words, return “INSUFFICIENT_NOTES — add more detail and retry.”
+• Auto-run collect → analyse → write → validate.
+• Use UK English, WCAG-AA, inclusive tone.
+
+OUTPUT STRUCTURE
+1) Session overview — two short paragraphs covering purpose, context, and success metrics drawn from the notes.
+2) Workshop blueprint — table with columns: Phase, Duration, Objectives, Activity steps, Evidence references, Participation mode.
+3) Reflection prompts — 6 prompts spanning analyse/evaluate/create linked to the notes.
+4) Support & follow-up — bullet list of help routes, resources, accessibility adjustments.
+5) Appendix A — ≥18 quoted evidence snippets (5–20 words + source/heading).
+
+NOTES (verbatim — analyse only this text):
+${notes}
+`
+  }
+];
+
+function deriveNotesMeta(raw) {
+  const lines = (raw || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  let title = lines.length ? lines[0].replace(/^#+\s*/, '') : 'Notes Pack';
+  if (title.length < 4 && lines.length > 1) title = lines[1];
+  const cleanTitle = title || 'Notes Pack';
+  const slug = slugify(cleanTitle);
+  return { title: cleanTitle, slug: slug || 'Notes_Pack' };
+}
+
+function getNotesInput() {
+  return ($('notesInput')?.value || '').trim();
+}
+
+function buildNotesOutput(template, rawNotes) {
+  const notes = (rawNotes || '').trim();
+  if (!notes) {
+    return { error: 'Please paste your notes first.' };
+  }
+  const meta = deriveNotesMeta(notes);
+  const prompt = template.build(notes, meta);
+  return { prompt, label: template.name };
+}
+
+function mountNotesToolCards(){
+  const grid = document.getElementById('notesToolsGrid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  NOTES_TEMPLATES.forEach((tool, index)=>{
+    const card = document.createElement('div');
+    card.className = 'preset-card tool-card';
+    const style = TOOL_STYLE_PALETTE[(index + 2) % TOOL_STYLE_PALETTE.length];
+    card.style.setProperty('--tool-accent', style.accent);
+    card.style.setProperty('--tool-accent-hover', style.accentHover || style.accent);
+    card.style.setProperty('--tool-badge-bg', style.badge);
+    card.style.setProperty('--tool-chip-bg', style.chip);
+    card.style.setProperty('--tool-chip-border', style.chipBorder);
+    const points = (tool.points || []).map(point => `<li>${point}</li>`).join('');
+    card.innerHTML = `
+      <div class=\"tool-badge\">${tool.icon} ${tool.name}</div>
+      <ul class=\"tool-points\">${points}</ul>
+      <div class=\"tool-actions\">
+        <button class=\"btn-primary\" data-tool=\"${tool.id}\">📋 Copy Prompt</button>
+        <button class=\"btn btn-ghost\" data-preview=\"${tool.id}\">👁 Preview</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  grid.querySelectorAll('button[data-tool]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.getAttribute('data-tool');
+      const template = NOTES_TEMPLATES.find(t=>t.id===id);
+      const result = buildNotesOutput(template, getNotesInput());
+      if (result.error) { alert(result.error); return; }
+      if (result.prompt.length > 8000) {
+        setNotesPreview(result.prompt, template.name, template);
+        alert('This prompt is over 8000 characters. Trim your notes and preview again.');
+        return;
+      }
+      setNotesPreview(result.prompt, template.name, template);
+      copyTextToClipboard(result.prompt);
+    });
+  });
+
+  grid.querySelectorAll('button[data-preview]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.getAttribute('data-preview');
+      const template = NOTES_TEMPLATES.find(t=>t.id===id);
+      const result = buildNotesOutput(template, getNotesInput());
+      if (result.error) { alert(result.error); return; }
+      setNotesPreview(result.prompt, template.name, template);
+      if (result.prompt.length > 8000) {
+        alert('This prompt is over 8000 characters. Trim your notes to stay within the limit.');
+      }
+    });
+  });
+  if (state.workflow === 'notes') {
+    setNotesPreview('', '', null);
+  }
+}
+
+function setNotesPreview(text, label, template){
+  const panel = $('notesPreviewPanel');
+  const placeholder = $('notesPreviewPlaceholder');
+  const pre = $('notesPreviewText');
+  const meta = $('notesPreviewMeta');
+  const titleEl = $('notesPreviewTitle');
+  if (!panel) return;
+  const content = text || '';
+  if (template) {
+    currentNotesTemplate = template;
+  } else if (!content) {
+    currentNotesTemplate = null;
+  }
+  currentNotesPrompt = content;
+  setCharStatus(content.length);
+  panel.classList.remove('hidden');
+  if (titleEl) titleEl.textContent = label ? `Preview — ${label}` : 'Preview';
+  if (!content) {
+    if (placeholder) {
+      placeholder.textContent = 'Paste notes and choose “Preview” to check the final prompt.';
+      placeholder.classList.remove('hidden');
+    }
+    if (pre) pre.classList.add('hidden');
+    if (meta) meta.textContent = '';
+    return;
+  }
+  if (placeholder) placeholder.classList.add('hidden');
+  if (pre) {
+    pre.textContent = content;
+    pre.classList.remove('hidden');
+  }
+  if (meta) {
+    const count = content.length.toLocaleString();
+    let message = `${count} chars` + (label ? ` • ${label}` : '');
+    if (content.length > 8000) message += ' • Trim notes to stay under 8000';
+    meta.textContent = message;
+  }
+}
+
+function refreshNotesPreview(){
+  if (!currentNotesTemplate) return;
+  const result = buildNotesOutput(currentNotesTemplate, getNotesInput());
+  if (result.error) {
+    setNotesPreview('', '', null);
+    return;
+  }
+  setNotesPreview(result.prompt, currentNotesTemplate.name, currentNotesTemplate);
 }
 
 // Render preview
 function render() {
-  let prompt = '';
-  if (state.workflow === 'quiz') prompt = buildQuizPrompt();
-  if (state.workflow === 'notes') prompt = buildNotesPrompt();
-
   if (state.workflow === 'study') {
-    if ($('charCount')) $('charCount').textContent = '0';
-    const progress = $('progressBar');
-    if (progress) {
-      progress.style.width = '0%';
-      progress.classList.remove('danger', 'warning');
-    }
-    if ($('statusBadge')) $('statusBadge').className = 'status-badge';
-    if ($('statusText')) $('statusText').textContent = 'Ready';
+    setCharStatus(0);
     if ($('previewPlaceholder')) $('previewPlaceholder').classList.remove('hidden');
     if ($('previewText')) $('previewText').classList.add('hidden');
     return;
   }
 
-  const len = prompt.length;
-  $('charCount').textContent = len;
-  
-  // Update progress bar and status
-  const pct = Math.min(100, (len / 8000) * 100);
-  $('progressBar').style.width = pct + '%';
-  
-  if (len >= 8000) {
-    $('progressBar').classList.add('danger');
-    $('progressBar').classList.remove('warning');
-    $('statusBadge').className = 'status-badge danger';
-    $('statusText').textContent = 'Too long';
-  } else if (len > 7500) {
-    $('progressBar').classList.add('warning');
-    $('progressBar').classList.remove('danger');
-    $('statusBadge').className = 'status-badge warning';
-    $('statusText').textContent = 'Near limit';
-  } else {
-    $('progressBar').classList.remove('danger', 'warning');
-    $('statusBadge').className = 'status-badge';
-    $('statusText').textContent = 'Ready';
+  if (state.workflow === 'notes') {
+    setCharStatus(currentNotesPrompt ? currentNotesPrompt.length : 0);
+    return;
   }
+
+  let prompt = '';
+  if (state.workflow === 'quiz') prompt = buildQuizPrompt();
+
+  setCharStatus(prompt.length);
   
-  // Show preview
   if (prompt) {
     $('previewPlaceholder').classList.add('hidden');
     $('previewText').classList.remove('hidden');
@@ -2653,86 +2795,37 @@ function copyPrompt() {
       alert('Select a tool and preview or copy its prompt first.');
       return;
     }
-    const text = currentStudyPrompt;
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(() => {
-        showToast();
-      }).catch(err => {
-        alert('Failed to copy to clipboard: ' + err.message);
-      });
-    } else {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.top = '0';
-      ta.style.left = '0';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.focus();
-      ta.select();
-      try {
-        document.execCommand('copy');
-        showToast();
-      } catch (e) {
-        alert('Failed to copy: ' + e.message);
-      }
-      document.body.removeChild(ta);
+    if (currentStudyPrompt.length > 8000) {
+      alert('This prompt is over 8000 characters. Trim inputs and preview again.');
+      return;
     }
+    copyTextToClipboard(currentStudyPrompt);
     return;
   }
 
-  // Rebuild the prompt right now to ensure it's fresh
+  if (state.workflow === 'notes') {
+    if (!currentNotesPrompt) {
+      alert('Paste your notes, choose a tool, then preview before copying.');
+      return;
+    }
+    if (currentNotesPrompt.length > 8000) {
+      alert('This prompt is over 8000 characters. Trim your notes and preview again.');
+      return;
+    }
+    copyTextToClipboard(currentNotesPrompt);
+    return;
+  }
+
   let prompt = '';
   if (state.workflow === 'quiz') prompt = buildQuizPrompt();
-  if (state.workflow === 'notes') prompt = buildNotesPrompt();
-  
+
   if (!prompt || prompt.trim() === '') {
     console.error('No prompt generated!');
     alert('No prompt to copy yet. Please ensure you have selected your options.');
     return;
   }
-  
-  // Try to copy
-  console.log('Attempting to copy...');
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    console.log('Using navigator.clipboard API');
-    navigator.clipboard.writeText(prompt).then(() => {
-      console.log('Copy successful!');
-      // Show toast
-      $('toast').classList.add('show');
-      setTimeout(() => $('toast').classList.remove('show'), 2000);
-    }).catch(err => {
-      console.error('Clipboard API failed:', err);
-      alert('Failed to copy to clipboard: ' + err.message);
-    });
-  } else {
-    console.log('Using fallback copy method');
-    // Fallback for older browsers
-    const ta = document.createElement('textarea');
-    ta.value = prompt;
-    ta.style.position = 'fixed';
-    ta.style.top = '0';
-    ta.style.left = '0';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.focus();
-    ta.select();
-    try { 
-      const success = document.execCommand('copy');
-      console.log('execCommand copy result:', success);
-      if (success) {
-        // Show toast
-        $('toast').classList.add('show');
-        setTimeout(() => $('toast').classList.remove('show'), 2000);
-      } else {
-        alert('Copy failed. Please try manually selecting and copying the text below.');
-      }
-    } catch(e) {
-      console.error('execCommand failed:', e);
-      alert('Failed to copy: ' + e.message);
-    }
-    document.body.removeChild(ta);
-  }
+
+  copyTextToClipboard(prompt);
 }
 
 // Init question type chips
@@ -2763,9 +2856,6 @@ function init() {
   if (p) $('pedBrief').textContent = p.brief;
   
   // Update pedagogy brief on load (notes)
-  const np = PEDAGOGY[state.notesPedagogy];
-  if (np && $('notesPedBrief')) $('notesPedBrief').textContent = np.brief;
-  
   // Hero content for each page
   const heroContent = {
     quiz: {
@@ -2847,14 +2937,8 @@ function init() {
   initQuestionTypes();
   render();
   
-  // Show the quiz workflow by default on page load
-  const defaultWorkflow = document.querySelector('.quiz-workflow');
-  if (defaultWorkflow) {
-    defaultWorkflow.classList.remove('hidden');
-  }
-  // Ensure the Quiz tab is visually active on load
-  const quizBtn = document.querySelector('[data-tab="quiz"]');
-  if (quizBtn) quizBtn.classList.add('active');
+  // Show Getting Started by default
+  switchWorkflow('help');
   
   // Attach progressive enhancement handlers in case inline onClick is stripped
   $$('.workflow-btn').forEach(btn => {
@@ -2902,11 +2986,20 @@ function init() {
           console.warn('Study tools deck failed:', e);
         }
       }, 0);
+    } else if (state.workflow === 'notes') {
+      setTimeout(() => {
+        try {
+          mountNotesToolCards();
+          refreshNotesPreview();
+        } catch (e) {
+          console.warn('Notes tools deck failed:', e);
+        }
+      }, 0);
     }
 
     // Show/hide preview section
     const previewSection = $('previewSection');
-    if (previewSection) previewSection.style.display = (state.workflow === 'help' || state.workflow === 'study') ? 'none' : 'block';
+    if (previewSection) previewSection.style.display = (state.workflow === 'help' || state.workflow === 'study' || state.workflow === 'notes') ? 'none' : 'block';
 
     const studyPanel = $('studyPreviewPanel');
     if (studyPanel) {
@@ -2919,12 +3012,24 @@ function init() {
       }
     }
 
+    const notesPanel = $('notesPreviewPanel');
+    if (notesPanel) {
+      if (state.workflow === 'notes') {
+        notesPanel.classList.remove('hidden');
+        refreshNotesPreview();
+      } else {
+        notesPanel.classList.add('hidden');
+        currentNotesPrompt = '';
+        currentNotesTemplate = null;
+      }
+    }
+
     // Re-setup FAQ when switching to help page
     if (state.workflow === 'help') {
       setTimeout(() => {
         if (typeof setupFaqAccordion === 'function') setupFaqAccordion();
       }, 0);
-    } else if (state.workflow !== 'study') {
+    } else if (state.workflow !== 'study' && state.workflow !== 'notes') {
       render();
     }
   };
@@ -2937,28 +3042,11 @@ function init() {
     render();
   });
   
-  // Preset cards - Notes
-  $$('.notes-workflow .preset-card').forEach(card => {
-    card.onclick = () => {
-      $$('.notes-workflow .preset-card').forEach(c => c.classList.remove('active'));
-      card.classList.add('active');
-      state.notesOutput = card.dataset.notesOutput;
-      render();
-    };
-  });
-  
   // Advanced toggles
   $('advancedToggle').onclick = () => {
     $('advancedContent').classList.toggle('open');
     $('advancedToggle').querySelector('.advanced-toggle').classList.toggle('open');
   };
-  
-  if ($('notesAdvancedToggle')) {
-    $('notesAdvancedToggle').onclick = () => {
-      $('notesAdvancedContent').classList.toggle('open');
-      $('notesAdvancedToggle').querySelector('.advanced-toggle').classList.toggle('open');
-    };
-  }
   
   // Form inputs - Quiz
   if ($('quizTitle')) {
@@ -2981,7 +3069,13 @@ function init() {
   
   // Form inputs - From Notes (using inline handlers, no duplicates needed)
   if ($('notesInput')) {
-    $('notesInput').oninput = e => { state.notesInput = e.target.value; render(); };
+    $('notesInput').oninput = e => {
+      state.notesInput = e.target.value;
+      if (state.workflow === 'notes') {
+        refreshNotesPreview();
+        if (!currentNotesTemplate) setCharStatus(0);
+      }
+    };
   }
   
   // Copy buttons
