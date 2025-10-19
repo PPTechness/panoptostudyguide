@@ -1594,20 +1594,20 @@
       <button class="workflow-btn" data-tab="quiz" onclick="switchWorkflow('quiz')">Canvas Quiz</button>
       <button class="workflow-btn" data-tab="study" onclick="switchWorkflow('study')">Study Guide</button>
       <button class="workflow-btn" data-tab="notes" onclick="switchWorkflow('notes')">From Notes</button>
-      <button class="workflow-btn" data-tab="help" onclick="switchWorkflow('help')">Getting Started</button>
+      <button class="workflow-btn active" data-tab="help" onclick="switchWorkflow('help')">Getting Started</button>
     </div>
   </div>
 </header>
 
 <!-- Hero Banner -->
-<div class="hero-banner quiz-hero" id="heroBanner">
+<div class="hero-banner help-hero" id="heroBanner">
   <div class="hero-content">
     <div class="hero-badge">
-      <span>✨</span>
-      <span id="heroBadgeText">Powered by AI & Queen's Beyond Blended Pedagogy</span>
+      <span>🧭</span>
+      <span id="heroBadgeText">Getting Started</span>
     </div>
-    <h1 class="hero-title" id="heroTitle">Transform Your Lectures into Learning Resources</h1>
-    <p class="hero-subtitle" id="heroSubtitle">Generate Canvas quizzes and study guides from your Panopto lectures in seconds—aligned with Queen's teaching excellence standards</p>
+    <h1 class="hero-title" id="heroTitle">Welcome to Prompt Builder</h1>
+    <p class="hero-subtitle" id="heroSubtitle">Your guide to generating QUB-aligned quizzes, study guides, and note-based resources in minutes</p>
   </div>
 </div>
 
@@ -2676,6 +2676,12 @@ function mountNotesToolCards(){
       </div>`;
     grid.appendChild(card);
   });
+
+  if (state.workflow === 'notes') {
+    setNotesPreview('', '', null);
+  } else {
+    setCharStatus((currentNotesPrompt || '').length);
+  }
 
   grid.querySelectorAll('button[data-tool]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
