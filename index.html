@@ -1591,7 +1591,7 @@
     </div>
     
     <div class="workflow-selector">
-      <button class="workflow-btn active" data-tab="quiz" onclick="switchWorkflow('quiz')">Canvas Quiz</button>
+      <button class="workflow-btn" data-tab="quiz" onclick="switchWorkflow('quiz')">Canvas Quiz</button>
       <button class="workflow-btn" data-tab="study" onclick="switchWorkflow('study')">Study Guide</button>
       <button class="workflow-btn" data-tab="notes" onclick="switchWorkflow('notes')">From Notes</button>
       <button class="workflow-btn" data-tab="help" onclick="switchWorkflow('help')">Getting Started</button>
@@ -1839,7 +1839,7 @@
   </div>
   
   <!-- Help/Getting Started Workflow -->
-  <div class="workflow-content help-workflow hidden">
+  <div class="workflow-content help-workflow">
     <h2 class="gradient-title" style="margin-top: 0;">Getting Started with Prompt Builder</h2>
     
     <div class="quick-start" style="margin-bottom: 4rem; padding: 3rem;">
@@ -2858,6 +2858,12 @@ function init() {
   // Update pedagogy brief on load (notes)
   // Hero content for each page
   const heroContent = {
+    help: {
+      badge: 'Getting Started',
+      title: 'Welcome to Prompt Builder',
+      subtitle: 'Your guide to generating QUB-aligned quizzes and study resources in minutes',
+      class: 'help-hero'
+    },
     quiz: {
       badge: 'Canvas Quiz Builder',
       title: 'Create Perfect Quizzes in Seconds',
@@ -2876,12 +2882,6 @@ function init() {
       subtitle: 'Convert your lecture notes into structured, student-ready study materials with expert guidance',
       class: 'notes-hero'
     },
-    help: {
-      badge: 'Getting Started',
-      title: 'Welcome to Prompt Builder',
-      subtitle: 'Learn how to create amazing educational resources in minutes with AI-powered tools',
-      class: 'help-hero'
-    }
   };
   
   // Help button - navigate to Getting Started page
