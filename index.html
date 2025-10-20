@@ -2856,40 +2856,160 @@ function initQuestionTypes() {
   });
 }
 
+// Update character count status and progress bar
+function setCharStatus(charLength) {
+  const charCountEl = $('charCount');
+  const statusBadgeEl = $('statusBadge');
+  const statusTextEl = $('statusText');
+  const progressBarEl = $('progressBar');
+  
+  if (charCountEl) charCountEl.textContent = charLength;
+  
+  if (progressBarEl) {
+    const percent = Math.min((charLength / 8000) * 100, 100);
+    progressBarEl.style.width = percent + '%';
+  }
+  
+  if (statusBadgeEl && statusTextEl) {
+    if (charLength === 0) {
+      statusBadgeEl.className = 'status-badge';
+      statusTextEl.textContent = 'Ready';
+    } else if (charLength < 6000) {
+      statusBadgeEl.className = 'status-badge success';
+      statusTextEl.textContent = 'Optimal';
+    } else if (charLength < 8000) {
+      statusBadgeEl.className = 'status-badge warning';
+      statusTextEl.textContent = 'Good';
+    } else {
+      statusBadgeEl.className = 'status-badge error';
+      statusTextEl.textContent = 'Too Long';
+    }
+  }
+}
+
+// Hero content for each workflow page
+const heroContent = {
+  help: {
+    badge: 'Getting Started',
+    title: 'Welcome to Prompt Builder',
+    subtitle: 'Your guide to generating QUB-aligned quizzes and study resources in minutes',
+    class: 'help-hero'
+  },
+  quiz: {
+    badge: 'Canvas Quiz Builder',
+    title: 'Create Perfect Quizzes in Seconds',
+    subtitle: 'Transform your Panopto lectures into Canvas-ready quizzes with AI—aligned with Queen\'s Beyond Blended pedagogy',
+    class: 'quiz-hero'
+  },
+  study: {
+    badge: 'Study Guide Generator',
+    title: 'Build Comprehensive Study Resources',
+    subtitle: 'Generate rich, pedagogy-first study guides with flashcards, problems, and reflections from your lectures',
+    class: 'study-hero'
+  },
+  notes: {
+    badge: 'Notes to Resources',
+    title: 'Transform Notes into Study Packs',
+    subtitle: 'Convert your lecture notes into structured, student-ready study materials with expert guidance',
+    class: 'notes-hero'
+  },
+};
+
+// switchWorkflow function - must be global for inline onclick handlers
+window.switchWorkflow = function(tab) {
+  console.log('switchWorkflow called with tab:', tab);
+  if (!tab) return;
+  
+  // Update active state
+  $$('.workflow-btn').forEach(b => b.classList.remove('active'));
+  const activeBtn = document.querySelector('[data-tab="' + tab + '"]');
+  if (activeBtn) activeBtn.classList.add('active');
+  state.workflow = tab;
+
+  // Toggle content visibility
+  $$('.workflow-content').forEach(w => w.classList.add('hidden'));
+  const target = document.querySelector('.' + tab + '-workflow');
+  console.log('Target element for', tab + '-workflow:', target);
+  if (target) {
+    target.classList.remove('hidden');
+    console.log('Successfully switched to', tab, 'workflow');
+  } else {
+    console.error('Could not find element with class', tab + '-workflow');
+  }
+
+  // Update hero banner
+  const hero = heroContent[tab];
+  if (hero) {
+    const heroBanner = $('heroBanner');
+    if (heroBanner) {
+      heroBanner.className = 'hero-banner ' + hero.class;
+      if ($('heroBadgeText')) $('heroBadgeText').textContent = hero.badge;
+      if ($('heroTitle')) $('heroTitle').textContent = hero.title;
+      if ($('heroSubtitle')) $('heroSubtitle').textContent = hero.subtitle;
+    }
+  }
+
+  if (tab === 'study') {
+    setTimeout(() => {
+      try {
+        mountStudyToolCards();
+      } catch (e) {
+        console.warn('Study tools deck failed:', e);
+      }
+    }, 0);
+  } else if (tab === 'notes') {
+    setTimeout(() => {
+      try {
+        mountNotesToolCards();
+        refreshNotesPreview();
+      } catch (e) {
+        console.warn('Notes tools deck failed:', e);
+      }
+    }, 0);
+  }
+
+  // Show/hide preview section
+  const previewSection = $('previewSection');
+  if (previewSection) previewSection.style.display = (tab === 'help' || tab === 'study' || tab === 'notes') ? 'none' : 'block';
+
+  const studyPanel = $('studyPreviewPanel');
+  if (studyPanel) {
+    if (tab === 'study') {
+      studyPanel.classList.remove('hidden');
+      setStudyPreview('', '');
+    } else {
+      studyPanel.classList.add('hidden');
+      currentStudyPrompt = '';
+    }
+  }
+
+  const notesPanel = $('notesPreviewPanel');
+  if (notesPanel) {
+    if (tab === 'notes') {
+      notesPanel.classList.remove('hidden');
+      refreshNotesPreview();
+    } else {
+      notesPanel.classList.add('hidden');
+      currentNotesPrompt = '';
+      currentNotesTemplate = null;
+    }
+  }
+
+  // Re-setup FAQ when switching to help page
+  if (tab === 'help') {
+    setTimeout(() => {
+      if (typeof setupFaqAccordion === 'function') setupFaqAccordion();
+    }, 0);
+  } else if (tab !== 'study' && tab !== 'notes') {
+    render();
+  }
+};
+
 // Init
 function init() {
   // Update pedagogy brief on load (quiz)
   const p = PEDAGOGY[state.pedagogy];
   if (p) $('pedBrief').textContent = p.brief;
-  
-  // Update pedagogy brief on load (notes)
-  // Hero content for each page
-  const heroContent = {
-    help: {
-      badge: 'Getting Started',
-      title: 'Welcome to Prompt Builder',
-      subtitle: 'Your guide to generating QUB-aligned quizzes and study resources in minutes',
-      class: 'help-hero'
-    },
-    quiz: {
-      badge: 'Canvas Quiz Builder',
-      title: 'Create Perfect Quizzes in Seconds',
-      subtitle: 'Transform your Panopto lectures into Canvas-ready quizzes with AI—aligned with Queen\'s Beyond Blended pedagogy',
-      class: 'quiz-hero'
-    },
-    study: {
-      badge: 'Study Guide Generator',
-      title: 'Build Comprehensive Study Resources',
-      subtitle: 'Generate rich, pedagogy-first study guides with flashcards, problems, and reflections from your lectures',
-      class: 'study-hero'
-    },
-    notes: {
-      badge: 'Notes to Resources',
-      title: 'Transform Notes into Study Packs',
-      subtitle: 'Convert your lecture notes into structured, student-ready study materials with expert guidance',
-      class: 'notes-hero'
-    },
-  };
   
   // Help button - navigate to Getting Started page
   if ($('helpToggle')) {
@@ -2943,107 +3063,6 @@ function init() {
   
   initQuestionTypes();
   render();
-  
-  // Attach progressive enhancement handlers in case inline onClick is stripped
-  $$('.workflow-btn').forEach(btn => {
-    btn.addEventListener('click', () => window.switchWorkflow(btn.dataset.tab));
-  });
-
-  // Last-resort: delegate clicks anywhere in the document to catch edge cases
-  document.addEventListener('click', (ev) => {
-    const btn = ev.target && ev.target.closest && ev.target.closest('.workflow-btn');
-    if (btn && btn.dataset && btn.dataset.tab) {
-      ev.preventDefault();
-      window.switchWorkflow(btn.dataset.tab);
-    }
-  }, true);
-
-  // Expose switchWorkflow for inline onclick
-  window.switchWorkflow = function(tab) {
-    console.log('switchWorkflow called with tab:', tab);
-    if (!tab) return;
-    // Update active state
-    $$('.workflow-btn').forEach(b => b.classList.remove('active'));
-    const activeBtn = document.querySelector('[data-tab="' + tab + '"]');
-    if (activeBtn) activeBtn.classList.add('active');
-    state.workflow = tab;
-
-    // Toggle content visibility
-    $$('.workflow-content').forEach(w => w.classList.add('hidden'));
-    const target = document.querySelector('.' + tab + '-workflow');
-    console.log('Target element for', tab + '-workflow:', target);
-    if (target) {
-      target.classList.remove('hidden');
-      console.log('Successfully switched to', tab, 'workflow');
-    } else {
-      console.error('Could not find element with class', tab + '-workflow');
-    }
-
-    // Update hero banner
-    const hero = heroContent[state.workflow];
-    if (hero) {
-      const heroBanner = $('heroBanner');
-      heroBanner.className = 'hero-banner ' + hero.class;
-      $('heroBadgeText').textContent = hero.badge;
-      $('heroTitle').textContent = hero.title;
-      $('heroSubtitle').textContent = hero.subtitle;
-    }
-
-    if (state.workflow === 'study') {
-      setTimeout(() => {
-        try {
-          mountStudyToolCards();
-        } catch (e) {
-          console.warn('Study tools deck failed:', e);
-        }
-      }, 0);
-    } else if (state.workflow === 'notes') {
-      setTimeout(() => {
-        try {
-          mountNotesToolCards();
-          refreshNotesPreview();
-        } catch (e) {
-          console.warn('Notes tools deck failed:', e);
-        }
-      }, 0);
-    }
-
-    // Show/hide preview section
-    const previewSection = $('previewSection');
-    if (previewSection) previewSection.style.display = (state.workflow === 'help' || state.workflow === 'study' || state.workflow === 'notes') ? 'none' : 'block';
-
-    const studyPanel = $('studyPreviewPanel');
-    if (studyPanel) {
-      if (state.workflow === 'study') {
-        studyPanel.classList.remove('hidden');
-        setStudyPreview('', '');
-      } else {
-        studyPanel.classList.add('hidden');
-        currentStudyPrompt = '';
-      }
-    }
-
-    const notesPanel = $('notesPreviewPanel');
-    if (notesPanel) {
-      if (state.workflow === 'notes') {
-        notesPanel.classList.remove('hidden');
-        refreshNotesPreview();
-      } else {
-        notesPanel.classList.add('hidden');
-        currentNotesPrompt = '';
-        currentNotesTemplate = null;
-      }
-    }
-
-    // Re-setup FAQ when switching to help page
-    if (state.workflow === 'help') {
-      setTimeout(() => {
-        if (typeof setupFaqAccordion === 'function') setupFaqAccordion();
-      }, 0);
-    } else if (state.workflow !== 'study' && state.workflow !== 'notes') {
-      render();
-    }
-  };
   
   // Show Getting Started by default
   window.switchWorkflow('help');
