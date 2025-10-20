@@ -2163,7 +2163,7 @@ Use ONLY THIS Panopto page. Language=${state.quizLang}. Do NOT ask questions.
 ${PANOPTO_BLOCK}
 PEDAGOGY: ${pedBlock}
 
-HE STANDARDS: Clear stems testing outcomes (not trivia); plausible distractors from lecture; meaningful feedback explaining WHY with timestamps; mix Bloom levels; university-level precision.
+HE STANDARDS: Clear stems targeting outcomes; plausible distractors; brief feedback with timestamps; mixed Bloom levels; precise UK English.
 
 Q TYPES: ${types} | ${state.quizCount} per type | TARGET=${target} | Rewrite invalid as essay${tfNum}
 
@@ -2196,58 +2196,6 @@ MC ITEM:
 <resprocessing><outcomes><decvar varname="SCORE" vartype="Decimal" minvalue="0" maxvalue="100"/></outcomes>
 <respcondition continue="No"><conditionvar><varequal respident="response1">CORRECT</varequal></conditionvar>
 <setvar varname="SCORE" action="Set">100</setvar>${state.quizFeedback !== 'off' ? '<displayfeedback feedbacktype="Response" linkrefid="fb"/>' : ''}</respcondition></resprocessing>${state.quizFeedback !== 'off' ? '<itemfeedback ident="fb"><material><mattext texttype="text/html">WHY [mm:ss]</mattext></material></itemfeedback>' : ''}
-</item>
-
-SA ITEM (short_answer_question):
-<item ident="qSA1" title="QSA1">
-<itemmetadata><qtimetadata>
-<qtimetadatafield><fieldlabel>question_type</fieldlabel><fieldentry>short_answer_question</fieldentry></qtimetadatafield>
-<qtimetadatafield><fieldlabel>points_possible</fieldlabel><fieldentry>1</fieldentry></qtimetadatafield>
-</qtimetadata></itemmetadata>
-<presentation><material><mattext texttype="text/html">STEM (ask for a term, definition, value, or short phrase grounded in the lecture)</mattext></material>
-<response_str ident="response1" rcardinality="Single"><render_fib fibtype="String" prompt="Box" maxchars="120"/></response_str></presentation>
-<resprocessing><outcomes><decvar varname="SCORE" vartype="Decimal" minvalue="0" maxvalue="100"/></outcomes>
-<respcondition continue="No"><conditionvar><or>
-<varequal respident="response1">CORRECT_1</varequal>
-<varequal respident="response1">CORRECT_2</varequal>
-<varequal respident="response1">CORRECT_3</varequal>
-</or></conditionvar><setvar varname="SCORE" action="Set">100</setvar>${state.quizFeedback !== 'off' ? '<displayfeedback feedbacktype="Response" linkrefid="fb"/>' : ''}</respcondition></resprocessing>${state.quizFeedback !== 'off' ? '<itemfeedback ident="fb"><material><mattext texttype="text/html">WHY correct [mm:ss]. Accept minor spelling variants and common synonyms listed above.</mattext></material></itemfeedback>' : ''}
-</item>
-
-ESSAY ITEM (essay_question):
-<item ident="qE1" title="QE1">
-<itemmetadata><qtimetadata>
-<qtimetadatafield><fieldlabel>question_type</fieldlabel><fieldentry>essay_question</fieldentry></qtimetadatafield>
-<qtimetadatafield><fieldlabel>points_possible</fieldlabel><fieldentry>0</fieldentry></qtimetadatafield>
-</qtimetadata></itemmetadata>
-<presentation><material><mattext texttype="text/html">PROMPT (open response drawing on specific lecture sections)</mattext></material>
-<response_str ident="response1" rcardinality="Single"><render_fib fibtype="Text" prompt="Box" rows="8" cols="60"/></response_str></presentation>
-<!-- Essays are unscored here; Canvas supports manual grading. -->
-</item>
-
-MATCHING ITEM (matching_question):
-<item ident="qM1" title="QM1">
-<itemmetadata><qtimetadata>
-<qtimetadatafield><fieldlabel>question_type</fieldlabel><fieldentry>matching_question</fieldentry></qtimetadatafield>
-<qtimetadatafield><fieldlabel>points_possible</fieldlabel><fieldentry>1</fieldentry></qtimetadatafield>
-</qtimetadata></itemmetadata>
-<presentation><material><mattext texttype="text/html">STEM (match each premise to the correct option)</mattext></material>
-<response_lid ident="response1" rcardinality="Multiple">
-<render_match shuffle="Yes">
-<response_label ident="P1"><material><mattext texttype="text/html">PREMISE_1</mattext></material></response_label>
-<response_label ident="P2"><material><mattext texttype="text/html">PREMISE_2</mattext></material></response_label>
-<response_label ident="P3"><material><mattext texttype="text/html">PREMISE_3</mattext></material></response_label>
-<response_label ident="C1"><material><mattext texttype="text/html">CHOICE_1</mattext></material></response_label>
-<response_label ident="C2"><material><mattext texttype="text/html">CHOICE_2</mattext></material></response_label>
-<response_label ident="C3"><material><mattext texttype="text/html">CHOICE_3</mattext></material></response_label>
-</render_match>
-</response_lid></presentation>
-<resprocessing><outcomes><decvar varname="SCORE" vartype="Decimal" minvalue="0" maxvalue="100"/></outcomes>
-<respcondition continue="No"><conditionvar><and>
-<varequal respident="response1">P1 C2</varequal>
-<varequal respident="response1">P2 C3</varequal>
-<varequal respident="response1">P3 C1</varequal>
-</and></conditionvar><setvar varname="SCORE" action="Set">100</setvar>${state.quizFeedback !== 'off' ? '<displayfeedback feedbacktype="Response" linkrefid="fb"/>' : ''}</respcondition></resprocessing>${state.quizFeedback !== 'off' ? '<itemfeedback ident="fb"><material><mattext texttype="text/html">WHY each pairing is correct, referencing [mm:ss] where possible.</mattext></material></itemfeedback>' : ''}
 </item>
 
 ${saTpl}${essayTpl}${matchTpl}
