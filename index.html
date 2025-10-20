@@ -2150,6 +2150,13 @@ function buildQuizPrompt() {
   let tfNum = '';
   if (state.questionTypes.includes('true_false_question')) tfNum += '\nTF: <response_lid> with 2 labels: True/False.';
   if (state.questionTypes.includes('numerical_question')) tfNum += '\nNUM: <response_num> + tolerance.';
+
+  // Minimal per-type QTI examples — only include for selected types to stay under 8k
+  const saTpl = state.questionTypes.includes('short_answer_question') ? `\nSA ITEM:\n<item ident="qSA1" title="QSA1">\n<itemmetadata><qtimetadata>\n<qtimetadatafield><fieldlabel>question_type</fieldlabel><fieldentry>short_answer_question</fieldentry></qtimetadatafield>\n<qtimetadatafield><fieldlabel>points_possible</fieldlabel><fieldentry>1</fieldentry></qtimetadatafield>\n</qtimetadata></itemmetadata>\n<presentation><material><mattext texttype="text/html">STEM</mattext></material>\n<response_str ident="response1" rcardinality="Single"><render_fib fibtype="String" prompt="Box" maxchars="120"/></response_str></presentation>\n<resprocessing><outcomes><decvar varname="SCORE" vartype="Decimal" minvalue="0" maxvalue="100"/></outcomes>\n<respcondition continue="No"><conditionvar><varequal respident="response1">CORRECT</varequal></conditionvar><setvar varname="SCORE" action="Set">100</setvar>${state.quizFeedback !== 'off' ? '<displayfeedback feedbacktype="Response" linkrefid="fb"/>' : ''}</respcondition></resprocessing>${state.quizFeedback !== 'off' ? '<itemfeedback ident="fb"><material><mattext texttype="text/html">WHY [mm:ss]</mattext></material></itemfeedback>' : ''}\n</item>\n` : '';
+
+  const essayTpl = state.questionTypes.includes('essay_question') ? `\nESSAY ITEM:\n<item ident="qE1" title="QE1">\n<itemmetadata><qtimetadata>\n<qtimetadatafield><fieldlabel>question_type</fieldlabel><fieldentry>essay_question</fieldentry></qtimetadatafield>\n<qtimetadatafield><fieldlabel>points_possible</fieldlabel><fieldentry>0</fieldentry></qtimetadatafield>\n</qtimetadata></itemmetadata>\n<presentation><material><mattext texttype="text/html">PROMPT</mattext></material>\n<response_str ident="response1" rcardinality="Single"><render_fib fibtype="Text" prompt="Box" rows="8" cols="60"/></response_str></presentation>\n</item>\n` : '';
+
+  const matchTpl = state.questionTypes.includes('matching_question') ? `\nMATCHING ITEM:\n<item ident="qM1" title="QM1">\n<itemmetadata><qtimetadata>\n<qtimetadatafield><fieldlabel>question_type</fieldlabel><fieldentry>matching_question</fieldentry></qtimetadatafield>\n<qtimetadatafield><fieldlabel>points_possible</fieldlabel><fieldentry>1</fieldentry></qtimetadatafield>\n</qtimetadata></itemmetadata>\n<presentation><material><mattext texttype="text/html">STEM</mattext></material>\n<response_lid ident="response1" rcardinality="Multiple"><render_match shuffle="Yes">\n<response_label ident="P1"><material><mattext texttype="text/html">P1</mattext></material></response_label>\n<response_label ident="P2"><material><mattext texttype="text/html">P2</mattext></material></response_label>\n<response_label ident="C1"><material><mattext texttype="text/html">C1</mattext></material></response_label>\n<response_label ident="C2"><material><mattext texttype="text/html">C2</mattext></material></response_label>\n</render_match></response_lid></presentation>\n<resprocessing><outcomes><decvar varname="SCORE" vartype="Decimal" minvalue="0" maxvalue="100"/></outcomes>\n<respcondition continue="No"><conditionvar><and><varequal respident="response1">P1 C1</varequal><varequal respident="response1">P2 C2</varequal></and></conditionvar><setvar varname="SCORE" action="Set">100</setvar>${state.quizFeedback !== 'off' ? '<displayfeedback feedbacktype="Response" linkrefid="fb"/>' : ''}</respcondition></resprocessing>${state.quizFeedback !== 'off' ? '<itemfeedback ident="fb"><material><mattext texttype="text/html">WHY pairs [mm:ss]</mattext></material></itemfeedback>' : ''}\n</item>\n` : '';
   
   return `SYSTEM: Return EXACTLY 2 files: (1) ${slug}_quiz_qti.zip, (2) ${slug}_quiz.pdf
 Use ONLY THIS Panopto page. Language=${state.quizLang}. Do NOT ask questions.
@@ -2158,7 +2165,7 @@ PEDAGOGY: ${pedBlock}
 
 HE STANDARDS: Clear stems testing outcomes (not trivia); plausible distractors from lecture; meaningful feedback explaining WHY with timestamps; mix Bloom levels; university-level precision.
 
-Q TYPES: ${types} | ${state.quizCount} per type | TARGET=${target} exactly | Rewrite invalid as essay${tfNum}
+Q TYPES: ${types} | ${state.quizCount} per type | TARGET=${target} | Rewrite invalid as essay${tfNum}
 
 QTI ZIP — ${slug}_quiz_qti.zip:
 imsmanifest.xml:
@@ -2188,7 +2195,7 @@ MC ITEM:
 </render_choice></response_lid></presentation>
 <resprocessing><outcomes><decvar varname="SCORE" vartype="Decimal" minvalue="0" maxvalue="100"/></outcomes>
 <respcondition continue="No"><conditionvar><varequal respident="response1">CORRECT</varequal></conditionvar>
-<setvar varname="SCORE" action="Set">100</setvar>${state.quizFeedback !== 'off' ? '<displayfeedback feedbacktype="Response" linkrefid="fb"/>' : ''}</respcondition></resprocessing>${state.quizFeedback !== 'off' ? '<itemfeedback ident="fb"><material><mattext texttype="text/html">WHY correct [mm:ss]</mattext></material></itemfeedback>' : ''}
+<setvar varname="SCORE" action="Set">100</setvar>${state.quizFeedback !== 'off' ? '<displayfeedback feedbacktype="Response" linkrefid="fb"/>' : ''}</respcondition></resprocessing>${state.quizFeedback !== 'off' ? '<itemfeedback ident="fb"><material><mattext texttype="text/html">WHY [mm:ss]</mattext></material></itemfeedback>' : ''}
 </item>
 
 SA ITEM (short_answer_question):
@@ -2243,11 +2250,13 @@ MATCHING ITEM (matching_question):
 </and></conditionvar><setvar varname="SCORE" action="Set">100</setvar>${state.quizFeedback !== 'off' ? '<displayfeedback feedbacktype="Response" linkrefid="fb"/>' : ''}</respcondition></resprocessing>${state.quizFeedback !== 'off' ? '<itemfeedback ident="fb"><material><mattext texttype="text/html">WHY each pairing is correct, referencing [mm:ss] where possible.</mattext></material></itemfeedback>' : ''}
 </item>
 
-GUARDS: UTF-8; escape XML chars; mattext≤1200; exactly ${target} items; all have metadata
+${saTpl}${essayTpl}${matchTpl}
+
+GUARDS: UTF-8; escape XML chars; mattext≤1200; items=${target}; include metadata
 
 PDF: A4. Title=[ACTUAL_VIDEO_TITLE], TOC, then 1Q/page: number, stem, options, answer${state.quizFeedback !== 'off' ? ', feedback+timestamp' : ''}
 
-VALIDATE: (1) ≥300w or "INSUFFICIENT_PAGE_CONTENT", (2) Real title extracted, (3) ${target} items, (4) Valid XML, (5) All metadata, (6) HE quality (clear/defensible/plausible/meaningful), (7) Mixed Bloom, (8) Expert-approvable
+VALIDATE: (1) ≥300w or "INSUFFICIENT_PAGE_CONTENT", (2) Real title extracted, (3) items=${target}, (4) Valid XML, (5) Metadata present, (6) HE quality, (7) Mixed Bloom
 
 OUTPUT: [ACTUAL_TITLE_SLUG]_quiz_qti.zip + [ACTUAL_TITLE_SLUG]_quiz.pdf using REAL title from og:title/[data-role="session-title"]/h1/document.title—NOT "Lecture_Quiz" placeholder.`;
 }
