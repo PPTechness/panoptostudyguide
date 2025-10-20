@@ -299,6 +299,11 @@
     background: linear-gradient(135deg, rgba(124,58,237,0.85) 0%, rgba(236,72,153,0.85) 100%), 
                 url('QUB-gallery-image-lanyon-building.jpg') center/cover;
   }
+
+  /* Build progress (Quiz) */
+  .build-progress { height: 6px; background: rgba(224,0,27,0.12); border-radius: 999px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(224,0,27,0.12); margin-top: 0.75rem; }
+  .build-progress.hidden { display: none; }
+  .build-progress-fill { height: 100%; width: 0%; background: var(--gradient-qub); transition: width 400ms ease; }
   
   .hero-banner::before {
     content: '';
@@ -1665,13 +1670,11 @@
           </div>
           
           <div class="form-group">
-            <label class="form-label" for="quizFeedback">Feedback level</label>
-            <select id="quizFeedback" title="What students will see after answering.">
-              <option value="off">Off — no explanations</option>
-              <option value="brief" selected>Brief — 1-sentence rationale for the correct answer</option>
-              <option value="detailed">Detailed — explain the correct answer AND why each distractor is less accurate, with study tips</option>
-            </select>
-            <p class="help">This feedback appears to students when they review the Canvas quiz. It helps address misconceptions and supports revision.</p>
+            <label class="form-label">Feedback level</label>
+            <div class="chip-group">
+              <div class="chip active">Detailed (recommended)</div>
+            </div>
+            <p class="help">Detailed feedback will be requested in the prompt for each item.</p>
           </div>
         </div>
         
@@ -1691,13 +1694,14 @@
         <div class="form-group mt-1half">
           <label class="form-label">Question Types</label>
           <div class="chip-group" id="questionTypes"></div>
-          <p class="help">Multiple Choice is a good default to check core understanding. You can add other Canvas-compatible types:
+          <p class="help">Multiple Choice is a good default to check core understanding. You can add other Canvas-compatible types (Matching disabled temporarily):
             <span class="tooltip" title="Multiple Answers: choose all that apply, scored with partial credit.">MA</span>,
             <span class="tooltip" title="True/False: two options; the prompt enforces valid structure in QTI.">TF</span>,
             <span class="tooltip" title="Short Answer: exact strings (or variants) are accepted.">SA</span>,
             <span class="tooltip" title="Essay: unscored text response; used as a fallback if a question can't be validated.">Essay</span>,
             <span class="tooltip" title="Numerical: exact value or tolerance range.">Numerical</span>,
-            <span class="tooltip" title="Matching: valid pairs; if not possible, we auto-rewrite to MC/Essay.">Matching</span>.
+            <!-- Matching disabled -->
+            
           </p>
         </div>
         
@@ -1707,8 +1711,9 @@
     <!-- Primary Action -->
     <div class="primary-action">
       <button class="btn-primary" id="generateQuiz" onclick="copyPrompt();">
-        📋 Copy Prompt to Clipboard
+        📋 Build & Copy Prompt
       </button>
+      <div class="build-progress hidden" id="buildProgress"><div class="build-progress-fill" id="buildProgressFill"></div></div>
     </div>
     
     <!-- Canvas How-To (Quiz Only) -->
@@ -1805,39 +1810,7 @@
     </div>
   </div>
   
-  <!-- Preview Section (Shared) -->
-  <div class="preview-section centered" id="previewSection" style="display:none;">
-    <div class="preview-header">
-      <div class="section-title">Your Copilot Prompt</div>
-      <div class="preview-stats">
-        <div class="stat">
-          <span>📊</span>
-          <span><span class="stat-value" id="charCount">0</span> chars (aim &lt; 8000)</span>
-        </div>
-        <span class="status-badge" id="statusBadge">
-          <span>✓</span>
-          <span id="statusText">Ready</span>
-        </span>
-      </div>
-    </div>
-    
-    <div class="progress-bar">
-      <div class="progress-fill" id="progressBar"></div>
-    </div>
-    
-    <div class="preview-actions" style="margin: 1rem 0; justify-content: space-between;">
-      <span class="help">Paste into Copilot with your Panopto Watch page open. Ensure preflight steps are done.</span>
-      <button class="btn-primary" id="copyTop" title="Copy the prompt" onclick="copyPrompt();">📋 Copy Prompt</button>
-    </div>
-    
-    <div class="preview-box">
-      <div class="preview-placeholder" id="previewPlaceholder">
-        <div class="preview-placeholder-icon">👆</div>
-        <p>Customise your options above and your prompt will appear here</p>
-      </div>
-      <pre class="preview-text hidden" id="previewText"></pre>
-    </div>
-  </div>
+  <!-- Preview Section removed for streamlined flow -->
   
   <!-- Help/Getting Started Workflow -->
   <div class="workflow-content help-workflow">
@@ -2092,8 +2065,8 @@ const QUESTION_TYPES = [
   { id: 'true_false_question', label: 'True/False' },
   { id: 'short_answer_question', label: 'Short Answer' },
   { id: 'essay_question', label: 'Essay' },
-  { id: 'numerical_question', label: 'Numerical' },
-  { id: 'matching_question', label: 'Matching' }
+  { id: 'numerical_question', label: 'Numerical' }
+  // Matching disabled for now
 ];
 
 /* ---------- Initialisation: mount chips once DOM is ready ---------- */
@@ -2977,9 +2950,7 @@ window.switchWorkflow = function(tab) {
     }, 0);
   }
 
-  // Show/hide preview section
-  const previewSection = $('previewSection');
-  if (previewSection) previewSection.style.display = (tab === 'help' || tab === 'study' || tab === 'notes') ? 'none' : 'block';
+  // Preview removed; nothing to toggle
 
   const studyPanel = $('studyPreviewPanel');
   if (studyPanel) {
@@ -3103,9 +3074,8 @@ function init() {
     quizCountEl.oninput = e => { state.quizCount = +e.target.value; render(); };
   }
   const quizFeedbackEl = $('quizFeedback');
-  if (quizFeedbackEl) {
-    quizFeedbackEl.onchange = e => { state.quizFeedback = e.target.value; render(); };
-  }
+  // Force detailed feedback
+  state.quizFeedback = 'detailed';
   
   // Form inputs - Study Guide (using inline handlers, no duplicates needed)
   
@@ -3123,7 +3093,21 @@ function init() {
   // Copy buttons
   if ($('generateQuiz')) {
     console.log('Wiring generateQuiz button');
-  $('generateQuiz').onclick = copyPrompt;
+    $('generateQuiz').onclick = () => {
+      const bar = $('buildProgress');
+      const fill = $('buildProgressFill');
+      if (bar && fill) {
+        bar.classList.remove('hidden');
+        fill.style.width = '0%';
+        setTimeout(()=>fill.style.width='35%', 50);
+        setTimeout(()=>fill.style.width='70%', 300);
+      }
+      // Do the copy
+      copyPrompt();
+      // Finish bar and hide after a moment
+      if (fill) setTimeout(()=>fill.style.width='100%', 150);
+      if (bar) setTimeout(()=>bar.classList.add('hidden'), 900);
+    };
   }
   if ($('generateNotes')) {
     console.log('Wiring generateNotes button');
