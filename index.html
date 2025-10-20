@@ -313,6 +313,11 @@
   .quiz-rail a:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(224,0,27,0.12); }
   .quiz-rail a.active { color: white; background: var(--gradient-qub); border-color: transparent; }
   @media (max-width: 980px) { .quiz-grid { grid-template-columns: 1fr; } .quiz-rail { display: none; } }
+
+  /* Canva-style option cards */
+  .advanced-options .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+  .advanced-options .form-group { background: var(--bg-secondary); padding: 16px 18px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: 0 6px 20px rgba(0,0,0,0.04); }
+  .advanced-options .form-label { font-weight: 700; margin-bottom: 8px; display: block; }
   
   .hero-banner::before {
     content: '';
@@ -1641,7 +1646,12 @@
 
     <div class="quiz-grid">
       <nav class="quiz-rail" aria-label="Quick navigation">
-        <a href="#preflight" class="active">Preflight</a>
+        <a href="#help" onclick="switchWorkflow('help'); return false;">Getting Started</a>
+        <a href="#quiz" class="active" onclick="switchWorkflow('quiz'); return false;">Canvas Quiz</a>
+        <a href="#study" onclick="switchWorkflow('study'); return false;">Study Guide</a>
+        <a href="#notes" onclick="switchWorkflow('notes'); return false;">From Notes</a>
+        <hr style="border:none;height:1px;background:rgba(224,0,27,0.12);margin:10px 0;"/>
+        <a href="#preflight">Preflight</a>
         <a href="#customise">Customise</a>
         <a href="#build">Build</a>
         <a href="#howto">Canvas How‑To</a>
