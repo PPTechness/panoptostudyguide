@@ -2960,6 +2960,7 @@ function init() {
 
   // Expose switchWorkflow for inline onclick
   window.switchWorkflow = function(tab) {
+    console.log('switchWorkflow called with tab:', tab);
     if (!tab) return;
     // Update active state
     $$('.workflow-btn').forEach(b => b.classList.remove('active'));
@@ -2970,7 +2971,13 @@ function init() {
     // Toggle content visibility
     $$('.workflow-content').forEach(w => w.classList.add('hidden'));
     const target = document.querySelector('.' + tab + '-workflow');
-    if (target) target.classList.remove('hidden');
+    console.log('Target element for', tab + '-workflow:', target);
+    if (target) {
+      target.classList.remove('hidden');
+      console.log('Successfully switched to', tab, 'workflow');
+    } else {
+      console.error('Could not find element with class', tab + '-workflow');
+    }
 
     // Update hero banner
     const hero = heroContent[state.workflow];
