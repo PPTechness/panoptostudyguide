@@ -1591,10 +1591,10 @@
     </div>
     
     <div class="workflow-selector">
+      <button class="workflow-btn active" data-tab="help" onclick="switchWorkflow('help')">Getting Started</button>
       <button class="workflow-btn" data-tab="quiz" onclick="switchWorkflow('quiz')">Canvas Quiz</button>
       <button class="workflow-btn" data-tab="study" onclick="switchWorkflow('study')">Study Guide</button>
       <button class="workflow-btn" data-tab="notes" onclick="switchWorkflow('notes')">From Notes</button>
-      <button class="workflow-btn active" data-tab="help" onclick="switchWorkflow('help')">Getting Started</button>
     </div>
   </div>
 </header>
@@ -1729,6 +1729,7 @@
       <p class="help" style="margin-top: 0.75rem;"><strong>Note:</strong> If Copilot returns "INSUFFICIENT_PAGE_CONTENT", go back and ensure captions/contents panels are fully expanded and loaded.</p>
       </div>
     </div>
+  </div>
     
   <!-- Study Guide Workflow -->
   <div class="workflow-content study-workflow hidden">
@@ -1805,7 +1806,7 @@
   </div>
   
   <!-- Preview Section (Shared) -->
-  <div class="preview-section centered" id="previewSection">
+  <div class="preview-section centered" id="previewSection" style="display:none;">
     <div class="preview-header">
       <div class="section-title">Your Copilot Prompt</div>
       <div class="preview-stats">
@@ -2943,12 +2944,9 @@ function init() {
   initQuestionTypes();
   render();
   
-  // Show Getting Started by default
-  switchWorkflow('help');
-  
   // Attach progressive enhancement handlers in case inline onClick is stripped
   $$('.workflow-btn').forEach(btn => {
-    btn.addEventListener('click', () => switchWorkflow(btn.dataset.tab));
+    btn.addEventListener('click', () => window.switchWorkflow(btn.dataset.tab));
   });
 
   // Last-resort: delegate clicks anywhere in the document to catch edge cases
@@ -2956,7 +2954,7 @@ function init() {
     const btn = ev.target && ev.target.closest && ev.target.closest('.workflow-btn');
     if (btn && btn.dataset && btn.dataset.tab) {
       ev.preventDefault();
-      switchWorkflow(btn.dataset.tab);
+      window.switchWorkflow(btn.dataset.tab);
     }
   }, true);
 
@@ -3039,6 +3037,9 @@ function init() {
       render();
     }
   };
+  
+  // Show Getting Started by default
+  window.switchWorkflow('help');
   
   // Pedagogy selector
   $('pedagogy').addEventListener('change', () => {
