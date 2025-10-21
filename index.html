@@ -2823,12 +2823,10 @@ function refreshNotesPreview(){
   setNotesPreview(result.prompt, currentNotesTemplate.name, currentNotesTemplate);
 }
 
-// Render preview
+// Render preview (deprecated - preview UI removed)
 function render() {
   if (state.workflow === 'study') {
     setCharStatus(0);
-    if ($('previewPlaceholder')) $('previewPlaceholder').classList.remove('hidden');
-    if ($('previewText')) $('previewText').classList.add('hidden');
     return;
   }
 
@@ -2841,15 +2839,6 @@ function render() {
   if (state.workflow === 'quiz') prompt = buildQuizPrompt();
 
   setCharStatus(prompt.length);
-  
-  if (prompt) {
-    $('previewPlaceholder').classList.add('hidden');
-    $('previewText').classList.remove('hidden');
-    $('previewText').textContent = prompt;
-  } else {
-    $('previewPlaceholder').classList.remove('hidden');
-    $('previewText').classList.add('hidden');
-  }
 }
 
 // Copy to clipboard
