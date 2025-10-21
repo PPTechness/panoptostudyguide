@@ -2430,7 +2430,6 @@ function mountStudyToolCards(){
       <ul class="tool-points">${points}</ul>
       <div class="tool-actions">
         <button class="btn-primary" data-tool="${tool.id}">📋 Copy Prompt</button>
-        <button class="btn btn-ghost" data-preview="${tool.id}">👁 Preview</button>
       </div>`;
     grid.appendChild(card);
   });
@@ -2445,46 +2444,13 @@ function mountStudyToolCards(){
       copyTextToClipboard(prompt);
     });
   });
-  grid.querySelectorAll('button[data-preview]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const id = btn.getAttribute('data-preview');
-      const tool = STUDY_TOOLS.find(t=>t.id===id);
-      if(!tool) return;
-      const prompt = tool.builder();
-      setStudyPreview(prompt, tool.name);
-    });
-  });
+  // Preview removed
 }
 
 function setStudyPreview(text, label){
   currentStudyPrompt = text || '';
-  const panel = $('studyPreviewPanel');
-  const placeholder = $('studyPreviewPlaceholder');
-  const pre = $('studyPreviewText');
-  const meta = $('studyPreviewMeta');
-  const titleEl = $('studyPreviewTitle');
-  if (!panel) return;
+  // Preview removed entirely; only update char count
   setCharStatus(text ? text.length : 0);
-  panel.classList.remove('hidden');
-  if (titleEl) titleEl.textContent = 'Preview';
-  if (!text) {
-    if (placeholder) {
-      placeholder.textContent = 'Select “Preview” on a tool to view the full prompt here.';
-      placeholder.classList.remove('hidden');
-    }
-    if (pre) pre.classList.add('hidden');
-    if (meta) meta.textContent = '';
-    return;
-  }
-  if (placeholder) placeholder.classList.add('hidden');
-  if (pre) {
-    pre.textContent = text;
-    pre.classList.remove('hidden');
-  }
-  if (meta) {
-    const count = text.length.toLocaleString();
-    meta.textContent = `${count} chars • ${label}`;
-  }
   if (titleEl && label) {
     titleEl.textContent = `Preview — ${label}`;
   }
@@ -2687,18 +2653,7 @@ function mountNotesToolCards(){
     });
   });
 
-  grid.querySelectorAll('button[data-preview]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const id = btn.getAttribute('data-preview');
-      const template = NOTES_TEMPLATES.find(t=>t.id===id);
-      const result = buildNotesOutput(template, getNotesInput());
-      if (result.error) { alert(result.error); return; }
-      setNotesPreview(result.prompt, template.name, template);
-      if (result.prompt.length > 8000) {
-        alert('This prompt is over 8000 characters. Trim your notes to stay within the limit.');
-      }
-    });
-  });
+  // Preview removed
   if (state.workflow === 'notes') {
     setNotesPreview('', '', null);
   }
