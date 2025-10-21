@@ -2626,7 +2626,6 @@ function mountNotesToolCards(){
       <ul class=\"tool-points\">${points}</ul>
       <div class=\"tool-actions\">
         <button class=\"btn-primary\" data-tool=\"${tool.id}\">📋 Copy Prompt</button>
-        <button class=\"btn btn-ghost\" data-preview=\"${tool.id}\">👁 Preview</button>
       </div>`;
     grid.appendChild(card);
   });
@@ -3046,10 +3045,7 @@ function init() {
     console.log('Wiring generateNotes button');
   $('generateNotes').onclick = copyPrompt;
   }
-  if ($('copyTop')) {
-    console.log('Wiring copyTop button');
-    $('copyTop').onclick = copyPrompt;
-  }
+  // copyTop removed with preview section
   
   // FAQ Accordion - robust setup with measured heights
   function setupFaqAccordion() {
