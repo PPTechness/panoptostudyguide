@@ -318,6 +318,18 @@
   .advanced-options .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
   .advanced-options .form-group { background: var(--bg-secondary); padding: 16px 18px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: 0 6px 20px rgba(0,0,0,0.04); }
   .advanced-options .form-label { font-weight: 700; margin-bottom: 8px; display: block; }
+
+  /* Global app rail (visible on all pages) */
+  .app-grid { display: grid; grid-template-columns: 220px 1fr; gap: 2rem; max-width: 1400px; margin: 0 auto; }
+  .app-main { min-width: 0; }
+  .app-rail { position: sticky; top: 96px; display: flex; flex-direction: column; gap: 12px; }
+  .app-rail .rail-btn { cursor: pointer; padding: 14px 16px; border-radius: 16px; border: 1px solid rgba(224,0,27,0.14); background: rgba(224,0,27,0.06); color: var(--primary); font-weight: 700; transition: transform .15s ease, box-shadow .25s ease, background .25s ease; }
+  .app-rail .rail-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 22px rgba(224,0,27,0.18); }
+  .app-rail .rail-btn.active { color: #fff; background: var(--gradient-qub); border-color: transparent; }
+  @media (max-width: 1024px) { .app-grid { grid-template-columns: 1fr; } .app-rail { display: none; } }
+
+  /* Hide old per-page quiz rail */
+  .quiz-rail { display: none !important; }
   
   .hero-banner::before {
     content: '';
@@ -1631,6 +1643,14 @@
 </div>
 
 <main>
+  <div class="app-grid">
+    <aside class="app-rail" aria-label="App navigation">
+      <div class="rail-btn" data-tab="help" onclick="switchWorkflow('help')">Getting Started</div>
+      <div class="rail-btn active" data-tab="quiz" onclick="switchWorkflow('quiz')">Canvas Quiz</div>
+      <div class="rail-btn" data-tab="study" onclick="switchWorkflow('study')">Study Guide</div>
+      <div class="rail-btn" data-tab="notes" onclick="switchWorkflow('notes')">From Notes</div>
+    </aside>
+    <section class="app-main">
   <!-- Help Info Boxes (Hidden by default) -->
   <div class="info" id="about">
     <div class="section-title">
@@ -1644,18 +1664,7 @@
   <div class="workflow-content quiz-workflow hidden">
     <h2 class="gradient-title" style="margin-top: 2rem; margin-bottom: 3rem;">Canvas Quiz Maker</h2>
 
-    <div class="quiz-grid">
-      <nav class="quiz-rail" aria-label="Quick navigation">
-        <a href="#help" onclick="switchWorkflow('help'); return false;">Getting Started</a>
-        <a href="#quiz" class="active" onclick="switchWorkflow('quiz'); return false;">Canvas Quiz</a>
-        <a href="#study" onclick="switchWorkflow('study'); return false;">Study Guide</a>
-        <a href="#notes" onclick="switchWorkflow('notes'); return false;">From Notes</a>
-        <hr style="border:none;height:1px;background:rgba(224,0,27,0.12);margin:10px 0;"/>
-        <a href="#preflight">Preflight</a>
-        <a href="#customise">Customise</a>
-        <a href="#build">Build</a>
-        <a href="#howto">Canvas How‑To</a>
-      </nav>
+    <div class="quiz-grid" style="grid-template-columns: 1fr;">
       <div class="quiz-main">
     
     <div class="info" id="preflight">
@@ -1677,9 +1686,9 @@
         <span class="advanced-title">Customise Options</span>
         <span class="advanced-toggle open">▼</span>
       </div>
-      <div class="advanced-content open" id="advancedContent">
+      <div class="advanced-content open" id="advancedContent" style="padding-top: 0.5rem;">
         
-        <div class="form-grid">
+        <div class="form-grid" style="grid-template-columns: repeat(3, minmax(240px,1fr));">
           
           <div class="form-group">
             <label class="form-label" for="quizLang">Language</label>
@@ -1736,9 +1745,9 @@
     </div>
   </div>
   
-    <!-- Primary Action -->
-    <div class="primary-action" id="build">
-      <button class="btn-primary" id="generateQuiz" onclick="copyPrompt();">
+    <!-- Primary Action (integrated into customise block) -->
+    <div class="primary-action" id="build" style="margin-top: -0.5rem;">
+      <button class="btn-primary" id="generateQuiz" onclick="copyPrompt();" style="width: 100%; max-width: 520px;">
         📋 Build & Copy Prompt
       </button>
       <div class="build-progress hidden" id="buildProgress"><div class="build-progress-fill" id="buildProgressFill"></div></div>
@@ -1789,16 +1798,7 @@
         <!-- Cards populated by JS -->
       </div>
     </div>
-    <div class="study-preview-panel hidden" id="studyPreviewPanel">
-      <div class="study-preview-header">
-        <span class="study-preview-title" id="studyPreviewTitle">Preview</span>
-        <span class="study-preview-meta" id="studyPreviewMeta"></span>
-      </div>
-      <div class="study-preview-body">
-        <div class="study-preview-placeholder" id="studyPreviewPlaceholder">Select “Preview” on a tool to view the full prompt here.</div>
-        <pre class="study-preview-text hidden" id="studyPreviewText"></pre>
-      </div>
-    </div>
+    <!-- Study preview removed for streamlined flow -->
   </div>
   
   <!-- From Notes Workflow -->
@@ -1820,23 +1820,12 @@
     </div>
 
     <div class="quick-start" id="notesToolsDeck" style="margin-top:1rem;">
-      <div class="section-title">
+      <div class="section-title" style="align-items: center;">
         <span>Notes Tools</span>
-        <span class="help">Choose an output style, then copy or preview the prompt.</span>
+        <span class="help" style="margin-left: auto;">Choose an output style, then copy the prompt.</span>
       </div>
-      <div class="preset-cards study-tools-grid" id="notesToolsGrid">
+      <div class="preset-cards study-tools-grid" id="notesToolsGrid" style="grid-template-columns: repeat(auto-fill, minmax(260px,1fr));">
         <!-- Cards populated by JS -->
-      </div>
-    </div>
-
-    <div class="study-preview-panel hidden" id="notesPreviewPanel">
-      <div class="study-preview-header">
-        <span class="study-preview-title" id="notesPreviewTitle">Preview</span>
-        <span class="study-preview-meta" id="notesPreviewMeta"></span>
-      </div>
-      <div class="study-preview-body">
-        <div class="study-preview-placeholder" id="notesPreviewPlaceholder">Paste notes and choose “Preview” to check the final prompt.</div>
-        <pre class="study-preview-text hidden" id="notesPreviewText"></pre>
       </div>
     </div>
   </div>
@@ -1990,6 +1979,8 @@
     <p style="margin-bottom:0.5rem;">Patrick Phillips • Support & enquiries: <a href="mailto:p.phillips@qub.ac.uk" style="color:inherit; text-decoration:underline;">p.phillips@qub.ac.uk</a></p>
     <p style="font-size:0.875rem;">We strive to create high‑quality resources aligned with Queen’s pedagogy. However, AI‑generated content may contain inaccuracies. Always review outputs for accuracy, inclusivity and accessibility before use.</p>
   </footer>
+</section>
+  </div> <!-- /.app-grid -->
 </main>
 
 <!-- Help Button -->
@@ -2731,12 +2722,7 @@ function mountNotesToolCards(){
 }
 
 function setNotesPreview(text, label, template){
-  const panel = $('notesPreviewPanel');
-  const placeholder = $('notesPreviewPlaceholder');
-  const pre = $('notesPreviewText');
-  const meta = $('notesPreviewMeta');
-  const titleEl = $('notesPreviewTitle');
-  if (!panel) return;
+  // Preview UI removed; maintain internal counters/state only
   const content = text || '';
   if (template) {
     currentNotesTemplate = template;
@@ -2745,28 +2731,6 @@ function setNotesPreview(text, label, template){
   }
   currentNotesPrompt = content;
   setCharStatus(content.length);
-  panel.classList.remove('hidden');
-  if (titleEl) titleEl.textContent = label ? `Preview — ${label}` : 'Preview';
-  if (!content) {
-    if (placeholder) {
-      placeholder.textContent = 'Paste notes and choose “Preview” to check the final prompt.';
-      placeholder.classList.remove('hidden');
-    }
-    if (pre) pre.classList.add('hidden');
-    if (meta) meta.textContent = '';
-    return;
-  }
-  if (placeholder) placeholder.classList.add('hidden');
-  if (pre) {
-    pre.textContent = content;
-    pre.classList.remove('hidden');
-  }
-  if (meta) {
-    const count = content.length.toLocaleString();
-    let message = `${count} chars` + (label ? ` • ${label}` : '');
-    if (content.length > 8000) message += ' • Trim notes to stay under 8000';
-    meta.textContent = message;
-  }
 }
 
 function refreshNotesPreview(){
