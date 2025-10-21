@@ -315,8 +315,8 @@
   @media (max-width: 980px) { .quiz-grid { grid-template-columns: 1fr; } .quiz-rail { display: none; } }
 
   /* Canva-style option cards */
-  .advanced-options .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
-  .advanced-options .form-group { background: var(--bg-secondary); padding: 16px 18px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: 0 6px 20px rgba(0,0,0,0.04); }
+  .advanced-options .form-grid { display: grid; grid-template-columns: repeat(3, minmax(260px, 1fr)); gap: 14px; }
+  .advanced-options .form-group { background: var(--bg-secondary); padding: 12px 14px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
   .advanced-options .form-label { font-weight: 700; margin-bottom: 8px; display: block; }
 
   /* Global app rail (visible on all pages) */
@@ -1695,13 +1695,7 @@
             <input type="number" id="quizCount" min="1" max="12" value="3" title="How many items to generate for each selected question type.">
           </div>
           
-          <div class="form-group">
-            <label class="form-label">Feedback level</label>
-            <div class="chip-group">
-              <div class="chip active">Detailed (recommended)</div>
-            </div>
-            <p class="help">Detailed feedback will be requested in the prompt for each item.</p>
-          </div>
+          <!-- Feedback note removed; detailed feedback is fixed by design -->
         </div>
         
         <div class="form-group mt-1half">
@@ -1735,8 +1729,8 @@
   </div>
   
     <!-- Primary Action (integrated into customise block) -->
-    <div class="primary-action" id="build" style="margin-top: -0.5rem;">
-      <button class="btn-primary" id="generateQuiz" onclick="copyPrompt();" style="width: 100%; max-width: 520px;">
+    <div class="primary-action" id="build" style="margin-top: 0.5rem;">
+      <button class="btn-primary" id="generateQuiz" onclick="copyPrompt();" style="width: 100%;">
         📋 Build & Copy Prompt
       </button>
       <div class="build-progress hidden" id="buildProgress"><div class="build-progress-fill" id="buildProgressFill"></div></div>
