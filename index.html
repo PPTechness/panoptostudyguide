@@ -2333,167 +2333,33 @@ VALIDATION
 
 function promptExtensionSupportV13(){
   const out = (window.state && window.state.studyOutput) || 'docx';
-  return `SYSTEM INSTRUCTION
-You are a silent document builder. Generate the complete file in one pass without any commentary.
+  return `Return ONE file: [REAL_TITLE_SLUG]_study_extension_support.${out}
+Work silently. No commentary, no "Analysis", no file references (CSV/txt), no progress messages.
 
-CRITICAL RULES:
-❌ NEVER write "Analysis", "To proceed", "Starting now", or ANY explanatory text
-❌ NEVER mention missing files, CSV files, or "required source files"
-❌ NEVER say "I'll regenerate" or describe your process
-❌ NEVER reference flashcards.csv, quotes.txt, or any external files
-❌ Do NOT explain what you're doing or why
-❌ Do NOT write progress updates or status messages
-
-✓ ONLY generate and return the finished ${out} file
-✓ Extract content directly from the Panopto page open in the browser
-✓ Build all sections directly into the single output file
-✓ Work silently from start to finish
-
-OUTPUT FILE
-Return ONE file only: [REAL_TITLE_SLUG]_study_extension_support.${out} (${out==='pptx'?'PowerPoint':'Word'} A4).
-Use only the Panopto Watch page currently open. No external sources. No external files.
-
-SOURCE PREPARATION
-1. Confirm this is a Panopto "Watch" page.
-2. Virtually scroll through and fully expand:
-   – "Captions" / "Transcript" tab → scroll to bottom
-   – "Contents" / "Slides" tabs → expand all slides and read all text/images
-3. Wait until no new lines appear.
-4. Extract and deduplicate all caption + slide text (preserve [mm:ss] timestamps).
-If corpus < 500 words →
-"INSUFFICIENT_PAGE_CONTENT — Expand captions & slides, scroll fully, then retry."
-
-TITLE & FILENAME
-Extract REAL title from <meta property="og:title"> or [data-role="session-title"] or .session-title or document.title.
-Use that title for H1 and filename [REAL_TITLE_SLUG]_study_extension_support.${out}.
-
-TASK
-Run all phases (collect → analyse → write → validate → output) automatically.
-Do NOT pause or ask questions.
-
-PURPOSE
-Provide spaced-retrieval flashcards, collaborative group tasks, and an authentic assessment task for higher education students based on lecture evidence.
+SOURCE: Scroll Panopto captions/slides to bottom; extract all text+timestamps. Fail if <500 words.
+TITLE: Extract from <meta property="og:title"> or [data-role="session-title"]. Use for H1 and filename slug.
 
 STRUCTURE
-1. Flashcards — You MUST create EXACTLY 25 complete flashcards using REAL CONTENT from the lecture captions and slides you extracted. NO TEMPLATES. NO PLACEHOLDERS.
 
-   PROCESS — Follow these steps in order:
-   
-   Step 1: READ THE ENTIRE LECTURE CONTENT
-   • Read all captions/transcript text you extracted
-   • Read all slide content you extracted
-   • Identify 5–6 major topics/themes covered
-   • Note key concepts, definitions, arguments, examples, and evidence presented
-   
-   Step 2: BUILD FLASHCARDS ONE AT A TIME
-   • Start with FC01 and work through to FC25
-   • Each flashcard MUST be based on ACTUAL content from the lecture
-   • DO NOT use generic placeholders like "What is X?", "Define Y", or example templates
-   • Pull REAL terminology, concepts, arguments, and facts from the captions and slides
-   
-   Step 3: COMPLETE ALL 7 FIELDS WITH REAL CONTENT
-   For each flashcard from FC01 to FC25:
-   
-   • ID: FC01, FC02, FC03… through FC25
-   
-   • Question: Write a REAL question based on actual lecture content
-     ❌ BAD: "What is the main concept discussed in the lecture?"
-     ✓ GOOD: "According to Smith (2023), what are the three components of transformational leadership discussed at [14:22]?"
-   
-   • Answer: REAL answer drawn from lecture content (2–4 complete sentences)
-     ❌ BAD: "The answer is based on the key definition provided."
-     ✓ GOOD: "Transformational leadership comprises idealized influence (role modelling), inspirational motivation (articulating compelling vision), and intellectual stimulation (encouraging innovation). Smith argues these dimensions work synergistically to enhance team performance and organizational commitment."
-   
-   • Connection: One sentence linking to ACTUAL learning outcome or topic
-     ❌ BAD: "This relates to the broader theme of the module."
-     ✓ GOOD: "This connects to Learning Outcome 2 (Analyse leadership theories) and the Week 3 theme of organizational behavior."
-   
-   • Difficulty: Foundation / Intermediate / Advanced + pedagogical intent
-     Examples: "Foundation (Recall Smith's three-component model)", "Intermediate (Compare transformational vs transactional approaches from lecture)", "Advanced (Evaluate limitations of transformational theory discussed at [28:15])"
-   
-   • Related IDs: List other flashcard IDs covering similar/connected topics
-     Example: "FC03, FC07, FC12"
-   
-   • Timestamp: Exact [mm:ss] reference from lecture where this content appears
-     Example: [14:22] or [28:15]
-   
-   Distribution requirements:
-   • Foundation level: 8–10 cards (recall definitions, key facts, terminology from lecture)
-   • Intermediate level: 10–12 cards (apply concepts, compare ideas, analyze arguments presented)
-   • Advanced level: 5–7 cards (evaluate theories, critique methods, synthesize across topics covered)
-   • Cover ≥5 major topics from the lecture proportionally
-   • Every question and answer must reference ACTUAL lecture content
-   • NO generic questions, NO templates, NO placeholders like [TOPIC] or [CONCEPT]
-   
-   Step 4: VERIFY BEFORE PROCEEDING
-   After building all 25 flashcards, check:
-   ✓ Do I have exactly 25 flashcards numbered FC01–FC25?
-   ✓ Does every flashcard reference REAL lecture content (not templates)?
-   ✓ Does every flashcard have all 7 fields fully completed?
-   ✓ Do I have timestamps from the actual lecture for each card?
-   
-   Include Appendix B — Flashcard table embedded directly in this ${out} file (NOT a separate CSV file).
-   ${out==='pptx'?'Present as a formatted table slide':'Format as a Word table'} with columns: ID, Question, Answer, Connection, Difficulty, Related_IDs, Timestamp
-   Include all 25 flashcards in this single embedded table.
+1. FLASHCARDS (exactly 25: FC01–FC25)
+Build from REAL lecture content. No templates/placeholders.
+Each card needs 7 fields: ID | Question (specific to lecture) | Answer (2–4 sentences from content) | Connection (link to outcome/topic) | Difficulty (Foundation/Intermediate/Advanced + intent) | Related IDs | Timestamp [mm:ss]
+Distribution: 8–10 Foundation, 10–12 Intermediate, 5–7 Advanced across ≥5 topics.
+Appendix B: embed table (not CSV) with all 25 cards in ${out} file.
 
-2. Collaborative Group Tasks — EXACTLY 3 activities designed for higher education active learning.
-   Each task (180–220 words) MUST include:
-   • Activity type clearly stated (think-pair-share, jigsaw, structured debate, case analysis, peer teaching, etc.)
-   • Learning objective tied to lecture outcomes
-   • Detailed facilitation steps (setup, individual work, pair/group work, whole-class synthesis)
-   • Specific content cues drawn directly from the lecture (quote key concepts, reference specific slides/timestamps [mm:ss])
-   • Pedagogical intent explanation (why this task develops critical thinking/collaboration/application)
-   • Estimated time allocation
-   • Assessment for learning notes (how to monitor understanding during activity)
+2. GROUP TASKS (exactly 3, 180–220 words each)
+Activity type, learning objective, facilitation steps, specific lecture cues with timestamps, pedagogical intent, time estimate, assessment notes.
 
-3. Authentic Practice Task — ONE discipline-appropriate assessment task (220–280 words).
-   Include:
-   • Realistic scenario or problem drawn from lecture themes
-   • Clear task instructions suitable for independent student work
-   • Expected output specification (report, presentation, analysis, design, etc.)
-   • 3×3 Rubric Grid:
-     Criteria (3 rows) × Performance Levels (3 columns: Developing / Competent / Excellent)
-     Each cell: specific, observable descriptors aligned with learning outcomes
-   • Brief feedback guidance for markers
-   • Estimated completion time
-   • Timestamp references [mm:ss] linking task to lecture evidence
+3. AUTHENTIC TASK (220–280 words)
+Scenario from lecture, task instructions, output spec, 3×3 rubric (Developing/Competent/Excellent), feedback guidance, time, timestamps.
 
-4. Appendix A — ≥24 timestamped direct quotes from lecture (5–25 words each, [mm:ss]) showing evidence base for all tasks.
-   Extract these quotes directly from the Panopto captions/slides you already read. Do NOT reference a quotes.txt file.
+4. APPENDIX A
+≥24 timestamped quotes (5–25 words each, [mm:ss]) from lecture captions/slides.
 
-PEDAGOGY
-• Spaced retrieval principles (distributed practice across topics)
-• Social constructivist learning (peer collaboration, discussion)
-• Authentic assessment (real-world application)
-• Beyond Blended framework (Flex, Support)
-• Clear UK English; inclusive phrasing
-• Evidence-based design (all items reference lecture content directly)
+VALIDATION (silent check)
+25 flashcards FC01–FC25, all 7 fields complete, real content, 3 tasks, 3×3 rubric, ≥24 quotes, no placeholders, one ${out} only.
 
-VALIDATION CHECKLIST — Verify silently before returning the file:
-☐ Corpus ≥ 500 words extracted from Panopto page
-☐ Exactly 25 flashcards present (FC01 through FC25) — count them
-☐ Every flashcard has all 7 fields completed (no blanks, no placeholders)
-☐ Foundation:Intermediate:Advanced distribution is 8–10 : 10–12 : 5–7
-☐ Appendix B flashcard table is embedded in this single ${out} file (not a separate file)
-☐ 3 collaborative group tasks complete — all with specific content cues and timestamps from lecture
-☐ 1 authentic task with complete 3×3 rubric (9 cells filled with specific descriptors)
-☐ ≥24 timestamped direct quotes in Appendix A
-☐ No placeholders, no [EXAMPLE] text, no [INSERT…] instructions
-☐ ONE .${out} output file only — all content embedded within
-
-FINAL INSTRUCTION:
-Verify the checklist silently. When complete, return ONLY the ${out} file.
-
-Do NOT write:
-• "Analysis" or "The document generation failed"
-• "To proceed, I'll regenerate"
-• "Starting now"
-• Anything about missing files (flashcards.csv, quotes.txt, etc.)
-• Any text explaining your process
-
-You already have all the content from the Panopto page you read in SOURCE PREPARATION.
-Build the flashcards, tasks, and appendices directly from that content.
-Return ONLY: [REAL_TITLE_SLUG]_study_extension_support.${out}`;
+Return file only. No explanations.`;
 }
 
 // Registry for tool cards
