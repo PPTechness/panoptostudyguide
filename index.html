@@ -2334,6 +2334,20 @@ VALIDATION
 function promptExtensionSupportV13(){
   const out = (window.state && window.state.studyOutput) || 'docx';
   return `SYSTEM
+You are creating a single, complete ${out==='pptx'?'PowerPoint':'Word'} document. Work silently and return ONLY the finished file.
+
+DO NOT:
+• Write progress messages, explanations, or commentary
+• Reference external files (like CSV files) or previous builds
+• Say "I'll now regenerate" or describe what you're doing
+• Pause to explain your process
+
+DO:
+• Build the complete document in one pass
+• Include all content directly in the single output file
+• Return the file immediately when complete
+
+OUTPUT FILE
 Return ONE file only: [REAL_TITLE_SLUG]_study_extension_support.${out} (${out==='pptx'?'PowerPoint':'Word'} A4).
 Use only the Panopto Watch page. No external sources.
 
@@ -2416,7 +2430,9 @@ STRUCTURE
    ✓ Does every flashcard have all 7 fields fully completed?
    ✓ Do I have timestamps from the actual lecture for each card?
    
-   Include Appendix B — Complete CSV export table with ALL 25 flashcards showing REAL content, columns: ID, Question, Answer, Connection, Difficulty, Related_IDs, Timestamp
+   Include Appendix B — Flashcard table embedded directly in this ${out} file (NOT a separate CSV file).
+   ${out==='pptx'?'Present as a formatted table slide':'Format as a Word table'} with columns: ID, Question, Answer, Connection, Difficulty, Related_IDs, Timestamp
+   Include all 25 flashcards in this single embedded table.
 
 2. Collaborative Group Tasks — EXACTLY 3 activities designed for higher education active learning.
    Each task (180–220 words) MUST include:
@@ -2450,19 +2466,23 @@ PEDAGOGY
 • Clear UK English; inclusive phrasing
 • Evidence-based design (all items reference lecture content directly)
 
-VALIDATION CHECKLIST — Complete this before finalizing:
+VALIDATION CHECKLIST — Verify silently before returning the file:
 ☐ Corpus ≥ 500 words extracted from Panopto page
-☐ COUNT YOUR FLASHCARDS: Exactly 25 flashcards present (FC01 through FC25)
+☐ Exactly 25 flashcards present (FC01 through FC25) — count them
 ☐ Every flashcard has all 7 fields completed (no blanks, no placeholders)
 ☐ Foundation:Intermediate:Advanced distribution is 8–10 : 10–12 : 5–7
-☐ Appendix B CSV table includes all 25 flashcards
+☐ Appendix B flashcard table is embedded in this single ${out} file (not a separate file)
 ☐ 3 collaborative group tasks complete — all with specific content cues and timestamps from lecture
 ☐ 1 authentic task with complete 3×3 rubric (9 cells filled with specific descriptors)
 ☐ ≥24 timestamped direct quotes in Appendix A
 ☐ No placeholders, no [EXAMPLE] text, no [INSERT…] instructions
-☐ One .${out} output file only
+☐ ONE .${out} output file only — all content embedded within
 
-STOP AND VERIFY: Before you finalize the document, manually count the flashcards. If you have fewer than 25, ADD MORE until you reach exactly 25. Do not submit with only 3 or 5 flashcards.`;
+FINAL INSTRUCTION:
+When you have verified all checklist items, return the complete ${out} file immediately.
+Do NOT write explanatory text, progress updates, or messages.
+Do NOT reference separate CSV files or previous builds.
+Return ONLY the finished [REAL_TITLE_SLUG]_study_extension_support.${out} file.`;
 }
 
 // Registry for tool cards
