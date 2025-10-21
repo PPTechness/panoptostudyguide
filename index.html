@@ -1680,6 +1680,19 @@
         <div class="form-grid" style="grid-template-columns: repeat(3, minmax(280px,1fr));">
           
           <div class="form-group">
+            <label class="form-label">Pedagogy Preset</label>
+            <select id="pedagogy" title="Sets tone and question style across disciplines.">
+              <option>Concept Check (Retrieval)</option>
+              <option>Worked Examples (Scaffolded)</option>
+              <option>Case/Scenario-Based</option>
+              <option>Debate / Critical Analysis</option>
+              <option>Metacognitive Reflection</option>
+              <option>Accessibility-First (UDL)</option>
+            </select>
+            <p class="help" id="pedBrief"></p>
+          </div>
+
+          <div class="form-group">
             <label class="form-label" for="quizLang">Language</label>
             <select id="quizLang" title="Output language and terminology style. Default: English (UK).">
               <option value="en-GB" selected>English (UK)</option>
@@ -1693,19 +1706,6 @@
           <div class="form-group">
             <label class="form-label" for="quizCount">Questions per type</label>
             <input type="number" id="quizCount" min="1" max="12" value="3" title="How many items to generate for each selected question type.">
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label">Pedagogy Preset</label>
-            <select id="pedagogy" title="Sets tone and question style across disciplines.">
-              <option>Concept Check (Retrieval)</option>
-              <option>Worked Examples (Scaffolded)</option>
-              <option>Case/Scenario-Based</option>
-              <option>Debate / Critical Analysis</option>
-              <option>Metacognitive Reflection</option>
-              <option>Accessibility-First (UDL)</option>
-            </select>
-            <p class="help" id="pedBrief"></p>
           </div>
           
           <!-- Feedback note removed; detailed feedback is fixed by design -->
@@ -1732,13 +1732,7 @@
           <div class="build-progress hidden" id="buildProgress" style="flex:1; max-width:220px; margin-left:12px;"><div class="build-progress-fill" id="buildProgressFill"></div></div>
         </div>
         
-    <!-- Primary Action inline with customise -->
-    <div class="primary-action" id="build" style="margin-top: 1rem; display:flex; gap:14px; align-items:center;">
-      <button class="btn-primary" id="generateQuiz" onclick="copyPrompt();" style="width:auto; padding:14px 22px;">
-        📋 Build & Copy Prompt
-      </button>
-      <div class="build-progress hidden" id="buildProgress" style="flex:1; max-width:420px;"><div class="build-progress-fill" id="buildProgressFill"></div></div>
-    </div>
+    <!-- Primary Action moved into row 2 right column above -->
     </div>
   </div>
     
