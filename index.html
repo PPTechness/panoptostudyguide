@@ -2491,14 +2491,7 @@ function mountStudyToolCards(){
 
 function setStudyPreview(text, label){
   currentStudyPrompt = text || '';
-  // Preview removed entirely; only update char count
   setCharStatus(text ? text.length : 0);
-  if (titleEl && label) {
-    titleEl.textContent = `Preview — ${label}`;
-  }
-  setTimeout(()=>{
-    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 100);
 }
 
 function showToast(){
@@ -2951,9 +2944,9 @@ window.switchWorkflow = function(tab) {
 
   // Re-setup FAQ when switching to help page
   if (tab === 'help') {
-    setTimeout(() => {
-      if (typeof setupFaqAccordion === 'function') setupFaqAccordion();
-    }, 0);
+      setTimeout(() => {
+        if (window.setupFaqAccordion) window.setupFaqAccordion();
+      }, 0);
   } else if (tab !== 'study' && tab !== 'notes') {
     render();
   }
@@ -2989,9 +2982,9 @@ function init() {
           $('heroSubtitle').textContent = hero.subtitle;
         }
         // Ensure FAQ gets initialized when entering help
-        setTimeout(() => {
-          if (typeof setupFaqAccordion === 'function') setupFaqAccordion();
-        }, 0);
+      setTimeout(() => {
+        if (window.setupFaqAccordion) window.setupFaqAccordion();
+      }, 0);
       }
     };
   }
