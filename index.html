@@ -2359,25 +2359,32 @@ PURPOSE
 Provide spaced-retrieval flashcards, collaborative group tasks, and an authentic assessment task for higher education students based on lecture evidence.
 
 STRUCTURE
-1. Flashcards — EXACTLY 45 items distributed across ≥6 major topics from the lecture.
-   Each flashcard MUST include ALL fields:
-   • ID (e.g., FC01, FC02…)
-   • Question (clear, discipline-specific, testing understanding/application)
-   • Answer (concise, academically rigorous, 2–4 sentences)
-   • Connection (1 sentence linking to broader topic/outcome)
-   • Difficulty: Foundation / Intermediate / Advanced + brief pedagogical intent (e.g., "Recall key term", "Apply concept to scenario", "Evaluate competing theories")
-   • Related IDs (list 1–3 other flashcard IDs that connect thematically)
-   • Timestamp [mm:ss]
+1. Flashcards — You MUST create EXACTLY 25 complete flashcards. NO EXCEPTIONS. Count them before submitting.
    
-   Requirements:
-   • Distribute across Foundation (15 cards), Intermediate (20 cards), Advanced (10 cards) levels
-   • Cover all major topics proportionally
+   CRITICAL: Do NOT rush. Build all 25 flashcards methodically. Generate them ONE AT A TIME and number them FC01 through FC25.
+   
+   Each flashcard MUST include ALL 7 fields:
+   • ID: FC01, FC02, FC03… through FC25
+   • Question: Clear, discipline-specific, testing understanding/application (not just recall)
+   • Answer: Academically rigorous, 2–4 complete sentences
+   • Connection: One sentence linking this card to a broader topic or learning outcome
+   • Difficulty: Foundation / Intermediate / Advanced + brief pedagogical intent in brackets
+     Examples: "Foundation (Recall key definition)", "Intermediate (Apply concept to new scenario)", "Advanced (Evaluate competing theories)"
+   • Related IDs: List 1–3 other flashcard IDs that connect thematically (e.g., "FC03, FC07, FC12")
+   • Timestamp: [mm:ss] reference from lecture
+   
+   Distribution requirements:
+   • Foundation level: 8–10 cards (basic recall, definitions, key facts)
+   • Intermediate level: 10–12 cards (application, analysis, comparison)
+   • Advanced level: 5–7 cards (evaluation, synthesis, critique)
+   • Cover ≥5 major topics from the lecture proportionally
    • Use authentic academic language suitable for higher education
-   • Questions should span Bloom's taxonomy: remember, understand, apply, analyse, evaluate
-   • NO duplicates or trivial variants
-   • If source material seems insufficient, synthesise closely related questions from available content until exactly 45 unique cards are produced
+   • Questions must span Bloom's taxonomy: remember, understand, apply, analyse, evaluate
+   • NO duplicates, NO trivial variants, NO placeholders
    
-   Include Appendix B — Complete CSV export table with columns: ID, Question, Answer, Connection, Difficulty, Related_IDs, Timestamp
+   WORK SLOWLY AND DELIBERATELY. After generating all 25 cards, verify you have exactly 25 before proceeding.
+   
+   Include Appendix B — Complete CSV export table with ALL 25 flashcards, columns: ID, Question, Answer, Connection, Difficulty, Related_IDs, Timestamp
 
 2. Collaborative Group Tasks — EXACTLY 3 activities designed for higher education active learning.
    Each task (180–220 words) MUST include:
@@ -2411,17 +2418,19 @@ PEDAGOGY
 • Clear UK English; inclusive phrasing
 • Evidence-based design (all items reference lecture content directly)
 
-VALIDATION CHECKLIST
-☐ Corpus ≥ 500 words extracted
-☐ Exactly 45 flashcards (no fewer, no more) — all 7 fields complete for each
-☐ Foundation:Intermediate:Advanced ratio approximately 15:20:10
-☐ 3 collaborative group tasks — all with content cues from lecture
-☐ 1 authentic task with full 3×3 rubric
-☐ ≥24 timestamped quotes in Appendix A
-☐ No placeholders, no [EXAMPLE] text
+VALIDATION CHECKLIST — Complete this before finalizing:
+☐ Corpus ≥ 500 words extracted from Panopto page
+☐ COUNT YOUR FLASHCARDS: Exactly 25 flashcards present (FC01 through FC25)
+☐ Every flashcard has all 7 fields completed (no blanks, no placeholders)
+☐ Foundation:Intermediate:Advanced distribution is 8–10 : 10–12 : 5–7
+☐ Appendix B CSV table includes all 25 flashcards
+☐ 3 collaborative group tasks complete — all with specific content cues and timestamps from lecture
+☐ 1 authentic task with complete 3×3 rubric (9 cells filled with specific descriptors)
+☐ ≥24 timestamped direct quotes in Appendix A
+☐ No placeholders, no [EXAMPLE] text, no [INSERT…] instructions
 ☐ One .${out} output file only
 
-If fewer than 45 flashcards seem possible from available material, you MUST synthesise additional closely-related questions using inference, application scenarios, comparison tasks, or analytical prompts until exactly 45 unique, non-duplicative cards are produced.`;
+STOP AND VERIFY: Before you finalize the document, manually count the flashcards. If you have fewer than 25, ADD MORE until you reach exactly 25. Do not submit with only 3 or 5 flashcards.`;
 }
 
 // Registry for tool cards
@@ -2479,10 +2488,10 @@ const STUDY_TOOLS = [
     icon:'🌐',
     name:'Extension & Support',
     points:[
-      'Generate 45 flashcards with difficulty + links',
+      'Generate 25 flashcards with difficulty + links',
       'Offer 3 collaborative group tasks with cues',
       'Design an authentic task with a 3×3 rubric',
-      'Audit ≥9 UDL checkpoints and help routes'
+      'Include evidence appendix with ≥24 timestamps'
     ],
     builder: promptExtensionSupportV13
   },
@@ -3220,11 +3229,21 @@ function init() {
     });
   }
 
-  // Initial setup
-  setupFaqAccordion();
+  // Initial setup - call via window to ensure availability
+  if (window.setupFaqAccordion) {
+    window.setupFaqAccordion();
+  }
 }
 
 init();
+
+// Ensure FAQ is set up after page fully loads
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOMContentLoaded - setting up FAQ');
+  if (window.setupFaqAccordion) {
+    window.setupFaqAccordion();
+  }
+});
 </script>
 
 </body>
