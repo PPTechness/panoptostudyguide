@@ -1677,7 +1677,7 @@
       </div>
       <div class="advanced-content open" id="advancedContent" style="padding-top: 0.5rem;">
         
-        <div class="form-grid" style="grid-template-columns: repeat(3, minmax(240px,1fr));">
+        <div class="form-grid" style="grid-template-columns: repeat(2, minmax(320px,1fr));">
           
           <div class="form-group">
             <label class="form-label" for="quizLang">Language</label>
@@ -1725,16 +1725,15 @@
           </p>
         </div>
         
-    </div>
-  </div>
-  
-    <!-- Primary Action (integrated into customise block) -->
-    <div class="primary-action" id="build" style="margin-top: 0.5rem;">
-      <button class="btn-primary" id="generateQuiz" onclick="copyPrompt();" style="width: 100%;">
+    <!-- Primary Action inline with customise -->
+    <div class="primary-action" id="build" style="margin-top: 1rem; display:flex; gap:14px; align-items:center;">
+      <button class="btn-primary" id="generateQuiz" onclick="copyPrompt();" style="width:auto; padding:14px 22px;">
         📋 Build & Copy Prompt
       </button>
-      <div class="build-progress hidden" id="buildProgress"><div class="build-progress-fill" id="buildProgressFill"></div></div>
+      <div class="build-progress hidden" id="buildProgress" style="flex:1; max-width:420px;"><div class="build-progress-fill" id="buildProgressFill"></div></div>
     </div>
+    </div>
+  </div>
     
     <!-- Canvas How-To (Quiz Only) -->
     <div class="info" id="howto">
