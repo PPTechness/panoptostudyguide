@@ -2359,32 +2359,64 @@ PURPOSE
 Provide spaced-retrieval flashcards, collaborative group tasks, and an authentic assessment task for higher education students based on lecture evidence.
 
 STRUCTURE
-1. Flashcards — You MUST create EXACTLY 25 complete flashcards. NO EXCEPTIONS. Count them before submitting.
+1. Flashcards — You MUST create EXACTLY 25 complete flashcards using REAL CONTENT from the lecture captions and slides you extracted. NO TEMPLATES. NO PLACEHOLDERS.
+
+   PROCESS — Follow these steps in order:
    
-   CRITICAL: Do NOT rush. Build all 25 flashcards methodically. Generate them ONE AT A TIME and number them FC01 through FC25.
+   Step 1: READ THE ENTIRE LECTURE CONTENT
+   • Read all captions/transcript text you extracted
+   • Read all slide content you extracted
+   • Identify 5–6 major topics/themes covered
+   • Note key concepts, definitions, arguments, examples, and evidence presented
    
-   Each flashcard MUST include ALL 7 fields:
+   Step 2: BUILD FLASHCARDS ONE AT A TIME
+   • Start with FC01 and work through to FC25
+   • Each flashcard MUST be based on ACTUAL content from the lecture
+   • DO NOT use generic placeholders like "What is X?", "Define Y", or example templates
+   • Pull REAL terminology, concepts, arguments, and facts from the captions and slides
+   
+   Step 3: COMPLETE ALL 7 FIELDS WITH REAL CONTENT
+   For each flashcard from FC01 to FC25:
+   
    • ID: FC01, FC02, FC03… through FC25
-   • Question: Clear, discipline-specific, testing understanding/application (not just recall)
-   • Answer: Academically rigorous, 2–4 complete sentences
-   • Connection: One sentence linking this card to a broader topic or learning outcome
-   • Difficulty: Foundation / Intermediate / Advanced + brief pedagogical intent in brackets
-     Examples: "Foundation (Recall key definition)", "Intermediate (Apply concept to new scenario)", "Advanced (Evaluate competing theories)"
-   • Related IDs: List 1–3 other flashcard IDs that connect thematically (e.g., "FC03, FC07, FC12")
-   • Timestamp: [mm:ss] reference from lecture
+   
+   • Question: Write a REAL question based on actual lecture content
+     ❌ BAD: "What is the main concept discussed in the lecture?"
+     ✓ GOOD: "According to Smith (2023), what are the three components of transformational leadership discussed at [14:22]?"
+   
+   • Answer: REAL answer drawn from lecture content (2–4 complete sentences)
+     ❌ BAD: "The answer is based on the key definition provided."
+     ✓ GOOD: "Transformational leadership comprises idealized influence (role modelling), inspirational motivation (articulating compelling vision), and intellectual stimulation (encouraging innovation). Smith argues these dimensions work synergistically to enhance team performance and organizational commitment."
+   
+   • Connection: One sentence linking to ACTUAL learning outcome or topic
+     ❌ BAD: "This relates to the broader theme of the module."
+     ✓ GOOD: "This connects to Learning Outcome 2 (Analyse leadership theories) and the Week 3 theme of organizational behavior."
+   
+   • Difficulty: Foundation / Intermediate / Advanced + pedagogical intent
+     Examples: "Foundation (Recall Smith's three-component model)", "Intermediate (Compare transformational vs transactional approaches from lecture)", "Advanced (Evaluate limitations of transformational theory discussed at [28:15])"
+   
+   • Related IDs: List other flashcard IDs covering similar/connected topics
+     Example: "FC03, FC07, FC12"
+   
+   • Timestamp: Exact [mm:ss] reference from lecture where this content appears
+     Example: [14:22] or [28:15]
    
    Distribution requirements:
-   • Foundation level: 8–10 cards (basic recall, definitions, key facts)
-   • Intermediate level: 10–12 cards (application, analysis, comparison)
-   • Advanced level: 5–7 cards (evaluation, synthesis, critique)
+   • Foundation level: 8–10 cards (recall definitions, key facts, terminology from lecture)
+   • Intermediate level: 10–12 cards (apply concepts, compare ideas, analyze arguments presented)
+   • Advanced level: 5–7 cards (evaluate theories, critique methods, synthesize across topics covered)
    • Cover ≥5 major topics from the lecture proportionally
-   • Use authentic academic language suitable for higher education
-   • Questions must span Bloom's taxonomy: remember, understand, apply, analyse, evaluate
-   • NO duplicates, NO trivial variants, NO placeholders
+   • Every question and answer must reference ACTUAL lecture content
+   • NO generic questions, NO templates, NO placeholders like [TOPIC] or [CONCEPT]
    
-   WORK SLOWLY AND DELIBERATELY. After generating all 25 cards, verify you have exactly 25 before proceeding.
+   Step 4: VERIFY BEFORE PROCEEDING
+   After building all 25 flashcards, check:
+   ✓ Do I have exactly 25 flashcards numbered FC01–FC25?
+   ✓ Does every flashcard reference REAL lecture content (not templates)?
+   ✓ Does every flashcard have all 7 fields fully completed?
+   ✓ Do I have timestamps from the actual lecture for each card?
    
-   Include Appendix B — Complete CSV export table with ALL 25 flashcards, columns: ID, Question, Answer, Connection, Difficulty, Related_IDs, Timestamp
+   Include Appendix B — Complete CSV export table with ALL 25 flashcards showing REAL content, columns: ID, Question, Answer, Connection, Difficulty, Related_IDs, Timestamp
 
 2. Collaborative Group Tasks — EXACTLY 3 activities designed for higher education active learning.
    Each task (180–220 words) MUST include:
@@ -3158,15 +3190,22 @@ function init() {
   }
   // copyTop removed with preview section
   
-  // FAQ Accordion - robust setup with measured heights
+  // FAQ Accordion - robust setup with measured heights and event delegation fallback
   window.setupFaqAccordion = function() {
-    const items = document.querySelectorAll('.faq-item');
+    const container = document.querySelector('.faq-items');
+    if (!container) {
+      console.log('No FAQ container found');
+      return;
+    }
+    
+    const items = container.querySelectorAll('.faq-item');
     if (!items || items.length === 0) {
       console.log('No FAQ items found');
       return;
     }
     console.log('Setting up FAQ accordion for', items.length, 'items');
     
+    // Reset all items to closed state
     items.forEach((item, idx) => {
       const question = item.querySelector('.faq-question');
       const answer = item.querySelector('.faq-answer');
@@ -3175,58 +3214,61 @@ function init() {
         return;
       }
 
-      // Skip if already initialized
-      if (question.dataset.faqInit === 'true') {
-        console.log('FAQ item', idx, 'already initialized');
-        return;
-      }
-      question.dataset.faqInit = 'true';
-
-      // Ensure collapsed state baseline
+      // Ensure collapsed state
       item.classList.remove('open');
-      answer.style.maxHeight = '0px';
+      answer.style.maxHeight = '0';
+      answer.style.overflow = 'hidden';
+      answer.style.transition = 'max-height 0.3s ease';
       question.setAttribute('role', 'button');
       question.setAttribute('tabindex', '0');
       question.setAttribute('aria-expanded', 'false');
-
-      const toggle = () => {
-        console.log('FAQ toggle clicked for item', idx);
-        // Close others first
-        document.querySelectorAll('.faq-item.open').forEach(other => {
-          if (other !== item) {
-            other.classList.remove('open');
-            const otherAns = other.querySelector('.faq-answer');
-            const otherQ = other.querySelector('.faq-question');
-            if (otherAns) otherAns.style.maxHeight = '0px';
-            if (otherQ) otherQ.setAttribute('aria-expanded', 'false');
-          }
-        });
-
-        // Toggle this one
-        const isOpen = item.classList.toggle('open');
-        question.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-        if (isOpen) {
-          // Measure content height
-          const inner = answer.querySelector('.faq-answer-text');
-          const h = inner ? (inner.scrollHeight + 32) : 300; // padding guard
-          answer.style.maxHeight = h + 'px';
-          console.log('Opened FAQ item', idx, 'height:', h);
-        } else {
-          answer.style.maxHeight = '0px';
-          console.log('Closed FAQ item', idx);
-        }
-      };
-
-      question.addEventListener('click', toggle, false);
-      question.addEventListener('keydown', (ev) => {
-        if (ev.key === 'Enter' || ev.key === ' ') {
-          ev.preventDefault();
-          toggle();
-        }
-      }, false);
+      question.style.cursor = 'pointer';
       
-      console.log('FAQ item', idx, 'initialized');
+      console.log('FAQ item', idx, 'prepared');
     });
+    
+    // Use event delegation on container
+    const handleClick = (ev) => {
+      const question = ev.target.closest('.faq-question');
+      if (!question) return;
+      
+      const item = question.closest('.faq-item');
+      const answer = item.querySelector('.faq-answer');
+      if (!item || !answer) return;
+      
+      console.log('FAQ click detected on:', item);
+      
+      // Close all other items
+      items.forEach(otherItem => {
+        if (otherItem !== item) {
+          otherItem.classList.remove('open');
+          const otherAns = otherItem.querySelector('.faq-answer');
+          const otherQ = otherItem.querySelector('.faq-question');
+          if (otherAns) otherAns.style.maxHeight = '0';
+          if (otherQ) otherQ.setAttribute('aria-expanded', 'false');
+        }
+      });
+      
+      // Toggle this one
+      const isOpen = item.classList.toggle('open');
+      question.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      
+      if (isOpen) {
+        // Measure and expand
+        const inner = answer.querySelector('.faq-answer-text');
+        const h = inner ? inner.scrollHeight : 400;
+        answer.style.maxHeight = (h + 64) + 'px'; // extra padding
+        console.log('Opened FAQ, height:', h + 64);
+      } else {
+        answer.style.maxHeight = '0';
+        console.log('Closed FAQ');
+      }
+    };
+    
+    // Remove old listeners and attach new
+    container.removeEventListener('click', handleClick);
+    container.addEventListener('click', handleClick, false);
+    console.log('FAQ event delegation attached to container');
   }
 
   // Initial setup - call via window to ensure availability
