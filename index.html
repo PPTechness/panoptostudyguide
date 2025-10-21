@@ -2209,7 +2209,7 @@ OUTPUT: [ACTUAL_TITLE_SLUG]_quiz_qti.zip + [ACTUAL_TITLE_SLUG]_quiz.pdf using RE
 function promptCoreConceptsV13(){
   const out = (window.state && window.state.studyOutput) || 'docx';
   return `SYSTEM
-Return ONE file only: [REAL_TITLE_SLUG]_study_core_concepts.${out} (Word A4).
+Return ONE file only: [REAL_TITLE_SLUG]_study_core_concepts.${out} (${out==='pptx'?'PowerPoint':'Word'} A4).
 Use only the Panopto Watch page. No external sources.
 
 SOURCE PREPARATION
@@ -2259,7 +2259,7 @@ Corpus ≥ 500 words; ≥ 3 thresholds; ≥ 12 key concepts; ≥ 24 timestamps; 
 function promptKnowledgeToolsV13(){
   const out = (window.state && window.state.studyOutput) || 'docx';
   return `SYSTEM
-Return ONE file only: [REAL_TITLE_SLUG]_study_knowledge_tools.${out} (Word A4).
+Return ONE file only: [REAL_TITLE_SLUG]_study_knowledge_tools.${out} (${out==='pptx'?'PowerPoint':'Word'} A4).
 
 SOURCE PREPARATION — same scroll/expand steps as Prompt 1; fail if < 500 words.
 
@@ -2282,7 +2282,7 @@ Glossary ≥ 28; Examples = 3; Cases = 2; ≥ 24 timestamps; no duplicates; one 
 function promptPracticeTestingV13(){
   const out = (window.state && window.state.studyOutput) || 'docx';
   return `SYSTEM
-Return ONE file only: [REAL_TITLE_SLUG]_study_practice_testing.${out} (Word A4).
+Return ONE file only: [REAL_TITLE_SLUG]_study_practice_testing.${out} (${out==='pptx'?'PowerPoint':'Word'} A4).
 
 SOURCE PREPARATION — scroll and expand captions & slides; fail if < 500 words.
 
@@ -2311,7 +2311,7 @@ VALIDATION
 function promptReflectionPlanningV13(){
   const out = (window.state && window.state.studyOutput) || 'docx';
   return `SYSTEM
-Return ONE file only: [REAL_TITLE_SLUG]_study_reflection_planning.${out} (Word A4).
+Return ONE file only: [REAL_TITLE_SLUG]_study_reflection_planning.${out} (${out==='pptx'?'PowerPoint':'Word'} A4).
 
 SOURCE PREPARATION — scroll & expand captions/slides fully; fail if < 500 words.
 
@@ -2334,7 +2334,7 @@ VALIDATION
 function promptExtensionSupportV13(){
   const out = (window.state && window.state.studyOutput) || 'docx';
   return `SYSTEM
-Return ONE file only: [REAL_TITLE_SLUG]_study_extension_support.${out} (Word A4).
+Return ONE file only: [REAL_TITLE_SLUG]_study_extension_support.${out} (${out==='pptx'?'PowerPoint':'Word'} A4).
 
 SOURCE PREPARATION — scroll and expand captions/slides to bottom; fail if < 500 words.
 
@@ -3083,7 +3083,7 @@ function init() {
   // copyTop removed with preview section
   
   // FAQ Accordion - robust setup with measured heights
-  function setupFaqAccordion() {
+  window.setupFaqAccordion = function() {
     const items = document.querySelectorAll('.faq-item');
     if (!items || items.length === 0) return;
     items.forEach(item => {
