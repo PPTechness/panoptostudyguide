@@ -2333,23 +2333,25 @@ VALIDATION
 
 function promptExtensionSupportV13(){
   const out = (window.state && window.state.studyOutput) || 'docx';
-  return `SYSTEM
-You are creating a single, complete ${out==='pptx'?'PowerPoint':'Word'} document. Work silently and return ONLY the finished file.
+  return `SYSTEM INSTRUCTION
+You are a silent document builder. Generate the complete file in one pass without any commentary.
 
-DO NOT:
-• Write progress messages, explanations, or commentary
-• Reference external files (like CSV files) or previous builds
-• Say "I'll now regenerate" or describe what you're doing
-• Pause to explain your process
+CRITICAL RULES:
+❌ NEVER write "Analysis", "To proceed", "Starting now", or ANY explanatory text
+❌ NEVER mention missing files, CSV files, or "required source files"
+❌ NEVER say "I'll regenerate" or describe your process
+❌ NEVER reference flashcards.csv, quotes.txt, or any external files
+❌ Do NOT explain what you're doing or why
+❌ Do NOT write progress updates or status messages
 
-DO:
-• Build the complete document in one pass
-• Include all content directly in the single output file
-• Return the file immediately when complete
+✓ ONLY generate and return the finished ${out} file
+✓ Extract content directly from the Panopto page open in the browser
+✓ Build all sections directly into the single output file
+✓ Work silently from start to finish
 
 OUTPUT FILE
 Return ONE file only: [REAL_TITLE_SLUG]_study_extension_support.${out} (${out==='pptx'?'PowerPoint':'Word'} A4).
-Use only the Panopto Watch page. No external sources.
+Use only the Panopto Watch page currently open. No external sources. No external files.
 
 SOURCE PREPARATION
 1. Confirm this is a Panopto "Watch" page.
@@ -2457,6 +2459,7 @@ STRUCTURE
    • Timestamp references [mm:ss] linking task to lecture evidence
 
 4. Appendix A — ≥24 timestamped direct quotes from lecture (5–25 words each, [mm:ss]) showing evidence base for all tasks.
+   Extract these quotes directly from the Panopto captions/slides you already read. Do NOT reference a quotes.txt file.
 
 PEDAGOGY
 • Spaced retrieval principles (distributed practice across topics)
@@ -2479,10 +2482,18 @@ VALIDATION CHECKLIST — Verify silently before returning the file:
 ☐ ONE .${out} output file only — all content embedded within
 
 FINAL INSTRUCTION:
-When you have verified all checklist items, return the complete ${out} file immediately.
-Do NOT write explanatory text, progress updates, or messages.
-Do NOT reference separate CSV files or previous builds.
-Return ONLY the finished [REAL_TITLE_SLUG]_study_extension_support.${out} file.`;
+Verify the checklist silently. When complete, return ONLY the ${out} file.
+
+Do NOT write:
+• "Analysis" or "The document generation failed"
+• "To proceed, I'll regenerate"
+• "Starting now"
+• Anything about missing files (flashcards.csv, quotes.txt, etc.)
+• Any text explaining your process
+
+You already have all the content from the Panopto page you read in SOURCE PREPARATION.
+Build the flashcards, tasks, and appendices directly from that content.
+Return ONLY: [REAL_TITLE_SLUG]_study_extension_support.${out}`;
 }
 
 // Registry for tool cards
