@@ -2335,26 +2335,93 @@ function promptExtensionSupportV13(){
   const out = (window.state && window.state.studyOutput) || 'docx';
   return `SYSTEM
 Return ONE file only: [REAL_TITLE_SLUG]_study_extension_support.${out} (${out==='pptx'?'PowerPoint':'Word'} A4).
+Use only the Panopto Watch page. No external sources.
 
-SOURCE PREPARATION — scroll and expand captions/slides to bottom; fail if < 500 words.
+SOURCE PREPARATION
+1. Confirm this is a Panopto "Watch" page.
+2. Virtually scroll through and fully expand:
+   – "Captions" / "Transcript" tab → scroll to bottom
+   – "Contents" / "Slides" tabs → expand all slides and read all text/images
+3. Wait until no new lines appear.
+4. Extract and deduplicate all caption + slide text (preserve [mm:ss] timestamps).
+If corpus < 500 words →
+"INSUFFICIENT_PAGE_CONTENT — Expand captions & slides, scroll fully, then retry."
+
+TITLE & FILENAME
+Extract REAL title from <meta property="og:title"> or [data-role="session-title"] or .session-title or document.title.
+Use that title for H1 and filename [REAL_TITLE_SLUG]_study_extension_support.${out}.
+
+TASK
+Run all phases (collect → analyse → write → validate → output) automatically.
+Do NOT pause or ask questions.
 
 PURPOSE
-Provide long-term retrieval, collaboration, and inclusive learning support based on lecture evidence.
+Provide spaced-retrieval flashcards, collaborative group tasks, and an authentic assessment task for higher education students based on lecture evidence.
 
 STRUCTURE
-1. Flashcards — 45 items across ≥6 topics; each = ID; Question; Answer; 1-sentence connection; Difficulty (Fdn/Int/Adv + brief intent phrase); Related IDs; [mm:ss].
-   Include Appendix B — CSV table (all fields).
-2. Group tasks — 3 activities (think-pair-share, jigsaw, mini-debate) 140–180 words + [mm:ss] and intent descriptions.
-3. Authentic practice task — 1 task (170–220 words + 3×3 rubric & feedback plan).
-4. UDL & Accessibility audit — ≥9 checkpoints with practical alternatives.
-5. Where to get help — inclusive signposting (QUB links ok).
-6. Appendix A — ≥24 timestamped quotes.
+1. Flashcards — EXACTLY 45 items distributed across ≥6 major topics from the lecture.
+   Each flashcard MUST include ALL fields:
+   • ID (e.g., FC01, FC02…)
+   • Question (clear, discipline-specific, testing understanding/application)
+   • Answer (concise, academically rigorous, 2–4 sentences)
+   • Connection (1 sentence linking to broader topic/outcome)
+   • Difficulty: Foundation / Intermediate / Advanced + brief pedagogical intent (e.g., "Recall key term", "Apply concept to scenario", "Evaluate competing theories")
+   • Related IDs (list 1–3 other flashcard IDs that connect thematically)
+   • Timestamp [mm:ss]
+   
+   Requirements:
+   • Distribute across Foundation (15 cards), Intermediate (20 cards), Advanced (10 cards) levels
+   • Cover all major topics proportionally
+   • Use authentic academic language suitable for higher education
+   • Questions should span Bloom's taxonomy: remember, understand, apply, analyse, evaluate
+   • NO duplicates or trivial variants
+   • If source material seems insufficient, synthesise closely related questions from available content until exactly 45 unique cards are produced
+   
+   Include Appendix B — Complete CSV export table with columns: ID, Question, Answer, Connection, Difficulty, Related_IDs, Timestamp
+
+2. Collaborative Group Tasks — EXACTLY 3 activities designed for higher education active learning.
+   Each task (180–220 words) MUST include:
+   • Activity type clearly stated (think-pair-share, jigsaw, structured debate, case analysis, peer teaching, etc.)
+   • Learning objective tied to lecture outcomes
+   • Detailed facilitation steps (setup, individual work, pair/group work, whole-class synthesis)
+   • Specific content cues drawn directly from the lecture (quote key concepts, reference specific slides/timestamps [mm:ss])
+   • Pedagogical intent explanation (why this task develops critical thinking/collaboration/application)
+   • Estimated time allocation
+   • Assessment for learning notes (how to monitor understanding during activity)
+
+3. Authentic Practice Task — ONE discipline-appropriate assessment task (220–280 words).
+   Include:
+   • Realistic scenario or problem drawn from lecture themes
+   • Clear task instructions suitable for independent student work
+   • Expected output specification (report, presentation, analysis, design, etc.)
+   • 3×3 Rubric Grid:
+     Criteria (3 rows) × Performance Levels (3 columns: Developing / Competent / Excellent)
+     Each cell: specific, observable descriptors aligned with learning outcomes
+   • Brief feedback guidance for markers
+   • Estimated completion time
+   • Timestamp references [mm:ss] linking task to lecture evidence
+
+4. Appendix A — ≥24 timestamped direct quotes from lecture (5–25 words each, [mm:ss]) showing evidence base for all tasks.
 
 PEDAGOGY
-Spaced retrieval + social learning; map items to outcomes; Beyond Blended (Flex, Support); ≥9 UDL checkpoints; UK English.
+• Spaced retrieval principles (distributed practice across topics)
+• Social constructivist learning (peer collaboration, discussion)
+• Authentic assessment (real-world application)
+• Beyond Blended framework (Flex, Support)
+• Clear UK English; inclusive phrasing
+• Evidence-based design (all items reference lecture content directly)
 
-VALIDATION
-Exactly forty-five flashcards (no fewer), 3 group tasks; UDL ≥9; ≥24 timestamps; one .${out} output. If fewer than 45 flashcards are possible from the material, synthesise closely related variants until 45 unique, non-duplicative cards are produced.`;
+VALIDATION CHECKLIST
+☐ Corpus ≥ 500 words extracted
+☐ Exactly 45 flashcards (no fewer, no more) — all 7 fields complete for each
+☐ Foundation:Intermediate:Advanced ratio approximately 15:20:10
+☐ 3 collaborative group tasks — all with content cues from lecture
+☐ 1 authentic task with full 3×3 rubric
+☐ ≥24 timestamped quotes in Appendix A
+☐ No placeholders, no [EXAMPLE] text
+☐ One .${out} output file only
+
+If fewer than 45 flashcards seem possible from available material, you MUST synthesise additional closely-related questions using inference, application scenarios, comparison tasks, or analytical prompts until exactly 45 unique, non-duplicative cards are produced.`;
 }
 
 // Registry for tool cards
@@ -3085,11 +3152,26 @@ function init() {
   // FAQ Accordion - robust setup with measured heights
   window.setupFaqAccordion = function() {
     const items = document.querySelectorAll('.faq-item');
-    if (!items || items.length === 0) return;
-    items.forEach(item => {
+    if (!items || items.length === 0) {
+      console.log('No FAQ items found');
+      return;
+    }
+    console.log('Setting up FAQ accordion for', items.length, 'items');
+    
+    items.forEach((item, idx) => {
       const question = item.querySelector('.faq-question');
       const answer = item.querySelector('.faq-answer');
-      if (!question || !answer) return;
+      if (!question || !answer) {
+        console.log('Missing question or answer for item', idx);
+        return;
+      }
+
+      // Skip if already initialized
+      if (question.dataset.faqInit === 'true') {
+        console.log('FAQ item', idx, 'already initialized');
+        return;
+      }
+      question.dataset.faqInit = 'true';
 
       // Ensure collapsed state baseline
       item.classList.remove('open');
@@ -3099,6 +3181,7 @@ function init() {
       question.setAttribute('aria-expanded', 'false');
 
       const toggle = () => {
+        console.log('FAQ toggle clicked for item', idx);
         // Close others first
         document.querySelectorAll('.faq-item.open').forEach(other => {
           if (other !== item) {
@@ -3118,18 +3201,22 @@ function init() {
           const inner = answer.querySelector('.faq-answer-text');
           const h = inner ? (inner.scrollHeight + 32) : 300; // padding guard
           answer.style.maxHeight = h + 'px';
+          console.log('Opened FAQ item', idx, 'height:', h);
         } else {
           answer.style.maxHeight = '0px';
+          console.log('Closed FAQ item', idx);
         }
       };
 
-      question.onclick = toggle;
-      question.onkeydown = (ev) => {
+      question.addEventListener('click', toggle, false);
+      question.addEventListener('keydown', (ev) => {
         if (ev.key === 'Enter' || ev.key === ' ') {
           ev.preventDefault();
           toggle();
         }
-      };
+      }, false);
+      
+      console.log('FAQ item', idx, 'initialized');
     });
   }
 
