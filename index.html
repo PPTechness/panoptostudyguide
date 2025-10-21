@@ -319,6 +319,11 @@
   .advanced-options .form-group { background: var(--bg-secondary); padding: 12px 14px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
   .advanced-options .form-label { font-weight: 700; margin-bottom: 8px; display: block; }
 
+  /* Segmented toggle */
+  .seg { display:inline-flex; background: var(--bg-secondary); border:1px solid var(--border); border-radius: 999px; overflow:hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.05); }
+  .seg button { padding:8px 14px; border:none; background:transparent; cursor:pointer; font-weight:600; color: var(--text-secondary); }
+  .seg button.active { color:#fff; background: var(--gradient-qub); }
+
   /* Global app rail (visible on all pages) */
   /* Remove global sidebar layout */
   .app-grid { display: block; max-width: 1400px; margin: 0 auto; }
@@ -1775,7 +1780,13 @@
     <div class="quick-start" id="studyToolsDeck" style="margin-top:1.5rem;">
       <div class="section-title">
         <span>Study Guide Tools</span>
-        <span class="help">Pick a tool and copy its pre-built prompt to Copilot</span>
+        <span class="help" style="display:flex; align-items:center; gap:8px;">
+          <span>Output:</span>
+          <span class="seg" role="tablist" aria-label="Study output format">
+            <button id="studyOutDoc" class="active" aria-selected="true">Word</button>
+            <button id="studyOutPpt">PowerPoint</button>
+          </span>
+        </span>
       </div>
       <div class="preset-cards study-tools-grid" id="studyToolsGrid">
         <!-- Cards populated by JS -->
@@ -1805,7 +1816,13 @@
     <div class="quick-start" id="notesToolsDeck" style="margin-top:1rem;">
       <div class="section-title" style="align-items: center;">
         <span>Notes Tools</span>
-        <span class="help" style="margin-left: auto;">Choose an output style, then copy the prompt.</span>
+        <span class="help" style="margin-left: auto; display:flex; align-items:center; gap:8px;">
+          <span>Output:</span>
+          <span class="seg" role="tablist" aria-label="Notes output format">
+            <button id="notesOutDoc" class="active" aria-selected="true">Word</button>
+            <button id="notesOutPpt">PowerPoint</button>
+          </span>
+        </span>
       </div>
       <div class="preset-cards study-tools-grid" id="notesToolsGrid" style="grid-template-columns: repeat(auto-fill, minmax(260px,1fr));">
         <!-- Cards populated by JS -->
@@ -2190,8 +2207,9 @@ OUTPUT: [ACTUAL_TITLE_SLUG]_quiz_qti.zip + [ACTUAL_TITLE_SLUG]_quiz.pdf using RE
 // -------- Study Tool Prompts (v13 with scroll/expand + Bloom intent) --------
 
 function promptCoreConceptsV13(){
+  const out = (window.state && window.state.studyOutput) || 'docx';
   return `SYSTEM
-Return ONE file only: [REAL_TITLE_SLUG]_study_core_concepts.docx (Word A4).
+Return ONE file only: [REAL_TITLE_SLUG]_study_core_concepts.${out} (Word A4).
 Use only the Panopto Watch page. No external sources.
 
 SOURCE PREPARATION
@@ -2239,8 +2257,9 @@ Corpus ≥ 500 words; ≥ 3 thresholds; ≥ 12 key concepts; ≥ 24 timestamps; 
 }
 
 function promptKnowledgeToolsV13(){
+  const out = (window.state && window.state.studyOutput) || 'docx';
   return `SYSTEM
-Return ONE file only: [REAL_TITLE_SLUG]_study_knowledge_tools.docx (Word A4).
+Return ONE file only: [REAL_TITLE_SLUG]_study_knowledge_tools.${out} (Word A4).
 
 SOURCE PREPARATION — same scroll/expand steps as Prompt 1; fail if < 500 words.
 
@@ -2261,8 +2280,9 @@ Glossary ≥ 28; Examples = 3; Cases = 2; ≥ 24 timestamps; no duplicates; one 
 }
 
 function promptPracticeTestingV13(){
+  const out = (window.state && window.state.studyOutput) || 'docx';
   return `SYSTEM
-Return ONE file only: [REAL_TITLE_SLUG]_study_practice_testing.docx (Word A4).
+Return ONE file only: [REAL_TITLE_SLUG]_study_practice_testing.${out} (Word A4).
 
 SOURCE PREPARATION — scroll and expand captions & slides; fail if < 500 words.
 
@@ -2289,8 +2309,9 @@ VALIDATION
 }
 
 function promptReflectionPlanningV13(){
+  const out = (window.state && window.state.studyOutput) || 'docx';
   return `SYSTEM
-Return ONE file only: [REAL_TITLE_SLUG]_study_reflection_planning.docx (Word A4).
+Return ONE file only: [REAL_TITLE_SLUG]_study_reflection_planning.${out} (Word A4).
 
 SOURCE PREPARATION — scroll & expand captions/slides fully; fail if < 500 words.
 
@@ -2311,8 +2332,9 @@ VALIDATION
 }
 
 function promptExtensionSupportV13(){
+  const out = (window.state && window.state.studyOutput) || 'docx';
   return `SYSTEM
-Return ONE file only: [REAL_TITLE_SLUG]_study_extension_support.docx (Word A4).
+Return ONE file only: [REAL_TITLE_SLUG]_study_extension_support.${out} (Word A4).
 
 SOURCE PREPARATION — scroll and expand captions/slides to bottom; fail if < 500 words.
 
@@ -2410,6 +2432,26 @@ const TOOL_STYLE_PALETTE = [
 let currentStudyPrompt = '';
 let currentNotesTemplate = null;
 let currentNotesPrompt = '';
+if (!window.state) window.state = {};
+window.state.studyOutput = 'docx';
+
+// Handle study/notes output toggles
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest && e.target.closest('.seg button');
+  if (!btn) return;
+  if (btn.id === 'studyOutDoc' || btn.id === 'studyOutPpt') {
+    window.state.studyOutput = btn.id === 'studyOutPpt' ? 'pptx' : 'docx';
+    const wrap = btn.parentElement;
+    wrap.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  if (btn.id === 'notesOutDoc' || btn.id === 'notesOutPpt') {
+    window.state.notesOutput = btn.id === 'notesOutPpt' ? 'pptx' : 'docx';
+    const wrap = btn.parentElement;
+    wrap.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+});
 
 function mountStudyToolCards(){
   const grid = document.getElementById('studyToolsGrid');
@@ -2506,7 +2548,7 @@ const NOTES_TEMPLATES = [
       'Compile an evidence appendix for quality assurance'
     ],
     build: (notes, meta) => `SYSTEM
-Return ONE file only: ${meta.slug}_notes_summary.docx (Word A4). Do NOT ask questions. Do NOT use external sources.
+Return ONE file only: ${meta.slug}_notes_summary.${(window.state && window.state.notesOutput) || 'docx'} (Word A4). Do NOT ask questions. Do NOT use external sources.
 
 NOTES SAFEGUARD
 • Use only the supplied notes. If cleaned text < 400 words, return “INSUFFICIENT_NOTES — add more detail and retry.”
@@ -2535,7 +2577,7 @@ ${notes}
       'Keep everything grounded in timestamped note evidence'
     ],
     build: (notes, meta) => `SYSTEM
-Return ONE file only: ${meta.slug}_notes_revision.docx (Word A4). Do NOT ask questions. Do NOT use external sources.
+Return ONE file only: ${meta.slug}_notes_revision.${(window.state && window.state.notesOutput) || 'docx'} (Word A4). Do NOT ask questions. Do NOT use external sources.
 
 NOTES SAFEGUARD
 • Use only the supplied notes. If cleaned text < 400 words, return “INSUFFICIENT_NOTES — add more detail and retry.”
@@ -2564,7 +2606,7 @@ ${notes}
       'Evidence every section with note references'
     ],
     build: (notes, meta) => `SYSTEM
-Return ONE file only: ${meta.slug}_notes_plan.docx (Word A4). Do NOT ask questions. Do NOT use external sources.
+Return ONE file only: ${meta.slug}_notes_plan.${(window.state && window.state.notesOutput) || 'docx'} (Word A4). Do NOT ask questions. Do NOT use external sources.
 
 NOTES SAFEGUARD
 • Use only the supplied notes. If cleaned text < 400 words, return “INSUFFICIENT_NOTES — add more detail and retry.”
