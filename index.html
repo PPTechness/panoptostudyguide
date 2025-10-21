@@ -2334,17 +2334,23 @@ VALIDATION
 function promptExtensionSupportV13(){
   const out = (window.state && window.state.studyOutput) || 'docx';
   return `Return ONE file: [REAL_TITLE_SLUG]_study_extension_support.${out}
-Work silently. No commentary, no "Analysis", no file references (CSV/txt), no progress messages.
+Work silently. No commentary, no "Analysis", no file references, no progress messages.
 
-SOURCE: Scroll Panopto captions/slides to bottom; extract all text+timestamps. Fail if <500 words.
+CRITICAL: READ THE ENTIRE LECTURE FIRST
+1. Scroll Panopto "Captions/Transcript" tab to absolute bottom - read every word
+2. Expand ALL "Contents/Slides" tabs - read every slide, every image caption, every text
+3. Extract ALL content: captions + slides + images + timestamps [mm:ss]
+4. Identify 5–6 major topics, key concepts, definitions, arguments, examples from this content
+5. Use THIS extracted content to build everything below - NO generic templates
+
 TITLE: Extract from <meta property="og:title"> or [data-role="session-title"]. Use for H1 and filename slug.
 
 STRUCTURE
 
 1. FLASHCARDS (exactly 25: FC01–FC25)
-Build from REAL lecture content. No templates/placeholders.
-Each card needs 7 fields: ID | Question (specific to lecture) | Answer (2–4 sentences from content) | Connection (link to outcome/topic) | Difficulty (Foundation/Intermediate/Advanced + intent) | Related IDs | Timestamp [mm:ss]
-Distribution: 8–10 Foundation, 10–12 Intermediate, 5–7 Advanced across ≥5 topics.
+MUST use actual lecture content you just read. NO generic questions like "What is X?" or "Define Y".
+Each card: ID | Question (specific to lecture concepts/arguments) | Answer (2–4 sentences from actual lecture content) | Connection (link to outcome/topic) | Difficulty (Foundation/Intermediate/Advanced + intent) | Related IDs | Timestamp [mm:ss]
+Distribution: 8–10 Foundation, 10–12 Intermediate, 5–7 Advanced across ≥5 topics from lecture.
 Appendix B: embed table (not CSV) with all 25 cards in ${out} file.
 
 2. GROUP TASKS (exactly 3, 180–220 words each)
