@@ -320,13 +320,8 @@
   .advanced-options .form-label { font-weight: 700; margin-bottom: 8px; display: block; }
 
   /* Global app rail (visible on all pages) */
-  .app-grid { display: grid; grid-template-columns: 220px 1fr; gap: 2rem; max-width: 1400px; margin: 0 auto; }
-  .app-main { min-width: 0; }
-  .app-rail { position: sticky; top: 96px; display: flex; flex-direction: column; gap: 12px; }
-  .app-rail .rail-btn { cursor: pointer; padding: 14px 16px; border-radius: 16px; border: 1px solid rgba(224,0,27,0.14); background: rgba(224,0,27,0.06); color: var(--primary); font-weight: 700; transition: transform .15s ease, box-shadow .25s ease, background .25s ease; }
-  .app-rail .rail-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 22px rgba(224,0,27,0.18); }
-  .app-rail .rail-btn.active { color: #fff; background: var(--gradient-qub); border-color: transparent; }
-  @media (max-width: 1024px) { .app-grid { grid-template-columns: 1fr; } .app-rail { display: none; } }
+  /* Remove global sidebar layout */
+  .app-grid { display: block; max-width: 1400px; margin: 0 auto; }
 
   /* Hide old per-page quiz rail */
   .quiz-rail { display: none !important; }
@@ -1644,12 +1639,6 @@
 
 <main>
   <div class="app-grid">
-    <aside class="app-rail" aria-label="App navigation">
-      <div class="rail-btn" data-tab="help" onclick="switchWorkflow('help')">Getting Started</div>
-      <div class="rail-btn active" data-tab="quiz" onclick="switchWorkflow('quiz')">Canvas Quiz</div>
-      <div class="rail-btn" data-tab="study" onclick="switchWorkflow('study')">Study Guide</div>
-      <div class="rail-btn" data-tab="notes" onclick="switchWorkflow('notes')">From Notes</div>
-    </aside>
     <section class="app-main">
   <!-- Help Info Boxes (Hidden by default) -->
   <div class="info" id="about">
@@ -1784,7 +1773,7 @@
     <div class="helper-message" style="margin-top: -0.5rem; margin-bottom: 1.5rem;">
       <div class="helper-message-icon">🧭</div>
       <div class="helper-message-text">
-        <strong>Pick a Study Guide Tool below</strong> — each card contains a complete, QUB‑aligned prompt. Click <em>Copy Prompt</em>, paste into Copilot with your Panopto <em>Watch</em> page open, and it will auto‑scroll captions &amp; slides, extract evidence, and generate a Word file. Use <em>Preview</em> to check the prompt first.
+        <strong>Pick a Study Guide Tool below</strong> — each card contains a complete, QUB‑aligned prompt. Click <em>Copy Prompt</em>, paste into Copilot with your Panopto <em>Watch</em> page open, and it will auto‑scroll captions &amp; slides, extract evidence, and generate a Word file.
       </div>
     </div>
 
@@ -1815,7 +1804,7 @@
     <div class="helper-message" style="margin-bottom: 1.5rem;">
       <div class="helper-message-icon">🗂️</div>
       <div class="helper-message-text">
-        <strong>Select a Notes Tool</strong> — each card wraps your pasted notes in a ready-to-copy prompt. Preview first to confirm the output and character count.
+        <strong>Select a Notes Tool</strong> — each card wraps your pasted notes in a ready-to-copy prompt.
       </div>
     </div>
 
