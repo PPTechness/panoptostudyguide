@@ -1749,7 +1749,7 @@
     <div class="helper-message" style="margin-top: 0.5rem; margin-bottom: 1.5rem;">
       <div class="helper-message-icon">🧭</div>
       <div class="helper-message-text">
-        <strong>Pick a Study Guide Tool below</strong> — each card contains a complete, QUB‑aligned prompt. Click <em>Copy Prompt</em>, paste into Copilot with your Panopto <em>Watch</em> page open, and it will auto‑scroll captions &amp; slides, extract evidence, and generate your document. Use <em>Preview</em> to check the prompt first.
+        <strong>Pick a Study Guide Tool below</strong> — each card contains a complete, QUB‑aligned prompt. Click <em>Copy Prompt</em>, paste into Copilot with your Panopto <em>Watch</em> page open, and it will auto‑scroll captions &amp; slides, extract evidence, and generate a Word file.
       </div>
     </div>
 
@@ -1761,16 +1761,6 @@
       </div>
       <div class="preset-cards study-tools-grid" id="studyToolsGrid">
         <!-- Cards populated by JS -->
-      </div>
-    </div>
-    <div class="study-preview-panel hidden" id="studyPreviewPanel">
-      <div class="study-preview-header">
-        <span class="study-preview-title" id="studyPreviewTitle">Preview</span>
-        <span class="study-preview-meta" id="studyPreviewMeta"></span>
-      </div>
-      <div class="study-preview-body">
-        <div class="study-preview-placeholder" id="studyPreviewPlaceholder">Select "Preview" on a tool to view the full prompt here.</div>
-        <pre class="study-preview-text hidden" id="studyPreviewText"></pre>
       </div>
     </div>
   </div>
@@ -1789,28 +1779,17 @@
     <div class="helper-message" style="margin-bottom: 1.5rem;">
       <div class="helper-message-icon">🗂️</div>
       <div class="helper-message-text">
-        <strong>Select a Notes Tool</strong> — each card wraps your pasted notes in a ready-to-copy prompt. Preview first to confirm the output and character count.
+        <strong>Select a Notes Tool</strong> — each card wraps your pasted notes in a ready-to-copy prompt. 
       </div>
     </div>
 
     <div class="quick-start" id="notesToolsDeck" style="margin-top:1rem;">
       <div class="section-title">
         <span>Notes Tools</span>
-        <span class="help">Choose an output style, then copy or preview the prompt.</span>
+        <span class="help">Choose an output style, then copy the prompt.</span>
       </div>
       <div class="preset-cards study-tools-grid" id="notesToolsGrid">
         <!-- Cards populated by JS -->
-      </div>
-    </div>
-
-    <div class="study-preview-panel hidden" id="notesPreviewPanel">
-      <div class="study-preview-header">
-        <span class="study-preview-title" id="notesPreviewTitle">Preview</span>
-        <span class="study-preview-meta" id="notesPreviewMeta"></span>
-      </div>
-      <div class="study-preview-body">
-        <div class="study-preview-placeholder" id="notesPreviewPlaceholder">Paste notes and choose "Preview" to check the final prompt.</div>
-        <pre class="study-preview-text hidden" id="notesPreviewText"></pre>
       </div>
     </div>
   </div>
@@ -2734,7 +2713,6 @@ function mountStudyToolCards(){
       <ul class="tool-points">${points}</ul>
       <div class="tool-actions">
         <button class="btn-primary" data-tool="${tool.id}">📋 Copy Prompt</button>
-        <button class="btn btn-ghost" data-preview="${tool.id}">👁 Preview</button>
       </div>`;
     grid.appendChild(card);
   });
@@ -2745,56 +2723,9 @@ function mountStudyToolCards(){
       const tool = STUDY_TOOLS.find(t=>t.id===id);
       if(!tool) return;
       const prompt = tool.builder();
-      setStudyPreview(prompt, tool.name);
       copyTextToClipboard(prompt);
     });
   });
-  grid.querySelectorAll('button[data-preview]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const id = btn.getAttribute('data-preview');
-      const tool = STUDY_TOOLS.find(t=>t.id===id);
-      if(!tool) return;
-      const prompt = tool.builder();
-      setStudyPreview(prompt, tool.name);
-    });
-  });
-}
-
-function setStudyPreview(text, label){
-  currentStudyPrompt = text || '';
-  const panel = $('studyPreviewPanel');
-  const placeholder = $('studyPreviewPlaceholder');
-  const pre = $('studyPreviewText');
-  const meta = $('studyPreviewMeta');
-  const titleEl = $('studyPreviewTitle');
-  if (!panel) return;
-  setCharStatus(text ? text.length : 0);
-  panel.classList.remove('hidden');
-  if (titleEl) titleEl.textContent = 'Preview';
-  if (!text) {
-    if (placeholder) {
-      placeholder.textContent = 'Select "Preview" on a tool to view the full prompt here.';
-      placeholder.classList.remove('hidden');
-    }
-    if (pre) pre.classList.add('hidden');
-    if (meta) meta.textContent = '';
-    return;
-  }
-  if (placeholder) placeholder.classList.add('hidden');
-  if (pre) {
-    pre.textContent = text;
-    pre.classList.remove('hidden');
-  }
-  if (meta) {
-    const count = text.length.toLocaleString();
-    meta.textContent = `${count} chars • ${label}`;
-  }
-  if (titleEl && label) {
-    titleEl.textContent = `Preview — ${label}`;
-  }
-  setTimeout(()=>{
-    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 100);
 }
 
 function showToast(){
@@ -2960,17 +2891,16 @@ function mountNotesToolCards(){
     card.style.setProperty('--tool-chip-border', style.chipBorder);
     const points = (tool.points || []).map(point => `<li>${point}</li>`).join('');
     card.innerHTML = `
-      <div class=\"tool-badge\">${tool.icon} ${tool.name}</div>
-      <ul class=\"tool-points\">${points}</ul>
-      <div class=\"tool-actions\">
-        <button class=\"btn-primary\" data-tool=\"${tool.id}\">📋 Copy Prompt</button>
-        <button class=\"btn btn-ghost\" data-preview=\"${tool.id}\">👁 Preview</button>
+      <div class="tool-badge">${tool.icon} ${tool.name}</div>
+      <ul class="tool-points">${points}</ul>
+      <div class="tool-actions">
+        <button class="btn-primary" data-tool="${tool.id}">📋 Copy Prompt</button>
       </div>`;
     grid.appendChild(card);
   });
 
   if (state.workflow === 'notes') {
-    setNotesPreview('', '', null);
+    // No preview panel; nothing to initialise here
   } else {
     setCharStatus((currentNotesPrompt || '').length);
   }
@@ -2982,79 +2912,17 @@ function mountNotesToolCards(){
       const result = buildNotesOutput(template, getNotesInput());
       if (result.error) { alert(result.error); return; }
       if (result.prompt.length > 8000) {
-        setNotesPreview(result.prompt, template.name, template);
-        alert('This prompt is over 8000 characters. Trim your notes and preview again.');
+        alert('This prompt is over 8000 characters. Trim your notes and try again.');
         return;
       }
-      setNotesPreview(result.prompt, template.name, template);
+      currentNotesPrompt = result.prompt;
       copyTextToClipboard(result.prompt);
     });
   });
 
-  grid.querySelectorAll('button[data-preview]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const id = btn.getAttribute('data-preview');
-      const template = NOTES_TEMPLATES.find(t=>t.id===id);
-      const result = buildNotesOutput(template, getNotesInput());
-      if (result.error) { alert(result.error); return; }
-      setNotesPreview(result.prompt, template.name, template);
-      if (result.prompt.length > 8000) {
-        alert('This prompt is over 8000 characters. Trim your notes to stay within the limit.');
-      }
-    });
-  });
   if (state.workflow === 'notes') {
-    setNotesPreview('', '', null);
+    // No preview panel to reset
   }
-}
-
-function setNotesPreview(text, label, template){
-  const panel = $('notesPreviewPanel');
-  const placeholder = $('notesPreviewPlaceholder');
-  const pre = $('notesPreviewText');
-  const meta = $('notesPreviewMeta');
-  const titleEl = $('notesPreviewTitle');
-  if (!panel) return;
-  const content = text || '';
-  if (template) {
-    currentNotesTemplate = template;
-  } else if (!content) {
-    currentNotesTemplate = null;
-  }
-  currentNotesPrompt = content;
-  setCharStatus(content.length);
-  panel.classList.remove('hidden');
-  if (titleEl) titleEl.textContent = label ? `Preview — ${label}` : 'Preview';
-  if (!content) {
-    if (placeholder) {
-      placeholder.textContent = 'Paste notes and choose "Preview" to check the final prompt.';
-      placeholder.classList.remove('hidden');
-    }
-    if (pre) pre.classList.add('hidden');
-    if (meta) meta.textContent = '';
-    return;
-  }
-  if (placeholder) placeholder.classList.add('hidden');
-  if (pre) {
-    pre.textContent = content;
-    pre.classList.remove('hidden');
-  }
-  if (meta) {
-    const count = content.length.toLocaleString();
-    let message = `${count} chars` + (label ? ` • ${label}` : '');
-    if (content.length > 8000) message += ' • Trim notes to stay under 8000';
-    meta.textContent = message;
-  }
-}
-
-function refreshNotesPreview(){
-  if (!currentNotesTemplate) return;
-  const result = buildNotesOutput(currentNotesTemplate, getNotesInput());
-  if (result.error) {
-    setNotesPreview('', '', null);
-    return;
-  }
-  setNotesPreview(result.prompt, currentNotesTemplate.name, currentNotesTemplate);
 }
 
 // Render preview
@@ -3252,7 +3120,6 @@ window.switchWorkflow = function(tab) {
     setTimeout(() => {
       try {
         mountNotesToolCards();
-        refreshNotesPreview();
       } catch (e) {
         console.warn('Notes tools deck failed:', e);
       }
@@ -3278,7 +3145,6 @@ window.switchWorkflow = function(tab) {
   if (notesPanel) {
     if (tab === 'notes') {
       notesPanel.classList.remove('hidden');
-      refreshNotesPreview();
     } else {
       notesPanel.classList.add('hidden');
       currentNotesPrompt = '';

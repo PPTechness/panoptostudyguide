@@ -3,8 +3,10 @@
 ## Problem
 The navigation links (Getting Started, Canvas Quiz, Study Guide, From Notes) were not working when clicked.
 
-## Root Cause
-The `quiz-workflow` div was not properly closed, causing all subsequent workflow sections to be improperly nested within it. This broke the JavaScript's ability to show/hide the correct content sections.
+## Root Causes
+1. The `quiz-workflow` div was not properly closed, causing all subsequent workflow sections to be improperly nested within it
+2. **Critical JavaScript Error**: `switchWorkflow` was defined inside the `init()` function but the inline `onclick` handlers were trying to call it before `init()` ran, causing `Uncaught ReferenceError: switchWorkflow is not defined`
+3. **Missing Function**: `setCharStatus` was called but never defined, causing additional errors
 
 ## Fixes Applied
 
@@ -22,6 +24,13 @@ The `quiz-workflow` div was not properly closed, causing all subsequent workflow
   - Which tab was clicked
   - Which DOM element was found/targeted
   - Success/error messages
+
+### 3. Fixed JavaScript Scope Issues (Commit: f75752c) **← THE CRITICAL FIX**
+- **Moved `window.switchWorkflow` definition OUTSIDE the `init()` function** so it's available immediately when the HTML is parsed and onclick handlers can call it
+- **Created `setCharStatus()` function** to handle character count display and progress bar updates
+- **Moved `heroContent` object to global scope** so it's accessible to the switchWorkflow function
+- **Removed duplicate code** from inside the `init()` function
+- This completely fixes the `Uncaught ReferenceError: switchWorkflow is not defined` errors
 
 ## Verification
 ✓ All workflow-content divs are properly opened and closed
