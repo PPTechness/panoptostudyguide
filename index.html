@@ -901,6 +901,35 @@
     gap: 2rem;
     margin-top: 2rem;
   }
+
+  /* Quiz maker two-row alignment (stable across screen sizes) */
+  .form-grid.align-end { align-items: end; }
+
+  /* Row 2: make right column a fixed action cell; left column flexible */
+  .quiz-grid { grid-template-columns: 1fr 320px; }
+  .quiz-grid .actions {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+    gap: 0.75rem;
+    height: 100%;
+  }
+  .quiz-grid .actions .btn-primary { min-width: 260px; }
+  .feedback-note {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    text-align: right;
+    margin-top: 0.5rem;
+  }
+
+  /* Responsive: stack cleanly and keep full-width button */
+  @media (max-width: 1100px) {
+    .quiz-grid { grid-template-columns: 1fr; }
+    .quiz-grid .actions { align-items: stretch; }
+    .quiz-grid .actions .btn-primary { width: 100%; min-width: 0; }
+    .feedback-note { text-align: left; }
+  }
   
   .form-group {
     display: flex;
@@ -1667,21 +1696,18 @@
         </div>
 
         <!-- ROW 2: Question types + Build & Copy button -->
-        <div class="form-grid">
+        <div class="form-grid align-end quiz-grid">
           <div class="form-group">
             <label class="form-label">Question Types</label>
             <div class="chip-group" id="questionTypes"></div>
             <p class="help">Allowed types: Multiple Choice, Multiple Answers, True/False, Short Answer, Essay, Numerical.</p>
           </div>
 
-          <div class="form-group" style="align-self: end;">
-            <label class="form-label">&nbsp;</label>
-            <div class="tool-actions">
-              <button class="btn-primary" id="generateQuiz" onclick="copyPrompt();">
-                🛠️ Build &amp; Copy Prompt
-              </button>
-              <p class="help" style="margin-top:0.5rem;">Detailed feedback is included by default.</p>
-            </div>
+          <div class="form-group actions">
+            <button class="btn-primary" id="generateQuiz" onclick="copyPrompt();">
+              🛠️ Build &amp; Copy Prompt
+            </button>
+            <p class="feedback-note">Detailed feedback is included by default.</p>
           </div>
         </div>
       </div>
@@ -1705,10 +1731,8 @@
       <p class="help" style="margin-top: 0.75rem;"><strong>Note:</strong> If Copilot returns "INSUFFICIENT_PAGE_CONTENT", go back and ensure captions/contents panels are fully expanded and loaded.</p>
       <p class="help" style="margin-top: 0.75rem;">
         <strong>About feedback in QTI:</strong> The package embeds general item feedback in each question using the QTI
-        <code>&lt;itemfeedback ident="fb"&gt;</code> element and a <code>&lt;displayfeedback linkrefid="fb"&gt;</code> reference.
-        Canvas shows this feedback after submission if your quiz settings allow it (e.g., "Show correct answers" / "Restrict student result view" in New Quizzes).
-        We include it because: (1) it explains the reasoning with a timestamp back to your lecture; (2) it supports retrieval practice with immediate, specific guidance;
-        (3) it saves time compared with writing per-question feedback manually in Canvas.
+        <code>&lt;itemfeedback ident="fb"&gt;</code> plus a <code>&lt;displayfeedback linkrefid="fb"&gt;</code> reference.
+        Canvas shows this after submission if your quiz settings allow it. We include it because it explains the reasoning with a timestamp back to your lecture, supports retrieval practice with specific guidance, and saves time compared with writing feedback in Canvas.
       </p>
       </div>
     </div>
