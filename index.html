@@ -1645,70 +1645,46 @@
         <span class="advanced-toggle open">▼</span>
       </div>
       <div class="advanced-content open" id="advancedContent">
-        
+        <!-- ROW 1: Pedagogy preset + Questions per type -->
         <div class="form-grid">
-          
           <div class="form-group">
-            <label class="form-label" for="quizLang">Language</label>
-            <select id="quizLang" title="Output language and terminology style. Default: English (UK).">
-              <option value="en-GB" selected>English (UK)</option>
-              <option value="ga-IE">Irish</option>
-              <option value="cy-GB">Welsh</option>
-              <option value="fr-FR">French</option>
-              <option value="es-ES">Spanish</option>
+            <label class="form-label">Pedagogy Preset</label>
+            <select id="pedagogy" title="Sets tone and question style across disciplines.">
+              <option>Concept Check (Retrieval)</option>
+              <option>Worked Examples (Scaffolded)</option>
+              <option>Case/Scenario-Based</option>
+              <option>Debate / Critical Analysis</option>
+              <option>Metacognitive Reflection</option>
+              <option>Accessibility-First (UDL)</option>
             </select>
+            <p class="help" id="pedBrief"></p>
           </div>
-          
+
           <div class="form-group">
             <label class="form-label" for="quizCount">Questions per type</label>
             <input type="number" id="quizCount" min="1" max="12" value="3" title="How many items to generate for each selected question type.">
           </div>
-          
+        </div>
+
+        <!-- ROW 2: Question types + Build & Copy button -->
+        <div class="form-grid">
           <div class="form-group">
-            <label class="form-label" for="quizFeedback">Feedback level</label>
-            <select id="quizFeedback" title="What students will see after answering.">
-              <option value="off">Off — no explanations</option>
-              <option value="brief" selected>Brief — 1-sentence rationale for the correct answer</option>
-              <option value="detailed">Detailed — explain the correct answer AND why each distractor is less accurate, with study tips</option>
-            </select>
-            <p class="help">This feedback appears to students when they review the Canvas quiz. It helps address misconceptions and supports revision.</p>
+            <label class="form-label">Question Types</label>
+            <div class="chip-group" id="questionTypes"></div>
+            <p class="help">Allowed types: Multiple Choice, Multiple Answers, True/False, Short Answer, Essay, Numerical.</p>
+          </div>
+
+          <div class="form-group" style="align-self: end;">
+            <label class="form-label">&nbsp;</label>
+            <div class="tool-actions">
+              <button class="btn-primary" id="generateQuiz" onclick="copyPrompt();">
+                🛠️ Build &amp; Copy Prompt
+              </button>
+              <p class="help" style="margin-top:0.5rem;">Detailed feedback is included by default.</p>
+            </div>
           </div>
         </div>
-        
-        <div class="form-group mt-1half">
-          <label class="form-label">Pedagogy Preset</label>
-          <select id="pedagogy" title="Sets tone and question style across disciplines.">
-            <option>Concept Check (Retrieval)</option>
-            <option>Worked Examples (Scaffolded)</option>
-            <option>Case/Scenario-Based</option>
-            <option>Debate / Critical Analysis</option>
-            <option>Metacognitive Reflection</option>
-            <option>Accessibility-First (UDL)</option>
-          </select>
-          <p class="help" id="pedBrief"></p>
-        </div>
-        
-        <div class="form-group mt-1half">
-          <label class="form-label">Question Types</label>
-          <div class="chip-group" id="questionTypes"></div>
-          <p class="help">Multiple Choice is a good default to check core understanding. You can add other Canvas-compatible types:
-            <span class="tooltip" title="Multiple Answers: choose all that apply, scored with partial credit.">MA</span>,
-            <span class="tooltip" title="True/False: two options; the prompt enforces valid structure in QTI.">TF</span>,
-            <span class="tooltip" title="Short Answer: exact strings (or variants) are accepted.">SA</span>,
-            <span class="tooltip" title="Essay: unscored text response; used as a fallback if a question can't be validated.">Essay</span>,
-            <span class="tooltip" title="Numerical: exact value or tolerance range.">Numerical</span>,
-            <span class="tooltip" title="Matching: valid pairs; if not possible, we auto-rewrite to MC/Essay.">Matching</span>.
-          </p>
-        </div>
-        
-    </div>
-  </div>
-  
-    <!-- Primary Action -->
-    <div class="primary-action">
-      <button class="btn-primary" id="generateQuiz" onclick="copyPrompt();">
-        📋 Copy Prompt to Clipboard
-      </button>
+      </div>
     </div>
     
     <!-- Canvas How-To (Quiz Only) -->
@@ -1727,6 +1703,13 @@
         <li>Review points, feedback, and availability dates; then publish.</li>
       </ol>
       <p class="help" style="margin-top: 0.75rem;"><strong>Note:</strong> If Copilot returns "INSUFFICIENT_PAGE_CONTENT", go back and ensure captions/contents panels are fully expanded and loaded.</p>
+      <p class="help" style="margin-top: 0.75rem;">
+        <strong>About feedback in QTI:</strong> The package embeds general item feedback in each question using the QTI
+        <code>&lt;itemfeedback ident="fb"&gt;</code> element and a <code>&lt;displayfeedback linkrefid="fb"&gt;</code> reference.
+        Canvas shows this feedback after submission if your quiz settings allow it (e.g., "Show correct answers" / "Restrict student result view" in New Quizzes).
+        We include it because: (1) it explains the reasoning with a timestamp back to your lecture; (2) it supports retrieval practice with immediate, specific guidance;
+        (3) it saves time compared with writing per-question feedback manually in Canvas.
+      </p>
       </div>
     </div>
   </div>
@@ -1794,39 +1777,6 @@
     </div>
   </div>
   
-  <!-- Preview Section (Shared) -->
-  <div class="preview-section centered" id="previewSection" style="display:none;">
-    <div class="preview-header">
-      <div class="section-title">Your Copilot Prompt</div>
-      <div class="preview-stats">
-        <div class="stat">
-          <span>📊</span>
-          <span><span class="stat-value" id="charCount">0</span> chars (aim &lt; 8000)</span>
-        </div>
-        <span class="status-badge" id="statusBadge">
-          <span>✓</span>
-          <span id="statusText">Ready</span>
-        </span>
-      </div>
-    </div>
-    
-    <div class="progress-bar">
-      <div class="progress-fill" id="progressBar"></div>
-    </div>
-    
-    <div class="preview-actions" style="margin: 1rem 0; justify-content: space-between;">
-      <span class="help">Paste into Copilot with your Panopto Watch page open. Ensure preflight steps are done.</span>
-      <button class="btn-primary" id="copyTop" title="Copy the prompt" onclick="copyPrompt();">📋 Copy Prompt</button>
-    </div>
-    
-    <div class="preview-box">
-      <div class="preview-placeholder" id="previewPlaceholder">
-        <div class="preview-placeholder-icon">👆</div>
-        <p>Customise your options above and your prompt will appear here</p>
-      </div>
-      <pre class="preview-text hidden" id="previewText"></pre>
-    </div>
-  </div>
   
   <!-- Help/Getting Started Workflow -->
   <div class="workflow-content help-workflow">
@@ -1844,7 +1794,7 @@
         <div style="padding: 2.5rem; background: linear-gradient(135deg, rgba(168,85,247,0.1) 0%, rgba(236,72,153,0.05) 100%); border-radius: var(--radius-lg); border-left: 5px solid #a855f7; box-shadow: 0 4px 20px rgba(168,85,247,0.1); transition: all 0.3s ease;">
           <div style="font-size: 3rem; margin-bottom: 1rem;">⚙️</div>
           <h4 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.75rem; background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Customise Your Settings</h4>
-          <p style="color: var(--text-secondary); line-height: 1.6;">Choose your pedagogy preset, question types, feedback level, and other options. The prompt updates automatically as you make changes.</p>
+          <p style="color: var(--text-secondary); line-height: 1.6;">Choose your pedagogy preset and question types. Detailed feedback is included by default. The prompt updates automatically as you make changes.</p>
         </div>
         
         <div style="padding: 2.5rem; background: linear-gradient(135deg, rgba(236,72,153,0.1) 0%, rgba(244,63,94,0.05) 100%); border-radius: var(--radius-lg); border-left: 5px solid #ec4899; box-shadow: 0 4px 20px rgba(236,72,153,0.1); transition: all 0.3s ease;">
@@ -1870,7 +1820,7 @@
               <li>Open your Panopto <em>Watch</em> page in a browser tab (avoid the small Canvas embed).</li>
               <li>Open the <strong>Captions/Transcript</strong> panel and the <strong>Contents/Slides</strong> panel. Scroll through the transcript once so all captions load.</li>
               <li>Open <strong>Microsoft Copilot</strong> in the sidebar and allow it to "Use page content".</li>
-              <li>In Prompt Builder, choose your <strong>Pedagogy preset</strong>, keep <strong>Multiple Choice</strong> as default (or add more types), and set the <strong>Feedback level</strong>.</li>
+              <li>In Prompt Builder, choose your <strong>Pedagogy preset</strong> and select your <strong>question types</strong>. Detailed feedback is included by default; no toggle needed.</li>
               <li>Click <strong>Copy Prompt</strong> and paste it into Copilot. It will read <em>only</em> your Panopto page (captions + slides) and generate the requested files.</li>
             </ol>
             <p class="help">Tip: If Copilot returns <code>INSUFFICIENT_PAGE_CONTENT</code>, reload the Panopto page, open both panels, scroll to the bottom of the transcript, and try again.</p>
@@ -1941,7 +1891,7 @@
             <p><strong>Yes.</strong> The app lets you tailor:</p>
             <ul>
               <li><strong>Question types & counts:</strong> Start with Multiple Choice, then add others as needed.</li>
-              <li><strong>Feedback level:</strong> Off, Brief, or Detailed—controls what students see after answering.</li>
+              <li><strong>Feedback:</strong> Detailed feedback is included in the QTI by default (see "About feedback" below). You can control student visibility in Canvas after import.</li>
               <li><strong>Pedagogy preset:</strong> Sets style, depth and feedback tone.</li>
               <li><strong>Study Guide components:</strong> Toggle concept map, glossary, worked examples, cases, problem set, flashcards, reflections and planner.</li>
               <li><strong>Output format:</strong> PDF/Word/PPTX for study guides; QTI + PDF for quizzes.</li>
@@ -2070,7 +2020,7 @@ let state = {
   quizTitle: '',
   quizLang: 'en-GB',
   quizCount: 3,
-  quizFeedback: 'brief',
+  quizFeedback: 'detailed',
   questionTypes: ['multiple_choice_question'],
   notesInput: '',
   studyFormat: 'word'
@@ -2082,8 +2032,7 @@ const QUESTION_TYPES = [
   { id: 'true_false_question', label: 'True/False' },
   { id: 'short_answer_question', label: 'Short Answer' },
   { id: 'essay_question', label: 'Essay' },
-  { id: 'numerical_question', label: 'Numerical' },
-  { id: 'matching_question', label: 'Matching' }
+  { id: 'numerical_question', label: 'Numerical' }
 ];
 
 /* ---------- Initialisation: mount chips once DOM is ready ---------- */
@@ -2093,6 +2042,24 @@ document.addEventListener('DOMContentLoaded', () => {
     mountNotesToolCards();
   } catch (e) {
     console.warn('Tool deck init failed:', e);
+  }
+});
+
+function updatePedBrief() {
+  const sel = document.getElementById('pedagogy');
+  const key = sel && sel.value ? sel.value : 'Concept Check (Retrieval)';
+  const brief = (PEDAGOGY[key] && PEDAGOGY[key].brief) || '';
+  const el = document.getElementById('pedBrief');
+  if (el) el.textContent = brief;
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const sel = document.getElementById('pedagogy');
+  if (sel) {
+    updatePedBrief();
+    sel.addEventListener('change', () => {
+      state.pedagogy = sel.value;
+      updatePedBrief();
+    });
   }
 });
 
@@ -2147,6 +2114,7 @@ ${PANOPTO_BLOCK}
 PEDAGOGY: ${pedBlock}
 
 HE STANDARDS: Clear stems testing outcomes (not trivia); plausible distractors from lecture; meaningful feedback explaining WHY with timestamps; mix Bloom levels; university-level precision.
+ADAPT TO PRESET: Make stems, distractors and feedback reflect the selected pedagogy ("${state.pedagogy}").
 
 Q TYPES: ${types} | ${state.quizCount} per type | TARGET=${target} exactly | Rewrite invalid as essay${tfNum}
 
