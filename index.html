@@ -292,44 +292,13 @@
   
   .hero-banner.notes-hero {
     background: linear-gradient(135deg, rgba(245,158,11,0.85) 0%, rgba(239,68,68,0.85) 100%), 
-                url('businessschoolimage_2800_q80.jpg') center/cover;
+                url('1cdd84d4-b0ce-4901-9d10-6b47a02ed554.jpg') center/cover;
   }
   
   .hero-banner.help-hero {
     background: linear-gradient(135deg, rgba(124,58,237,0.85) 0%, rgba(236,72,153,0.85) 100%), 
                 url('QUB-gallery-image-lanyon-building.jpg') center/cover;
   }
-
-  /* Build progress (Quiz) */
-  .build-progress { height: 6px; background: rgba(224,0,27,0.12); border-radius: 999px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(224,0,27,0.12); margin-top: 0.75rem; }
-  .build-progress.hidden { display: none; }
-  .build-progress-fill { height: 100%; width: 0%; background: var(--gradient-qub); transition: width 400ms ease; }
-
-  /* Quiz layout (sleek Canva-like) */
-  .quiz-grid { display: grid; grid-template-columns: 220px 1fr; gap: 2rem; align-items: start; }
-  .quiz-main { min-width: 0; }
-  .quiz-rail { position: sticky; top: 96px; display: flex; flex-direction: column; gap: 10px; }
-  .quiz-rail a { text-decoration: none; font-weight: 600; padding: 10px 14px; border-radius: 12px; color: var(--primary); background: rgba(224,0,27,0.06); border: 1px solid rgba(224,0,27,0.12); transition: transform .15s ease, box-shadow .2s ease, background .2s ease; }
-  .quiz-rail a:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(224,0,27,0.12); }
-  .quiz-rail a.active { color: white; background: var(--gradient-qub); border-color: transparent; }
-  @media (max-width: 980px) { .quiz-grid { grid-template-columns: 1fr; } .quiz-rail { display: none; } }
-
-  /* Canva-style option cards */
-  .advanced-options .form-grid { display: grid; grid-template-columns: repeat(3, minmax(260px, 1fr)); gap: 14px; }
-  .advanced-options .form-group { background: var(--bg-secondary); padding: 12px 14px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
-  .advanced-options .form-label { font-weight: 700; margin-bottom: 8px; display: block; }
-
-  /* Segmented toggle */
-  .seg { display:inline-flex; background: var(--bg-secondary); border:1px solid var(--border); border-radius: 999px; overflow:hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.05); }
-  .seg button { padding:8px 14px; border:none; background:transparent; cursor:pointer; font-weight:600; color: var(--text-secondary); }
-  .seg button.active { color:#fff; background: var(--gradient-qub); }
-
-  /* Global app rail (visible on all pages) */
-  /* Remove global sidebar layout */
-  .app-grid { display: block; max-width: 1400px; margin: 0 auto; }
-
-  /* Hide old per-page quiz rail */
-  .quiz-rail { display: none !important; }
   
   .hero-banner::before {
     content: '';
@@ -1643,8 +1612,6 @@
 </div>
 
 <main>
-  <div class="app-grid">
-    <section class="app-main">
   <!-- Help Info Boxes (Hidden by default) -->
   <div class="info" id="about">
     <div class="section-title">
@@ -1657,9 +1624,6 @@
   <!-- Quiz Workflow -->
   <div class="workflow-content quiz-workflow hidden">
     <h2 class="gradient-title" style="margin-top: 2rem; margin-bottom: 3rem;">Canvas Quiz Maker</h2>
-
-    <div class="quiz-grid" style="grid-template-columns: 1fr;">
-      <div class="quiz-main">
     
     <div class="info" id="preflight">
       <div class="section-title">
@@ -1675,28 +1639,15 @@
     </div>
     
     <!-- Customise Options (Now at Top) -->
-    <div class="advanced-options" id="customise" style="margin-bottom: 2rem;">
+    <div class="advanced-options" style="margin-bottom: 2rem;">
       <div class="advanced-header" id="advancedToggle">
         <span class="advanced-title">Customise Options</span>
         <span class="advanced-toggle open">▼</span>
       </div>
-      <div class="advanced-content open" id="advancedContent" style="padding-top: 0.5rem;">
+      <div class="advanced-content open" id="advancedContent">
         
-        <div class="form-grid" style="grid-template-columns: repeat(3, minmax(280px,1fr));">
+        <div class="form-grid">
           
-          <div class="form-group">
-            <label class="form-label">Pedagogy Preset</label>
-            <select id="pedagogy" title="Sets tone and question style across disciplines.">
-              <option>Concept Check (Retrieval)</option>
-              <option>Worked Examples (Scaffolded)</option>
-              <option>Case/Scenario-Based</option>
-              <option>Debate / Critical Analysis</option>
-              <option>Metacognitive Reflection</option>
-              <option>Accessibility-First (UDL)</option>
-            </select>
-            <p class="help" id="pedBrief"></p>
-          </div>
-
           <div class="form-group">
             <label class="form-label" for="quizLang">Language</label>
             <select id="quizLang" title="Output language and terminology style. Default: English (UK).">
@@ -1713,36 +1664,55 @@
             <input type="number" id="quizCount" min="1" max="12" value="3" title="How many items to generate for each selected question type.">
           </div>
           
-          <!-- Feedback note removed; detailed feedback is fixed by design -->
+          <div class="form-group">
+            <label class="form-label" for="quizFeedback">Feedback level</label>
+            <select id="quizFeedback" title="What students will see after answering.">
+              <option value="off">Off — no explanations</option>
+              <option value="brief" selected>Brief — 1-sentence rationale for the correct answer</option>
+              <option value="detailed">Detailed — explain the correct answer AND why each distractor is less accurate, with study tips</option>
+            </select>
+            <p class="help">This feedback appears to students when they review the Canvas quiz. It helps address misconceptions and supports revision.</p>
+          </div>
         </div>
         
-        <div class="form-group mt-1half" style="grid-column: 1 / span 2;">
+        <div class="form-group mt-1half">
+          <label class="form-label">Pedagogy Preset</label>
+          <select id="pedagogy" title="Sets tone and question style across disciplines.">
+            <option>Concept Check (Retrieval)</option>
+            <option>Worked Examples (Scaffolded)</option>
+            <option>Case/Scenario-Based</option>
+            <option>Debate / Critical Analysis</option>
+            <option>Metacognitive Reflection</option>
+            <option>Accessibility-First (UDL)</option>
+          </select>
+          <p class="help" id="pedBrief"></p>
+        </div>
+        
+        <div class="form-group mt-1half">
           <label class="form-label">Question Types</label>
           <div class="chip-group" id="questionTypes"></div>
-          <p class="help">Multiple Choice is a good default to check core understanding. You can add other Canvas-compatible types (Matching disabled temporarily):
+          <p class="help">Multiple Choice is a good default to check core understanding. You can add other Canvas-compatible types:
             <span class="tooltip" title="Multiple Answers: choose all that apply, scored with partial credit.">MA</span>,
             <span class="tooltip" title="True/False: two options; the prompt enforces valid structure in QTI.">TF</span>,
             <span class="tooltip" title="Short Answer: exact strings (or variants) are accepted.">SA</span>,
             <span class="tooltip" title="Essay: unscored text response; used as a fallback if a question can't be validated.">Essay</span>,
             <span class="tooltip" title="Numerical: exact value or tolerance range.">Numerical</span>,
-            <!-- Matching disabled -->
-            
+            <span class="tooltip" title="Matching: valid pairs; if not possible, we auto-rewrite to MC/Essay.">Matching</span>.
           </p>
         </div>
         
-        <div class="form-group" style="grid-column: 3; display:flex; align-items:center; justify-content:flex-end;">
-          <button class="btn-primary" id="generateQuiz" onclick="copyPrompt();" style="width:auto; padding:14px 22px;">
-            📋 Build & Copy Prompt
-          </button>
-          <div class="build-progress hidden" id="buildProgress" style="flex:1; max-width:220px; margin-left:12px;"><div class="build-progress-fill" id="buildProgressFill"></div></div>
-        </div>
-        
-    <!-- Primary Action moved into row 2 right column above -->
     </div>
   </div>
+  
+    <!-- Primary Action -->
+    <div class="primary-action">
+      <button class="btn-primary" id="generateQuiz" onclick="copyPrompt();">
+        📋 Copy Prompt to Clipboard
+      </button>
+    </div>
     
     <!-- Canvas How-To (Quiz Only) -->
-    <div class="info" id="howto">
+    <div class="info" id="canvasHow">
       <div class="section-title">
         <strong>Using this in Canvas (New or Classic Quizzes)</strong>
         <button class="btn" id="hideCanvasHow" title="Hide instructions">✕</button>
@@ -1759,20 +1729,27 @@
       <p class="help" style="margin-top: 0.75rem;"><strong>Note:</strong> If Copilot returns "INSUFFICIENT_PAGE_CONTENT", go back and ensure captions/contents panels are fully expanded and loaded.</p>
       </div>
     </div>
-    
-      </div> <!-- /.quiz-main -->
-    </div> <!-- /.quiz-grid -->
   </div>
     
   <!-- Study Guide Workflow -->
   <div class="workflow-content study-workflow hidden">
     <h2 class="gradient-title" style="margin-top: 2rem; margin-bottom: 3rem;">Study Guide Builder</h2>
 
+    <!-- Format Selector -->
+    <div class="quick-start" style="margin-top: -0.5rem; margin-bottom: 1.5rem;">
+      <div class="section-title">Output Format</div>
+      <div id="studyFormatSelector" style="display: flex; gap: 1rem; align-items: center;">
+        <div class="chip active" data-format="word" style="cursor: pointer; padding: 0.75rem 1.5rem;">📄 Word (.docx)</div>
+        <div class="chip" data-format="powerpoint" style="cursor: pointer; padding: 0.75rem 1.5rem;">📊 PowerPoint (.pptx)</div>
+      </div>
+      <p class="help">Choose the output format for your study guide documents.</p>
+    </div>
+
     <!-- Study Guide Quick Intro (no customiser) -->
-    <div class="helper-message" style="margin-top: -0.5rem; margin-bottom: 1.5rem;">
+    <div class="helper-message" style="margin-top: 0.5rem; margin-bottom: 1.5rem;">
       <div class="helper-message-icon">🧭</div>
       <div class="helper-message-text">
-        <strong>Pick a Study Guide Tool below</strong> — each card contains a complete, QUB‑aligned prompt. Click <em>Copy Prompt</em>, paste into Copilot with your Panopto <em>Watch</em> page open, and it will auto‑scroll captions &amp; slides, extract evidence, and generate a Word file.
+        <strong>Pick a Study Guide Tool below</strong> — each card contains a complete, QUB‑aligned prompt. Click <em>Copy Prompt</em>, paste into Copilot with your Panopto <em>Watch</em> page open, and it will auto‑scroll captions &amp; slides, extract evidence, and generate your document. Use <em>Preview</em> to check the prompt first.
       </div>
     </div>
 
@@ -1780,19 +1757,22 @@
     <div class="quick-start" id="studyToolsDeck" style="margin-top:1.5rem;">
       <div class="section-title">
         <span>Study Guide Tools</span>
-        <span class="help" style="display:flex; align-items:center; gap:8px;">
-          <span>Output:</span>
-          <span class="seg" role="tablist" aria-label="Study output format">
-            <button id="studyOutDoc" class="active" aria-selected="true">Word</button>
-            <button id="studyOutPpt">PowerPoint</button>
-          </span>
-        </span>
+        <span class="help">Pick a tool and copy its pre-built prompt to Copilot</span>
       </div>
       <div class="preset-cards study-tools-grid" id="studyToolsGrid">
         <!-- Cards populated by JS -->
       </div>
     </div>
-    <!-- Study preview removed for streamlined flow -->
+    <div class="study-preview-panel hidden" id="studyPreviewPanel">
+      <div class="study-preview-header">
+        <span class="study-preview-title" id="studyPreviewTitle">Preview</span>
+        <span class="study-preview-meta" id="studyPreviewMeta"></span>
+      </div>
+      <div class="study-preview-body">
+        <div class="study-preview-placeholder" id="studyPreviewPlaceholder">Select "Preview" on a tool to view the full prompt here.</div>
+        <pre class="study-preview-text hidden" id="studyPreviewText"></pre>
+      </div>
+    </div>
   </div>
   
   <!-- From Notes Workflow -->
@@ -1803,34 +1783,71 @@
     <div class="quick-start">
       <div class="section-title">Paste your notes</div>
       <textarea id="notesInput" placeholder="Paste your lecture notes here (plain text, headings, bullets)..." class="w-100 min-h-200"></textarea>
-      <p class="help">Aim for 400–2000 words. Keep headings and key ideas — we’ll combine your notes with the selected tool and ensure the prompt stays under 8000 characters.</p>
+      <p class="help">Aim for 400–2000 words. Keep headings and key ideas — we'll combine your notes with the selected tool and ensure the prompt stays under 8000 characters.</p>
     </div>
 
     <div class="helper-message" style="margin-bottom: 1.5rem;">
       <div class="helper-message-icon">🗂️</div>
       <div class="helper-message-text">
-        <strong>Select a Notes Tool</strong> — each card wraps your pasted notes in a ready-to-copy prompt.
+        <strong>Select a Notes Tool</strong> — each card wraps your pasted notes in a ready-to-copy prompt. Preview first to confirm the output and character count.
       </div>
     </div>
 
     <div class="quick-start" id="notesToolsDeck" style="margin-top:1rem;">
-      <div class="section-title" style="align-items: center;">
+      <div class="section-title">
         <span>Notes Tools</span>
-        <span class="help" style="margin-left: auto; display:flex; align-items:center; gap:8px;">
-          <span>Output:</span>
-          <span class="seg" role="tablist" aria-label="Notes output format">
-            <button id="notesOutDoc" class="active" aria-selected="true">Word</button>
-            <button id="notesOutPpt">PowerPoint</button>
-          </span>
-        </span>
+        <span class="help">Choose an output style, then copy or preview the prompt.</span>
       </div>
-      <div class="preset-cards study-tools-grid" id="notesToolsGrid" style="grid-template-columns: repeat(auto-fill, minmax(260px,1fr));">
+      <div class="preset-cards study-tools-grid" id="notesToolsGrid">
         <!-- Cards populated by JS -->
+      </div>
+    </div>
+
+    <div class="study-preview-panel hidden" id="notesPreviewPanel">
+      <div class="study-preview-header">
+        <span class="study-preview-title" id="notesPreviewTitle">Preview</span>
+        <span class="study-preview-meta" id="notesPreviewMeta"></span>
+      </div>
+      <div class="study-preview-body">
+        <div class="study-preview-placeholder" id="notesPreviewPlaceholder">Paste notes and choose "Preview" to check the final prompt.</div>
+        <pre class="study-preview-text hidden" id="notesPreviewText"></pre>
       </div>
     </div>
   </div>
   
-  <!-- Preview Section removed for streamlined flow -->
+  <!-- Preview Section (Shared) -->
+  <div class="preview-section centered" id="previewSection" style="display:none;">
+    <div class="preview-header">
+      <div class="section-title">Your Copilot Prompt</div>
+      <div class="preview-stats">
+        <div class="stat">
+          <span>📊</span>
+          <span><span class="stat-value" id="charCount">0</span> chars (aim &lt; 8000)</span>
+        </div>
+        <span class="status-badge" id="statusBadge">
+          <span>✓</span>
+          <span id="statusText">Ready</span>
+        </span>
+      </div>
+    </div>
+    
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressBar"></div>
+    </div>
+    
+    <div class="preview-actions" style="margin: 1rem 0; justify-content: space-between;">
+      <span class="help">Paste into Copilot with your Panopto Watch page open. Ensure preflight steps are done.</span>
+      <button class="btn-primary" id="copyTop" title="Copy the prompt" onclick="copyPrompt();">📋 Copy Prompt</button>
+    </div>
+    
+    <div class="preview-box">
+      <div class="preview-placeholder" id="previewPlaceholder">
+        <div class="preview-placeholder-icon">👆</div>
+        <p>Customise your options above and your prompt will appear here</p>
+      </div>
+      <pre class="preview-text hidden" id="previewText"></pre>
+    </div>
+  </div>
   
   <!-- Help/Getting Started Workflow -->
   <div class="workflow-content help-workflow">
@@ -1873,7 +1890,7 @@
             <ol>
               <li>Open your Panopto <em>Watch</em> page in a browser tab (avoid the small Canvas embed).</li>
               <li>Open the <strong>Captions/Transcript</strong> panel and the <strong>Contents/Slides</strong> panel. Scroll through the transcript once so all captions load.</li>
-              <li>Open <strong>Microsoft Copilot</strong> in the sidebar and allow it to “Use page content”.</li>
+              <li>Open <strong>Microsoft Copilot</strong> in the sidebar and allow it to "Use page content".</li>
               <li>In Prompt Builder, choose your <strong>Pedagogy preset</strong>, keep <strong>Multiple Choice</strong> as default (or add more types), and set the <strong>Feedback level</strong>.</li>
               <li>Click <strong>Copy Prompt</strong> and paste it into Copilot. It will read <em>only</em> your Panopto page (captions + slides) and generate the requested files.</li>
             </ol>
@@ -1904,10 +1921,10 @@
         </div>
         <div class="faq-answer">
           <div class="faq-answer-text">
-            <p>Presets shape the <strong>tone, structure and feedback style</strong> of what is generated, aligned with Queen’s <em>Beyond Blended</em> approach:</p>
+            <p>Presets shape the <strong>tone, structure and feedback style</strong> of what is generated, aligned with Queen's <em>Beyond Blended</em> approach:</p>
             <ul>
               <li><strong>Concept Check (Retrieval):</strong> Short, focused questions that probe essential ideas and common misconceptions.</li>
-              <li><strong>Worked Examples (Scaffolded):</strong> Step‑by‑step reasoning with “why this step” notes and common slips.</li>
+              <li><strong>Worked Examples (Scaffolded):</strong> Step‑by‑step reasoning with "why this step" notes and common slips.</li>
               <li><strong>Case/Scenario‑Based:</strong> Realistic vignettes that ask students to apply ideas; one answer is most defensible from the lecture.</li>
               <li><strong>Debate / Critical Analysis:</strong> Contrast positions and justify the preferred option using evidence from slides/captions.</li>
               <li><strong>Metacognitive Reflection:</strong> Prompts that surface process, limits and next steps (great for short‑answer / essay).</li>
@@ -1931,7 +1948,7 @@
               <li>If you only see an <strong>Item Bank</strong>, open it and build a quiz from those questions—Canvas sometimes does this automatically.</li>
               <li>Open the quiz to review points, availability, and <strong>Student Feedback</strong> settings; then <strong>Publish</strong>.</li>
             </ol>
-            <p class="help">Troubleshooting: If Canvas shows “No question type used…”, the QTI was malformed. Regenerate using this tool’s latest prompt and ensure only Canvas‑supported types are selected.</p>
+            <p class="help">Troubleshooting: If Canvas shows "No question type used…", the QTI was malformed. Regenerate using this tool's latest prompt and ensure only Canvas‑supported types are selected.</p>
           </div>
         </div>
       </div>
@@ -1961,7 +1978,7 @@
         </div>
         <div class="faq-answer">
           <div class="faq-answer-text">
-            <p>This tool runs entirely in your browser and only creates a <em>prompt</em>. Your materials are not uploaded to our servers. When you paste the prompt into Microsoft Copilot, your data is handled under Microsoft’s terms and your institutional account settings.</p>
+            <p>This tool runs entirely in your browser and only creates a <em>prompt</em>. Your materials are not uploaded to our servers. When you paste the prompt into Microsoft Copilot, your data is handled under Microsoft's terms and your institutional account settings.</p>
             <ul>
               <li>The prompt instructs Copilot to use <strong>only</strong> your Panopto captions/slides or notes and to avoid external sources.</li>
               <li>No student data is processed.</li>
@@ -1975,12 +1992,10 @@
   </div>
   
   <footer style="max-width:1400px;margin:3rem auto 2rem;padding:1.5rem 2rem;border-top:2px solid var(--border);text-align:center;color:var(--text-secondary);">
-    <p style="margin-bottom:0.5rem;"><strong>Teaching & Training Unit – D&IS, Queen’s University Belfast</strong></p>
+    <p style="margin-bottom:0.5rem;"><strong>Teaching & Training Unit – D&IS, Queen's University Belfast</strong></p>
     <p style="margin-bottom:0.5rem;">Patrick Phillips • Support & enquiries: <a href="mailto:p.phillips@qub.ac.uk" style="color:inherit; text-decoration:underline;">p.phillips@qub.ac.uk</a></p>
-    <p style="font-size:0.875rem;">We strive to create high‑quality resources aligned with Queen’s pedagogy. However, AI‑generated content may contain inaccuracies. Always review outputs for accuracy, inclusivity and accessibility before use.</p>
+    <p style="font-size:0.875rem;">We strive to create high‑quality resources aligned with Queen's pedagogy. However, AI‑generated content may contain inaccuracies. Always review outputs for accuracy, inclusivity and accessibility before use.</p>
   </footer>
-</section>
-  </div> <!-- /.app-grid -->
 </main>
 
 <!-- Help Button -->
@@ -2078,7 +2093,8 @@ let state = {
   quizCount: 3,
   quizFeedback: 'brief',
   questionTypes: ['multiple_choice_question'],
-  notesInput: ''
+  notesInput: '',
+  studyFormat: 'word'
 };
 
 const QUESTION_TYPES = [
@@ -2087,8 +2103,8 @@ const QUESTION_TYPES = [
   { id: 'true_false_question', label: 'True/False' },
   { id: 'short_answer_question', label: 'Short Answer' },
   { id: 'essay_question', label: 'Essay' },
-  { id: 'numerical_question', label: 'Numerical' }
-  // Matching disabled for now
+  { id: 'numerical_question', label: 'Numerical' },
+  { id: 'matching_question', label: 'Matching' }
 ];
 
 /* ---------- Initialisation: mount chips once DOM is ready ---------- */
@@ -2145,22 +2161,15 @@ function buildQuizPrompt() {
   let tfNum = '';
   if (state.questionTypes.includes('true_false_question')) tfNum += '\nTF: <response_lid> with 2 labels: True/False.';
   if (state.questionTypes.includes('numerical_question')) tfNum += '\nNUM: <response_num> + tolerance.';
-
-  // Minimal per-type QTI examples — only include for selected types to stay under 8k
-  const saTpl = state.questionTypes.includes('short_answer_question') ? `\nSA ITEM:\n<item ident="qSA1" title="QSA1">\n<itemmetadata><qtimetadata>\n<qtimetadatafield><fieldlabel>question_type</fieldlabel><fieldentry>short_answer_question</fieldentry></qtimetadatafield>\n<qtimetadatafield><fieldlabel>points_possible</fieldlabel><fieldentry>1</fieldentry></qtimetadatafield>\n</qtimetadata></itemmetadata>\n<presentation><material><mattext texttype="text/html">STEM</mattext></material>\n<response_str ident="response1" rcardinality="Single"><render_fib fibtype="String" prompt="Box" maxchars="120"/></response_str></presentation>\n<resprocessing><outcomes><decvar varname="SCORE" vartype="Decimal" minvalue="0" maxvalue="100"/></outcomes>\n<respcondition continue="No"><conditionvar><varequal respident="response1">CORRECT</varequal></conditionvar><setvar varname="SCORE" action="Set">100</setvar>${state.quizFeedback !== 'off' ? '<displayfeedback feedbacktype="Response" linkrefid="fb"/>' : ''}</respcondition></resprocessing>${state.quizFeedback !== 'off' ? '<itemfeedback ident="fb"><material><mattext texttype="text/html">WHY [mm:ss]</mattext></material></itemfeedback>' : ''}\n</item>\n` : '';
-
-  const essayTpl = state.questionTypes.includes('essay_question') ? `\nESSAY ITEM:\n<item ident="qE1" title="QE1">\n<itemmetadata><qtimetadata>\n<qtimetadatafield><fieldlabel>question_type</fieldlabel><fieldentry>essay_question</fieldentry></qtimetadatafield>\n<qtimetadatafield><fieldlabel>points_possible</fieldlabel><fieldentry>0</fieldentry></qtimetadatafield>\n</qtimetadata></itemmetadata>\n<presentation><material><mattext texttype="text/html">PROMPT</mattext></material>\n<response_str ident="response1" rcardinality="Single"><render_fib fibtype="Text" prompt="Box" rows="8" cols="60"/></response_str></presentation>\n</item>\n` : '';
-
-  const matchTpl = state.questionTypes.includes('matching_question') ? `\nMATCHING ITEM (≥3 pairs + ≥2 distractors):\n<item ident="qM1" title="QM1">\n<itemmetadata><qtimetadata>\n<qtimetadatafield><fieldlabel>question_type</fieldlabel><fieldentry>matching_question</fieldentry></qtimetadatafield>\n<qtimetadatafield><fieldlabel>points_possible</fieldlabel><fieldentry>1</fieldentry></qtimetadatafield>\n</qtimetadata></itemmetadata>\n<presentation><material><mattext texttype="text/html">STEM</mattext></material>\n<response_lid ident="response1" rcardinality="Multiple"><render_match shuffle="Yes">\n<!-- Premises -->\n<response_label ident="P1"><material><mattext texttype="text/html">P1</mattext></material></response_label>\n<response_label ident="P2"><material><mattext texttype="text/html">P2</mattext></material></response_label>\n<response_label ident="P3"><material><mattext texttype="text/html">P3</mattext></material></response_label>\n<!-- Choices (correct + distractors) -->\n<response_label ident="C1"><material><mattext texttype="text/html">C1</mattext></material></response_label>\n<response_label ident="C2"><material><mattext texttype="text/html">C2</mattext></material></response_label>\n<response_label ident="C3"><material><mattext texttype="text/html">C3</mattext></material></response_label>\n<response_label ident="D1"><material><mattext texttype="text/html">DIST_1</mattext></material></response_label>\n<response_label ident="D2"><material><mattext texttype="text/html">DIST_2</mattext></material></response_label>\n</render_match></response_lid></presentation>\n<resprocessing><outcomes><decvar varname="SCORE" vartype="Decimal" minvalue="0" maxvalue="100"/></outcomes>\n<respcondition continue="No"><conditionvar><and><varequal respident="response1">P1 C1</varequal><varequal respident="response1">P2 C2</varequal><varequal respident="response1">P3 C3</varequal></and></conditionvar><setvar varname="SCORE" action="Set">100</setvar>${state.quizFeedback !== 'off' ? '<displayfeedback feedbacktype="Response" linkrefid="fb"/>' : ''}</respcondition></resprocessing>${state.quizFeedback !== 'off' ? '<itemfeedback ident="fb"><material><mattext texttype="text/html">WHY pairs [mm:ss]</mattext></material></itemfeedback>' : ''}\n</item>\n` : '';
   
   return `SYSTEM: Return EXACTLY 2 files: (1) ${slug}_quiz_qti.zip, (2) ${slug}_quiz.pdf
 Use ONLY THIS Panopto page. Language=${state.quizLang}. Do NOT ask questions.
 ${PANOPTO_BLOCK}
 PEDAGOGY: ${pedBlock}
 
-HE STANDARDS: Clear stems targeting outcomes; plausible distractors; brief feedback with timestamps; mixed Bloom levels; precise UK English.
+HE STANDARDS: Clear stems testing outcomes (not trivia); plausible distractors from lecture; meaningful feedback explaining WHY with timestamps; mix Bloom levels; university-level precision.
 
-Q TYPES: ${types} | ${state.quizCount} per type | TARGET=${target} | Rewrite invalid as essay${tfNum}
+Q TYPES: ${types} | ${state.quizCount} per type | TARGET=${target} exactly | Rewrite invalid as essay${tfNum}
 
 QTI ZIP — ${slug}_quiz_qti.zip:
 imsmanifest.xml:
@@ -2190,16 +2199,14 @@ MC ITEM:
 </render_choice></response_lid></presentation>
 <resprocessing><outcomes><decvar varname="SCORE" vartype="Decimal" minvalue="0" maxvalue="100"/></outcomes>
 <respcondition continue="No"><conditionvar><varequal respident="response1">CORRECT</varequal></conditionvar>
-<setvar varname="SCORE" action="Set">100</setvar>${state.quizFeedback !== 'off' ? '<displayfeedback feedbacktype="Response" linkrefid="fb"/>' : ''}</respcondition></resprocessing>${state.quizFeedback !== 'off' ? '<itemfeedback ident="fb"><material><mattext texttype="text/html">WHY [mm:ss]</mattext></material></itemfeedback>' : ''}
+<setvar varname="SCORE" action="Set">100</setvar>${state.quizFeedback !== 'off' ? '<displayfeedback feedbacktype="Response" linkrefid="fb"/>' : ''}</respcondition></resprocessing>${state.quizFeedback !== 'off' ? '<itemfeedback ident="fb"><material><mattext texttype="text/html">WHY correct [mm:ss]</mattext></material></itemfeedback>' : ''}
 </item>
 
-${saTpl}${essayTpl}${matchTpl}
-
-GUARDS: UTF-8; escape XML chars; mattext≤1200; items=${target}; include metadata
+GUARDS: UTF-8; escape XML chars; mattext≤1200; exactly ${target} items; all have metadata
 
 PDF: A4. Title=[ACTUAL_VIDEO_TITLE], TOC, then 1Q/page: number, stem, options, answer${state.quizFeedback !== 'off' ? ', feedback+timestamp' : ''}
 
-VALIDATE: (1) ≥300w or "INSUFFICIENT_PAGE_CONTENT", (2) Real title extracted, (3) items=${target}, (4) Valid XML, (5) Metadata present, (6) HE quality, (7) Mixed Bloom
+VALIDATE: (1) ≥300w or "INSUFFICIENT_PAGE_CONTENT", (2) Real title extracted, (3) ${target} items, (4) Valid XML, (5) All metadata, (6) HE quality (clear/defensible/plausible/meaningful), (7) Mixed Bloom, (8) Expert-approvable
 
 OUTPUT: [ACTUAL_TITLE_SLUG]_quiz_qti.zip + [ACTUAL_TITLE_SLUG]_quiz.pdf using REAL title from og:title/[data-role="session-title"]/h1/document.title—NOT "Lecture_Quiz" placeholder.`;
 }
@@ -2207,24 +2214,23 @@ OUTPUT: [ACTUAL_TITLE_SLUG]_quiz_qti.zip + [ACTUAL_TITLE_SLUG]_quiz.pdf using RE
 // -------- Study Tool Prompts (v13 with scroll/expand + Bloom intent) --------
 
 function promptCoreConceptsV13(){
-  const out = (window.state && window.state.studyOutput) || 'docx';
   return `SYSTEM
-Return ONE file only: [REAL_TITLE_SLUG]_study_core_concepts.${out} (${out==='pptx'?'PowerPoint':'Word'} A4).
+Return ONE file only: [REAL_TITLE_SLUG]_study_core_concepts.docx (Word A4).
 Use only the Panopto Watch page. No external sources.
 
 SOURCE PREPARATION
-1. Confirm this is a Panopto “Watch” page.
+1. Confirm this is a Panopto "Watch" page.
 2. Virtually scroll through and fully expand:
-   – “Captions” / “Transcript” tab → bottom
-   – “Contents” / “Slides” tabs → expand all
+   – "Captions" / "Transcript" tab → bottom
+   – "Contents" / "Slides" tabs → expand all
 3. Wait until no new lines appear.
 4. Extract and dedupe all caption + slide text (preserve [mm:ss]).
 If corpus < 500 words →
-“INSUFFICIENT_PAGE_CONTENT — Expand captions & slides, scroll fully, then retry.”
+"INSUFFICIENT_PAGE_CONTENT — Expand captions & slides, scroll fully, then retry."
 
 TITLE & FILENAME
 Extract REAL title from <meta property="og:title"> or [data-role="session-title"] or .session-title or document.title.
-Use that title for H1 and filename [REAL_TITLE_SLUG]_study_core_concepts.${out}.
+Use that title for H1 and filename [REAL_TITLE_SLUG]_study_core_concepts.docx.
 
 TASK
 Run all phases (collect → analyse → write → validate → output) automatically.
@@ -2234,7 +2240,7 @@ PURPOSE
 Produce a timestamp-based conceptual study guide that explains key ideas and how they connect, using clear language and evidence.
 
 STRUCTURE
-1. Title page — REAL title, module, date + 120-word “How to use this guide”.
+1. Title page — REAL title, module, date + 120-word "How to use this guide".
 2. Learning outcomes — 5 outcomes (10–18 words, ≥ 3 Bloom levels) + 120-word alignment note.
 3. Threshold concepts — 3–5 ideas (80–110 words + [mm:ss]).
 4. Key concepts — ≥ 12 concepts (55–75 words + [mm:ss]).
@@ -2253,13 +2259,12 @@ PEDAGOGY
 Link concepts to outcomes; embed Beyond Blended pillars; apply ≥7 UDL checkpoints; UK English; QUB red #E0001B; WCAG-AA.
 
 VALIDATION
-Corpus ≥ 500 words; ≥ 3 thresholds; ≥ 12 key concepts; ≥ 24 timestamps; no placeholders; one .${out} output.`;
+Corpus ≥ 500 words; ≥ 3 thresholds; ≥ 12 key concepts; ≥ 24 timestamps; no placeholders; one .docx output.`;
 }
 
 function promptKnowledgeToolsV13(){
-  const out = (window.state && window.state.studyOutput) || 'docx';
   return `SYSTEM
-Return ONE file only: [REAL_TITLE_SLUG]_study_knowledge_tools.${out} (${out==='pptx'?'PowerPoint':'Word'} A4).
+Return ONE file only: [REAL_TITLE_SLUG]_study_knowledge_tools.docx (Word A4).
 
 SOURCE PREPARATION — same scroll/expand steps as Prompt 1; fail if < 500 words.
 
@@ -2268,7 +2273,7 @@ Turn lecture content into usable terminology and reasoning patterns that model e
 
 STRUCTURE
 1. Glossary — ≥ 28 terms (25–35 words + authentic example + [mm:ss]).
-2. Worked examples — 3 (180–220 words): Context; Steps; Why; Common slip; “Check you can…” + [mm:ss] and a short intent note (e.g., apply/analyse).
+2. Worked examples — 3 (180–220 words): Context; Steps; Why; Common slip; "Check you can…" + [mm:ss] and a short intent note (e.g., apply/analyse).
 3. Mini cases — 2 (180–220 words) with decision-making analysis + [mm:ss].
 4. Appendix A — ≥ 24 timestamped quotes.
 
@@ -2279,39 +2284,176 @@ VALIDATION
 Glossary ≥ 28; Examples = 3; Cases = 2; ≥ 24 timestamps; no duplicates; one .docx output.`;
 }
 
-function promptPracticeTestingV13(){
-  const out = (window.state && window.state.studyOutput) || 'docx';
+function promptPracticeTestingV13Word(){
   return `SYSTEM
-Return ONE file only: [REAL_TITLE_SLUG]_study_practice_testing.${out} (${out==='pptx'?'PowerPoint':'Word'} A4).
+Return ONE file only: [REAL_TITLE_SLUG]_study_practice_testing.docx (Word A4).
+Use UK English. Use only the Panopto Watch page. No external sources. Work silently.
 
-SOURCE PREPARATION — scroll and expand captions & slides; fail if < 500 words.
+SOURCE PREPARATION
+1) Confirm this is a Panopto "Watch" page.
+2) Open Captions or Transcript and Contents or Slides. Expand all sections.
+3) Scroll the transcript to the last line so all captions load. Wait until no new lines appear.
+4) Click slide thumbnails so all slide text loads.
+5) Extract and de-dup e captions + slide text. Preserve timestamps. Accept [m:ss], [mm:ss], [h:mm:ss].
+→ If corpus after de-duplication is less than 500 words, output exactly:
+"INSUFFICIENT_PAGE_CONTENT — Expand captions & slides, scroll fully, then retry."
 
-TASK
-Auto-run (collect → topic-seed → draft → validate → output). Do not ask for confirmation.
+TIMESTAMPS
+Before output, normalise all times:
+• Use [mm:ss] if total duration is under 1 hour, zero-pad minutes and seconds.
+• Use [h:mm:ss] if 1 hour or longer.
 
-PURPOSE
-Build a practice and testing section that develops retrieval and reasoning with clear feedback and Bloom-intent explanations.
+COLLECT
+Build QUOTES with at least 30 unique fragments, each 5–20 words, each with a distinct timestamp.
+If a caption fragment is messy or filler, use the matching phrasing from Slides or Contents.
+
+TITLE
+Extract the real title from og:title or [data-role="session-title"] or .session-title or document.title.
+Use it as H1 and to build [REAL_TITLE_SLUG].
 
 STRUCTURE
-1. Intro — 100-word “How to use this section” explaining that each task targets a different thinking skill.
-2. Problem set — 16 unique items (6 Recall, 6 Apply/Analyse, 4 Evaluate/Create).
-   Each: Prompt ≤25 words; Hint 20–35; Solution 60–110 + [mm:ss];
-   Why Correct 40–60; Common Misconception ≤25; short cognitive intent phrase.
-3. Self-check quiz — 14 MC/SA items on different topics; each with answer, 20–35 word rationale, misconception, [mm:ss], and cognitive intent note.
-4. Mini-rubric excerpt (3 criteria × 3 levels).
-5. Appendix A — ≥ 24 timestamped quotes.
 
-PEDAGOGY
-Use ≥5 distinct lecture topics; Balance Bloom levels; Beyond Blended (Pace, Flex, Support); ≥7 UDL checkpoints; UK English.
+H2 Introduction
+Write 80–120 words on how to use this section for retrieval and reasoning. Mention that each item cites the lecture with timestamps.
+
+H2 Problem Set (exactly 10 items)
+Create 10 unique items that cover at least 3 distinct topics and a spread of Bloom levels:
+• 4 items at Remember or Understand
+• 4 items at Apply or Analyse
+• 2 items at Evaluate or Create
+
+For each item provide:
+• Prompt: 25 words or fewer
+• Hint: 15–30 words
+• Solution: 60–110 words using one direct "quote" + timestamp from QUOTES
+• Why Correct: 30–50 words
+• Common Misconception: 20 words or fewer
+• Bloom intent: one level name
+
+Each problem must use a different quote and timestamp. No repeats.
+
+H2 Self-check Quiz (exactly 10 items)
+Create 10 items on different ideas than the Problem Set.
+For each item provide:
+• Question type: MC or Short Answer
+• Question text
+• Correct answer
+• Rationale: 20–35 words using one direct "quote" + timestamp from QUOTES
+• Common Misconception: 20 words or fewer
+• Bloom intent: one level name
+
+Use 10 new quotes and timestamps not used in the Problem Set.
+
+H2 Mini Rubric
+Provide a 3 × 3 table with levels Developing, Competent, Excellent. Tie criteria to lecture specifics.
+
+H2 Appendix A — Quotes Used
+List only the quotes actually used in Problems and Quiz, grouped by section.
+Format each as: "quoted text" [normalised time].
+Do not add new quotes here.
+
+UNIQUENESS AND QUALITY CHECKS
+Before output:
+• No quote text or timestamp is reused anywhere except in Appendix A.
+• Problems do not duplicate topics. Quiz items use different ideas than Problems.
+• No placeholders like "[Insert…]" or "Sample quote".
+• UK spelling throughout.
 
 VALIDATION
-16 unique problems (≥5 topics); 14 quiz items; ≥24 timestamps; no duplicates; one .docx output.`;
+1) Exactly 10 Problems and 10 Quiz items are present.
+2) Every quoted fragment exists in Captions or Slides.
+3) Each item's timestamp is normalised to [mm:ss] or [h:mm:ss] and the quote appears verbatim.
+4) One .docx file only.`;
+}
+
+function promptPracticeTestingV13Pptx(){
+  return `SYSTEM
+Return ONE file only: [REAL_TITLE_SLUG]_study_practice_testing.pptx (PowerPoint).
+Use UK English. Use only the Panopto Watch page. No external sources. Work silently.
+
+SOURCE PREPARATION
+1) Confirm this is a Panopto "Watch" page.
+2) Open Captions or Transcript and Contents or Slides. Expand all sections.
+3) Scroll the transcript to the last line so all captions load. Wait until no new lines appear.
+4) Click slide thumbnails so all slide text loads.
+5) Extract and de-dup captions + slide text. Preserve timestamps. Accept [m:ss], [mm:ss], [h:mm:ss].
+→ If corpus after de-duplication is less than 500 words, output exactly:
+"INSUFFICIENT_PAGE_CONTENT — Expand captions & slides, scroll fully, then retry."
+
+TIMESTAMPS
+Before output, normalise all times:
+• Use [mm:ss] if total duration is under 1 hour, zero-pad minutes and seconds.
+• Use [h:mm:ss] if 1 hour or longer.
+
+COLLECT
+Build QUOTES with at least 30 unique fragments, each 5–20 words, each with a distinct timestamp.
+If a caption fragment is messy or filler, use the matching phrasing from Slides or Contents.
+
+TITLE
+Extract the real title from og:title or [data-role="session-title"] or .session-title or document.title.
+Use it for the Title Slide and to build [REAL_TITLE_SLUG].
+
+STRUCTURE (Slides)
+
+Title Slide
+• Display the extracted title.
+
+Section Header: Introduction
+• Create one content slide (80–120 words) explaining how to use this section for retrieval and reasoning. Mention that each item cites the lecture with timestamps.
+
+Section Header: Problem Set (exactly 10 slides)
+Create 10 content slides titled "Problem X" that cover at least 3 distinct topics and a spread of Bloom levels:
+• 4 slides at Remember or Understand
+• 4 slides at Apply or Analyse
+• 2 slides at Evaluate or Create
+For each slide include:
+• Prompt: 25 words or fewer
+• Hint: 15–30 words
+• Solution: 60–110 words using one direct "quote" + timestamp from QUOTES
+• Why Correct: 30–50 words
+• Common Misconception: 20 words or fewer
+• Bloom intent: one level name
+Each problem slide must use a different quote and timestamp. No repeats.
+
+Section Header: Self-check Quiz (exactly 10 slides)
+Create 10 content slides on different ideas than the Problem Set. For each slide include:
+• Question type: MC or Short Answer
+• Question text
+• Correct answer
+• Rationale: 20–35 words using one direct "quote" + timestamp from QUOTES
+• Common Misconception: 20 words or fewer
+• Bloom intent: one level name
+Use 10 new quotes and timestamps not used in the Problem Set.
+
+Section Header: Mini Rubric
+• Create one content slide with a 3 × 3 table (Developing, Competent, Excellent). Tie criteria to lecture specifics.
+
+Section Header: Appendix A — Quotes Used
+• Create content slide(s) listing only the quotes actually used in Problems and Quiz, grouped by section.
+• Format each as: "quoted text" [normalised time].
+• Do not add new quotes here.
+
+UNIQUENESS AND QUALITY CHECKS
+Before output:
+• No quote text or timestamp is reused anywhere except in Appendix A.
+• Problems do not duplicate topics. Quiz slides use different ideas than Problems.
+• No placeholders like "[Insert…]" or "Sample quote".
+• UK spelling throughout.
+
+VALIDATION
+1) Exactly 10 Problem slides and 10 Quiz slides are present.
+2) Every quoted fragment exists in Captions or Slides.
+3) Each slide's timestamp is normalised to [mm:ss] or [h:mm:ss] and the quote appears verbatim.
+4) One .pptx file only.`;
+}
+
+function promptPracticeTestingV13(){
+  return state.studyFormat === 'powerpoint' ? promptPracticeTestingV13Pptx() : promptPracticeTestingV13Word();
 }
 
 function promptReflectionPlanningV13(){
-  const out = (window.state && window.state.studyOutput) || 'docx';
   return `SYSTEM
-Return ONE file only: [REAL_TITLE_SLUG]_study_reflection_planning.${out} (${out==='pptx'?'PowerPoint':'Word'} A4).
+Return ONE file only: [REAL_TITLE_SLUG]_study_reflection_planning.docx (Word A4).
 
 SOURCE PREPARATION — scroll & expand captions/slides fully; fail if < 500 words.
 
@@ -2319,8 +2461,8 @@ PURPOSE
 Develop self-reflection and study planning skills based on timestamped lecture evidence and awareness of thinking levels.
 
 STRUCTURE
-1. Reflection prompts — 6–8 questions (each with a brief intent phrase like “This helps you evaluate …” + [mm:ss]).
-2. Rewatch guide — 8 clip intervals [mm:ss–mm:ss] with “watch for…” and an active task + intent note.
+1. Reflection prompts — 6–8 questions (each with a brief intent phrase like "This helps you evaluate …" + [mm:ss]).
+2. Rewatch guide — 8 clip intervals [mm:ss–mm:ss] with "watch for…" and an active task + intent note.
 3. Two-week planner — 14 rows with task, time estimate, and thinking skill column.
 4. Appendix A — ≥ 24 timestamped quotes.
 
@@ -2331,45 +2473,170 @@ VALIDATION
 ≥6 reflections; 8 rewatch segments; 14-day planner; ≥24 timestamps; one .docx output.`;
 }
 
+function promptExtensionSupportV13Word(){
+  return `SYSTEM
+Return ONE file only: [REAL_TITLE_SLUG]_study_extension_support.docx (Word A4).
+Use UK English. Use only the Panopto Watch page. No external sources. Work silently.
+
+SOURCE PREP
+1) Confirm this is a Panopto Watch page.
+2) Open Captions/Transcript and Contents/Slides. Expand all sections.
+3) Scroll the transcript to the last line so all captions load. Wait until no new lines appear.
+4) Click slide thumbnails so all slide text loads.
+5) Extract on-screen text from Captions, Contents and Slides with timestamps in [h:mm:ss] or [mm:ss].
+→ If combined text after de-duplication is < 500 words, output exactly:
+"INSUFFICIENT_PAGE_CONTENT — Expand captions & slides, scroll transcript fully, then retry."
+
+COLLECT
+Build a pool named QUOTES with at least 36 UNIQUE fragments, each 5–20 words, each with a DISTINCT timestamp.
+If a caption fragment is garbled, prefer the parallel wording from Slides or Contents for that concept.
+
+TITLE
+Extract the real title from <meta property="og:title"> or [data-role="session-title"] or .session-title or document.title.
+Use it as H1 and to build [REAL_TITLE_SLUG].
+
+FORMAT
+Use Word styles: H1 for title, H2 for sections, H3 for subheads. Use proper tables where requested.
+
+H2 Flashcards (12)
+Create TWELVE flashcards covering at least THREE distinct topics from the lecture. Do not use any one topic more than THREE times.
+Each card fields:
+• ID: FC01–FC12
+• Question: specific to the lecture wording. Ban generic stems such as "What is X?"
+• Answer: 1–3 sentences using lecture wording and include ONE quote + timestamp from QUOTES
+• Connection: why this matters for study or practice
+• Difficulty: Foundation or Intermediate or Advanced
+• Related IDs: 1–3 IDs. Do not include the card's own ID. Do not repeat the same ID twice.
+• Source: the same timestamp used in the Answer
+Use TWELVE different quotes and timestamps. No repeats across cards.
+
+H2 Group Tasks (2)
+Create TWO activities of 140–180 words each grounded in lecture specifics.
+Each task must include ONE quote + timestamp from QUOTES that has not been used in Flashcards and is not reused between tasks.
+For each task include:
+• Activity type
+• Learning objective
+• Facilitation steps
+• One specific lecture cue with [mm:ss] or [h:mm:ss]
+• Pedagogical intent
+• Time estimate
+• Assessment note
+Tasks must be distinct from each other.
+
+H2 Authentic Practice Task (1)
+Create ONE scenario of 170–220 words grounded in the lecture. Include ONE new quote + timestamp from QUOTES not used earlier.
+Add a 3×3 rubric table with criteria tied to lecture specifics and three levels: Developing, Competent, Excellent.
+
+H2 Appendix A: Quotes Used
+List every quote used in the document, grouped by section.
+Show the exact quoted text in quotation marks plus the timestamp. Do not add any new quotes here.
+
+H2 Appendix B: Flashcards Table
+Provide a Word table with headers: ID, Question, Answer, Connection, Difficulty, Related IDs, Source.
+Fill rows FC01–FC12 using the exact Flashcard content.
+
+UNIQUENESS AND QUALITY CHECKS (hard rules)
+Before output:
+• No quote text or timestamp is reused anywhere in the document, apart from being listed again in Appendix A.
+• Related IDs never repeat within a card and never include the card's own ID.
+• Flashcards cover at least three distinct topics and do not exceed three cards on any single topic.
+• Group tasks are distinct from each other and from the Authentic Practice Task.
+• No placeholder text such as "Question 1", "Sample quote", "Concept N", or generic answer patterns.
+• All timestamps match ^(\d{1,2}:)?[0-5]\d:[0-5]\d$ ([mm:ss] or [h:mm:ss]).
+• Remove any stray quotation marks after timestamps.
+
+VALIDATION
+1) Every quoted fragment exists in Captions or Slides.
+2) Each Flashcard "Source" matches the timestamp quoted in its Answer.
+3) Use UK spelling throughout.
+
+OUTPUT
+Produce the .docx file only.`;
+}
+
+function promptExtensionSupportV13Pptx(){
+  return `SYSTEM
+Return ONE file only: [REAL_TITLE_SLUG]_study_extension_support.pptx (PowerPoint).
+Use UK English. Use only the Panopto Watch page. No external sources. Work silently.
+
+SOURCE PREP
+1) Confirm this is a Panopto Watch page.
+2) Open Captions/Transcript and Contents/Slides. Expand all sections.
+3) Scroll the transcript to the last line so all captions load. Wait until no new lines appear.
+4) Click slide thumbnails so all slide text loads.
+5) Extract on-screen text from Captions, Contents and Slides with timestamps in [h:mm:ss] or [mm:ss].
+→ If combined text after de-duplication is < 500 words, output exactly:
+"INSUFFICIENT_PAGE_CONTENT — Expand captions & slides, scroll transcript fully, then retry."
+
+COLLECT
+Build a pool named QUOTES with at least 36 UNIQUE fragments, each 5–20 words, each with a DISTINCT timestamp.
+If a caption fragment is garbled, prefer the parallel wording from Slides or Contents for that concept.
+
+TITLE
+Extract the real title from <meta property="og:title"> or [data-role="session-title"] or .session-title or document.title.
+Use it as H1 and to build [REAL_TITLE_SLUG].
+
+FORMAT
+Use Word styles: H1 for title, H2 for sections, H3 for subheads. Use proper tables where requested.
+
+H2 Flashcards (12)
+Create TWELVE flashcards covering at least THREE distinct topics from the lecture. Do not use any one topic more than THREE times.
+Each card fields:
+• ID: FC01–FC12
+• Question: specific to the lecture wording. Ban generic stems such as "What is X?"
+• Answer: 1–3 sentences using lecture wording and include ONE quote + timestamp from QUOTES
+• Connection: why this matters for study or practice
+• Difficulty: Foundation or Intermediate or Advanced
+• Related IDs: 1–3 IDs. Do not include the card's own ID. Do not repeat the same ID twice.
+• Source: the same timestamp used in the Answer
+Use TWELVE different quotes and timestamps. No repeats across cards.
+
+H2 Group Tasks (2)
+Create TWO activities of 140–180 words each grounded in lecture specifics.
+Each task must include ONE quote + timestamp from QUOTES that has not been used in Flashcards and is not reused between tasks.
+For each task include:
+• Activity type
+• Learning objective
+• Facilitation steps
+• One specific lecture cue with [mm:ss] or [h:mm:ss]
+• Pedagogical intent
+• Time estimate
+• Assessment note
+Tasks must be distinct from each other.
+
+H2 Authentic Practice Task (1)
+Create ONE scenario of 170–220 words grounded in the lecture. Include ONE new quote + timestamp from QUOTES not used earlier.
+Add a 3×3 rubric table with criteria tied to lecture specifics and three levels: Developing, Competent, Excellent.
+
+H2 Appendix A: Quotes Used
+List every quote used in the document, grouped by section.
+Show the exact quoted text in quotation marks plus the timestamp. Do not add any new quotes here.
+
+H2 Appendix B: Flashcards Table
+Provide a Word table with headers: ID, Question, Answer, Connection, Difficulty, Related IDs, Source.
+Fill rows FC01–FC12 using the exact Flashcard content.
+
+UNIQUENESS AND QUALITY CHECKS (hard rules)
+Before output:
+• No quote text or timestamp is reused anywhere in the document, apart from being listed again in Appendix A.
+• Related IDs never repeat within a card and never include the card's own ID.
+• Flashcards cover at least three distinct topics and do not exceed three cards on any single topic.
+• Group tasks are distinct from each other and from the Authentic Practice Task.
+• No placeholder text such as "Question 1", "Sample quote", "Concept N", or generic answer patterns.
+• All timestamps match ^(\d{1,2}:)?[0-5]\d:[0-5]\d$ ([mm:ss] or [h:mm:ss]).
+• Remove any stray quotation marks after timestamps.
+
+VALIDATION
+1) Every quoted fragment exists in Captions or Slides.
+2) Each Flashcard "Source" matches the timestamp quoted in its Answer.
+3) Use UK spelling throughout.
+
+OUTPUT
+Produce the .pptx file only.`;
+}
+
 function promptExtensionSupportV13(){
-  const out = (window.state && window.state.studyOutput) || 'docx';
-  return `Return ONE file: [REAL_TITLE_SLUG]_study_extension_support.${out}
-Work silently. No commentary, no "Analysis", no file references, no progress messages.
-
-CRITICAL: READ THE ENTIRE LECTURE FIRST
-1. Scroll Panopto "Captions/Transcript" tab to absolute bottom - read every word
-2. Expand ALL "Contents/Slides" tabs - read every slide, every image caption, every text
-3. Extract ALL content: captions + slides + images + timestamps [mm:ss]
-4. Identify 5–6 major topics, key concepts, definitions, arguments, examples from this content
-5. Use THIS extracted content to build everything below - NO generic templates
-
-TITLE: Extract from <meta property="og:title"> or [data-role="session-title"]. Use for H1 and filename slug.
-
-STRUCTURE
-
-1. FLASHCARDS (exactly 25: FC01–FC25)
-MUST use actual lecture content you just read. NO generic questions like "What is X?" or "Define Y".
-Each card: ID | Question (specific to lecture concepts/arguments) | Answer (2–4 sentences from actual lecture content) | Connection (link to outcome/topic) | Difficulty (Foundation/Intermediate/Advanced + intent) | Related IDs | Timestamp [mm:ss]
-Distribution: 8–10 Foundation, 10–12 Intermediate, 5–7 Advanced across ≥5 topics from lecture.
-Appendix B: embed table (not CSV) with all 25 cards in ${out} file.
-
-CRITICAL: Count your flashcards. You MUST have exactly 25 (FC01 through FC25). If you have fewer than 25, create additional cards using different aspects of the lecture content until you reach exactly 25. Do not stop at 3, 5, or 10 cards.
-
-2. GROUP TASKS (exactly 3, 180–220 words each)
-Activity type, learning objective, facilitation steps, specific lecture cues with timestamps, pedagogical intent, time estimate, assessment notes.
-
-3. AUTHENTIC TASK (220–280 words)
-Scenario from lecture, task instructions, output spec, 3×3 rubric (Developing/Competent/Excellent), feedback guidance, time, timestamps.
-
-4. APPENDIX A
-≥24 timestamped quotes (5–25 words each, [mm:ss]) from lecture captions/slides.
-
-VALIDATION (silent check)
-25 flashcards FC01–FC25, all 7 fields complete, real content, 3 tasks, 3×3 rubric, ≥24 quotes, no placeholders, one ${out} only.
-
-FINAL COUNT CHECK: Before returning the file, verify you have exactly 25 flashcards numbered FC01 through FC25. If you have fewer, add more cards using different lecture content until you reach 25.
-
-Return file only. No explanations.`;
+  return state.studyFormat === 'powerpoint' ? promptExtensionSupportV13Pptx() : promptExtensionSupportV13Word();
 }
 
 // Registry for tool cards
@@ -2403,8 +2670,8 @@ const STUDY_TOOLS = [
     icon:'🧠',
     name:'Practice & Testing',
     points:[
-      'Create 16 interleaved problems with feedback',
-      'Add a 14-item self-check quiz with rationales',
+      'Create 10 interleaved problems with feedback',
+      'Add a 10 item self check quiz with rationales',
       'Flag misconceptions and Bloom focus per item',
       'Include a mini rubric for rapid marking'
     ],
@@ -2427,10 +2694,10 @@ const STUDY_TOOLS = [
     icon:'🌐',
     name:'Extension & Support',
     points:[
-      'Generate 25 flashcards with difficulty + links',
-      'Offer 3 collaborative group tasks with cues',
-      'Design an authentic task with a 3×3 rubric',
-      'Include evidence appendix with ≥24 timestamps'
+      'Generate 10 flashcards with quotes and timestamps',
+      'Design 2 distinct group tasks with objectives',
+      'Create 1 authentic task with a 3×3 rubric',
+      'Include Quotes Used + Flashcards Table appendices'
     ],
     builder: promptExtensionSupportV13
   },
@@ -2447,26 +2714,6 @@ const TOOL_STYLE_PALETTE = [
 let currentStudyPrompt = '';
 let currentNotesTemplate = null;
 let currentNotesPrompt = '';
-if (!window.state) window.state = {};
-window.state.studyOutput = 'docx';
-
-// Handle study/notes output toggles
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest && e.target.closest('.seg button');
-  if (!btn) return;
-  if (btn.id === 'studyOutDoc' || btn.id === 'studyOutPpt') {
-    window.state.studyOutput = btn.id === 'studyOutPpt' ? 'pptx' : 'docx';
-    const wrap = btn.parentElement;
-    wrap.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-  }
-  if (btn.id === 'notesOutDoc' || btn.id === 'notesOutPpt') {
-    window.state.notesOutput = btn.id === 'notesOutPpt' ? 'pptx' : 'docx';
-    const wrap = btn.parentElement;
-    wrap.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-  }
-});
 
 function mountStudyToolCards(){
   const grid = document.getElementById('studyToolsGrid');
@@ -2487,6 +2734,7 @@ function mountStudyToolCards(){
       <ul class="tool-points">${points}</ul>
       <div class="tool-actions">
         <button class="btn-primary" data-tool="${tool.id}">📋 Copy Prompt</button>
+        <button class="btn btn-ghost" data-preview="${tool.id}">👁 Preview</button>
       </div>`;
     grid.appendChild(card);
   });
@@ -2501,12 +2749,52 @@ function mountStudyToolCards(){
       copyTextToClipboard(prompt);
     });
   });
-  // Preview removed
+  grid.querySelectorAll('button[data-preview]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.getAttribute('data-preview');
+      const tool = STUDY_TOOLS.find(t=>t.id===id);
+      if(!tool) return;
+      const prompt = tool.builder();
+      setStudyPreview(prompt, tool.name);
+    });
+  });
 }
 
 function setStudyPreview(text, label){
   currentStudyPrompt = text || '';
+  const panel = $('studyPreviewPanel');
+  const placeholder = $('studyPreviewPlaceholder');
+  const pre = $('studyPreviewText');
+  const meta = $('studyPreviewMeta');
+  const titleEl = $('studyPreviewTitle');
+  if (!panel) return;
   setCharStatus(text ? text.length : 0);
+  panel.classList.remove('hidden');
+  if (titleEl) titleEl.textContent = 'Preview';
+  if (!text) {
+    if (placeholder) {
+      placeholder.textContent = 'Select "Preview" on a tool to view the full prompt here.';
+      placeholder.classList.remove('hidden');
+    }
+    if (pre) pre.classList.add('hidden');
+    if (meta) meta.textContent = '';
+    return;
+  }
+  if (placeholder) placeholder.classList.add('hidden');
+  if (pre) {
+    pre.textContent = text;
+    pre.classList.remove('hidden');
+  }
+  if (meta) {
+    const count = text.length.toLocaleString();
+    meta.textContent = `${count} chars • ${label}`;
+  }
+  if (titleEl && label) {
+    titleEl.textContent = `Preview — ${label}`;
+  }
+  setTimeout(()=>{
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
 }
 
 function showToast(){
@@ -2556,15 +2844,15 @@ const NOTES_TEMPLATES = [
       'Compile an evidence appendix for quality assurance'
     ],
     build: (notes, meta) => `SYSTEM
-Return ONE file only: ${meta.slug}_notes_summary.${(window.state && window.state.notesOutput) || 'docx'} (Word A4). Do NOT ask questions. Do NOT use external sources.
+Return ONE file only: ${meta.slug}_notes_summary.docx (Word A4). Do NOT ask questions. Do NOT use external sources.
 
 NOTES SAFEGUARD
-• Use only the supplied notes. If cleaned text < 400 words, return “INSUFFICIENT_NOTES — add more detail and retry.”
+• Use only the supplied notes. If cleaned text < 400 words, return "INSUFFICIENT_NOTES — add more detail and retry."
 • Auto-run collect → analyse → write → validate (no user confirmation).
-• Use UK English, WCAG-AA contrast, Queen’s red (#E0001B).
+• Use UK English, WCAG-AA contrast, Queen's red (#E0001B).
 
 OUTPUT STRUCTURE
-1) Title page — use "${meta.title}" + module, date, and a 90–120 word “How to use this guide”.
+1) Title page — use "${meta.title}" + module, date, and a 90–120 word "How to use this guide".
 2) Key outcomes — 4–6 outcome statements linked directly to the notes.
 3) Section summaries — 5–8 sections: heading, what it covers, why it matters, evidence snippet.
 4) Concept connectors — bullets for links, misconceptions, follow-up actions.
@@ -2585,12 +2873,12 @@ ${notes}
       'Keep everything grounded in timestamped note evidence'
     ],
     build: (notes, meta) => `SYSTEM
-Return ONE file only: ${meta.slug}_notes_revision.${(window.state && window.state.notesOutput) || 'docx'} (Word A4). Do NOT ask questions. Do NOT use external sources.
+Return ONE file only: ${meta.slug}_notes_revision.docx (Word A4). Do NOT ask questions. Do NOT use external sources.
 
 NOTES SAFEGUARD
-• Use only the supplied notes. If cleaned text < 400 words, return “INSUFFICIENT_NOTES — add more detail and retry.”
+• Use only the supplied notes. If cleaned text < 400 words, return "INSUFFICIENT_NOTES — add more detail and retry."
 • Auto-run collect → analyse → write → validate.
-• Use UK English, WCAG-AA, Queen’s red accents.
+• Use UK English, WCAG-AA, Queen's red accents.
 
 OUTPUT STRUCTURE
 1) Orientation — ≤120 words on how to revise with this pack.
@@ -2614,10 +2902,10 @@ ${notes}
       'Evidence every section with note references'
     ],
     build: (notes, meta) => `SYSTEM
-Return ONE file only: ${meta.slug}_notes_plan.${(window.state && window.state.notesOutput) || 'docx'} (Word A4). Do NOT ask questions. Do NOT use external sources.
+Return ONE file only: ${meta.slug}_notes_plan.docx (Word A4). Do NOT ask questions. Do NOT use external sources.
 
 NOTES SAFEGUARD
-• Use only the supplied notes. If cleaned text < 400 words, return “INSUFFICIENT_NOTES — add more detail and retry.”
+• Use only the supplied notes. If cleaned text < 400 words, return "INSUFFICIENT_NOTES — add more detail and retry."
 • Auto-run collect → analyse → write → validate.
 • Use UK English, WCAG-AA, inclusive tone.
 
@@ -2676,6 +2964,7 @@ function mountNotesToolCards(){
       <ul class=\"tool-points\">${points}</ul>
       <div class=\"tool-actions\">
         <button class=\"btn-primary\" data-tool=\"${tool.id}\">📋 Copy Prompt</button>
+        <button class=\"btn btn-ghost\" data-preview=\"${tool.id}\">👁 Preview</button>
       </div>`;
     grid.appendChild(card);
   });
@@ -2702,14 +2991,30 @@ function mountNotesToolCards(){
     });
   });
 
-  // Preview removed
+  grid.querySelectorAll('button[data-preview]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.getAttribute('data-preview');
+      const template = NOTES_TEMPLATES.find(t=>t.id===id);
+      const result = buildNotesOutput(template, getNotesInput());
+      if (result.error) { alert(result.error); return; }
+      setNotesPreview(result.prompt, template.name, template);
+      if (result.prompt.length > 8000) {
+        alert('This prompt is over 8000 characters. Trim your notes to stay within the limit.');
+      }
+    });
+  });
   if (state.workflow === 'notes') {
     setNotesPreview('', '', null);
   }
 }
 
 function setNotesPreview(text, label, template){
-  // Preview UI removed; maintain internal counters/state only
+  const panel = $('notesPreviewPanel');
+  const placeholder = $('notesPreviewPlaceholder');
+  const pre = $('notesPreviewText');
+  const meta = $('notesPreviewMeta');
+  const titleEl = $('notesPreviewTitle');
+  if (!panel) return;
   const content = text || '';
   if (template) {
     currentNotesTemplate = template;
@@ -2718,6 +3023,28 @@ function setNotesPreview(text, label, template){
   }
   currentNotesPrompt = content;
   setCharStatus(content.length);
+  panel.classList.remove('hidden');
+  if (titleEl) titleEl.textContent = label ? `Preview — ${label}` : 'Preview';
+  if (!content) {
+    if (placeholder) {
+      placeholder.textContent = 'Paste notes and choose "Preview" to check the final prompt.';
+      placeholder.classList.remove('hidden');
+    }
+    if (pre) pre.classList.add('hidden');
+    if (meta) meta.textContent = '';
+    return;
+  }
+  if (placeholder) placeholder.classList.add('hidden');
+  if (pre) {
+    pre.textContent = content;
+    pre.classList.remove('hidden');
+  }
+  if (meta) {
+    const count = content.length.toLocaleString();
+    let message = `${count} chars` + (label ? ` • ${label}` : '');
+    if (content.length > 8000) message += ' • Trim notes to stay under 8000';
+    meta.textContent = message;
+  }
 }
 
 function refreshNotesPreview(){
@@ -2730,10 +3057,12 @@ function refreshNotesPreview(){
   setNotesPreview(result.prompt, currentNotesTemplate.name, currentNotesTemplate);
 }
 
-// Render preview (deprecated - preview UI removed)
+// Render preview
 function render() {
   if (state.workflow === 'study') {
     setCharStatus(0);
+    if ($('previewPlaceholder')) $('previewPlaceholder').classList.remove('hidden');
+    if ($('previewText')) $('previewText').classList.add('hidden');
     return;
   }
 
@@ -2746,6 +3075,15 @@ function render() {
   if (state.workflow === 'quiz') prompt = buildQuizPrompt();
 
   setCharStatus(prompt.length);
+  
+  if (prompt) {
+    $('previewPlaceholder').classList.add('hidden');
+    $('previewText').classList.remove('hidden');
+    $('previewText').textContent = prompt;
+  } else {
+    $('previewPlaceholder').classList.remove('hidden');
+    $('previewText').classList.add('hidden');
+  }
 }
 
 // Copy to clipboard
@@ -2921,7 +3259,9 @@ window.switchWorkflow = function(tab) {
     }, 0);
   }
 
-  // Preview removed; nothing to toggle
+  // Show/hide preview section
+  const previewSection = $('previewSection');
+  if (previewSection) previewSection.style.display = (tab === 'help' || tab === 'study' || tab === 'notes') ? 'none' : 'block';
 
   const studyPanel = $('studyPreviewPanel');
   if (studyPanel) {
@@ -2948,9 +3288,9 @@ window.switchWorkflow = function(tab) {
 
   // Re-setup FAQ when switching to help page
   if (tab === 'help') {
-      setTimeout(() => {
-        if (window.setupFaqAccordion) window.setupFaqAccordion();
-      }, 0);
+    setTimeout(() => {
+      if (typeof setupFaqAccordion === 'function') setupFaqAccordion();
+    }, 0);
   } else if (tab !== 'study' && tab !== 'notes') {
     render();
   }
@@ -2986,9 +3326,9 @@ function init() {
           $('heroSubtitle').textContent = hero.subtitle;
         }
         // Ensure FAQ gets initialized when entering help
-      setTimeout(() => {
-        if (window.setupFaqAccordion) window.setupFaqAccordion();
-      }, 0);
+        setTimeout(() => {
+          if (typeof setupFaqAccordion === 'function') setupFaqAccordion();
+        }, 0);
       }
     };
   }
@@ -3045,10 +3385,22 @@ function init() {
     quizCountEl.oninput = e => { state.quizCount = +e.target.value; render(); };
   }
   const quizFeedbackEl = $('quizFeedback');
-  // Force detailed feedback
-  state.quizFeedback = 'detailed';
+  if (quizFeedbackEl) {
+    quizFeedbackEl.onchange = e => { state.quizFeedback = e.target.value; render(); };
+  }
   
-  // Form inputs - Study Guide (using inline handlers, no duplicates needed)
+  // Form inputs - Study Guide - Format Selector
+  const formatSelector = $('studyFormatSelector');
+  if (formatSelector) {
+    formatSelector.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const format = chip.getAttribute('data-format');
+        state.studyFormat = format;
+        formatSelector.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+      });
+    });
+  }
   
   // Form inputs - From Notes (using inline handlers, no duplicates needed)
   if ($('notesInput')) {
@@ -3064,124 +3416,73 @@ function init() {
   // Copy buttons
   if ($('generateQuiz')) {
     console.log('Wiring generateQuiz button');
-    $('generateQuiz').onclick = () => {
-      const bar = $('buildProgress');
-      const fill = $('buildProgressFill');
-      if (bar && fill) {
-        bar.classList.remove('hidden');
-        fill.style.width = '0%';
-        setTimeout(()=>fill.style.width='35%', 50);
-        setTimeout(()=>fill.style.width='70%', 300);
-      }
-      // Do the copy
-      copyPrompt();
-      // Finish bar and hide after a moment
-      if (fill) setTimeout(()=>fill.style.width='100%', 150);
-      if (bar) setTimeout(()=>bar.classList.add('hidden'), 900);
-    };
+  $('generateQuiz').onclick = copyPrompt;
   }
   if ($('generateNotes')) {
     console.log('Wiring generateNotes button');
   $('generateNotes').onclick = copyPrompt;
   }
-  // copyTop removed with preview section
+  if ($('copyTop')) {
+    console.log('Wiring copyTop button');
+    $('copyTop').onclick = copyPrompt;
+  }
   
-  // FAQ Accordion - robust setup with measured heights and event delegation fallback
-  window.setupFaqAccordion = function() {
-    const container = document.querySelector('.faq-items');
-    if (!container) {
-      console.log('No FAQ container found');
-      return;
-    }
-    
-    const items = container.querySelectorAll('.faq-item');
-    if (!items || items.length === 0) {
-      console.log('No FAQ items found');
-      return;
-    }
-    console.log('Setting up FAQ accordion for', items.length, 'items');
-    
-    // Reset all items to closed state
-    items.forEach((item, idx) => {
+  // FAQ Accordion - robust setup with measured heights
+  function setupFaqAccordion() {
+    const items = document.querySelectorAll('.faq-item');
+    if (!items || items.length === 0) return;
+    items.forEach(item => {
       const question = item.querySelector('.faq-question');
       const answer = item.querySelector('.faq-answer');
-      if (!question || !answer) {
-        console.log('Missing question or answer for item', idx);
-        return;
-      }
+      if (!question || !answer) return;
 
-      // Ensure collapsed state
+      // Ensure collapsed state baseline
       item.classList.remove('open');
-      answer.style.maxHeight = '0';
-      answer.style.overflow = 'hidden';
-      answer.style.transition = 'max-height 0.3s ease';
+      answer.style.maxHeight = '0px';
       question.setAttribute('role', 'button');
       question.setAttribute('tabindex', '0');
       question.setAttribute('aria-expanded', 'false');
-      question.style.cursor = 'pointer';
-      
-      console.log('FAQ item', idx, 'prepared');
-    });
-    
-    // Use event delegation on container
-    const handleClick = (ev) => {
-      const question = ev.target.closest('.faq-question');
-      if (!question) return;
-      
-      const item = question.closest('.faq-item');
-      const answer = item.querySelector('.faq-answer');
-      if (!item || !answer) return;
-      
-      console.log('FAQ click detected on:', item);
-      
-      // Close all other items
-      items.forEach(otherItem => {
-        if (otherItem !== item) {
-          otherItem.classList.remove('open');
-          const otherAns = otherItem.querySelector('.faq-answer');
-          const otherQ = otherItem.querySelector('.faq-question');
-          if (otherAns) otherAns.style.maxHeight = '0';
-          if (otherQ) otherQ.setAttribute('aria-expanded', 'false');
+
+      const toggle = () => {
+        // Close others first
+        document.querySelectorAll('.faq-item.open').forEach(other => {
+          if (other !== item) {
+            other.classList.remove('open');
+            const otherAns = other.querySelector('.faq-answer');
+            const otherQ = other.querySelector('.faq-question');
+            if (otherAns) otherAns.style.maxHeight = '0px';
+            if (otherQ) otherQ.setAttribute('aria-expanded', 'false');
+          }
+        });
+
+        // Toggle this one
+        const isOpen = item.classList.toggle('open');
+        question.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        if (isOpen) {
+          // Measure content height
+          const inner = answer.querySelector('.faq-answer-text');
+          const h = inner ? (inner.scrollHeight + 32) : 300; // padding guard
+          answer.style.maxHeight = h + 'px';
+        } else {
+          answer.style.maxHeight = '0px';
         }
-      });
-      
-      // Toggle this one
-      const isOpen = item.classList.toggle('open');
-      question.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-      
-      if (isOpen) {
-        // Measure and expand
-        const inner = answer.querySelector('.faq-answer-text');
-        const h = inner ? inner.scrollHeight : 400;
-        answer.style.maxHeight = (h + 64) + 'px'; // extra padding
-        console.log('Opened FAQ, height:', h + 64);
-      } else {
-        answer.style.maxHeight = '0';
-        console.log('Closed FAQ');
-      }
-    };
-    
-    // Remove old listeners and attach new
-    container.removeEventListener('click', handleClick);
-    container.addEventListener('click', handleClick, false);
-    console.log('FAQ event delegation attached to container');
+      };
+
+      question.onclick = toggle;
+      question.onkeydown = (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ') {
+          ev.preventDefault();
+          toggle();
+        }
+      };
+    });
   }
 
-  // Initial setup - call via window to ensure availability
-  if (window.setupFaqAccordion) {
-    window.setupFaqAccordion();
-  }
+  // Initial setup
+  setupFaqAccordion();
 }
 
 init();
-
-// Ensure FAQ is set up after page fully loads
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOMContentLoaded - setting up FAQ');
-  if (window.setupFaqAccordion) {
-    window.setupFaqAccordion();
-  }
-});
 </script>
 
 </body>
