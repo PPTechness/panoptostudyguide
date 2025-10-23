@@ -1,0 +1,5 @@
+
+# local artefacts
+.DS_Store
+*.docx
+*.zip
