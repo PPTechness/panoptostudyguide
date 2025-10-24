@@ -1,0 +1,40 @@
+{
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "commitMsg",
+      "type": "promptString",
+      "description": "Commit message",
+      "default": "chore: save work in progress"
+    }
+  ],
+  "tasks": [
+    {
+      "label": "Git: Stage & Push (tracked only)",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "shell": {
+          "executable": "powershell.exe",
+          "args": [
+            "-NoLogo",
+            "-NoProfile",
+            "-Command"
+          ]
+        }
+      },
+      "command": "Write-Host '▶ Git push started' -ForegroundColor Cyan; " +
+        "$ErrorActionPreference='Stop'; " +
+        "if (Test-Path .git\\index.lock) { Remove-Item .git\\index.lock -Force }; " +
+        "git rebase --abort 2>$null; git merge --abort 2>$null; " +
+        "git remote set-url origin git@github.com:PPTechness/panoptostudyguide.git; " +
+        "git switch main; git pull --rebase origin main; " +
+        "git add -u; " +
+        "$changes = git status --porcelain; " +
+        "if (-not $changes) { Write-Host 'No tracked changes to commit.' -ForegroundColor Yellow; exit 0 }; " +
+        "git commit -m \"${input:commitMsg}\"; " +
+        "git push -u origin main; " +
+        "Write-Host '✔ Pushed to origin/main' -ForegroundColor Green"
+    }
+  ]
+}

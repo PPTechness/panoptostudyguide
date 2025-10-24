@@ -1,0 +1,13 @@
+{
+  "files.autoSave": "off",
+  "editor.formatOnSave": false,
+  "git.autofetch": false,
+  "git.postCommitCommand": "none",
+  "git.enableSmartCommit": false,
+  "terminal.integrated.defaultProfile.windows": "Command Prompt",
+  "code-runner.runInTerminal": true,
+  "code-runner.executorMap.powershell": "",
+  "emeraldwalk.runonsave": {
+    "commands": []
+  }
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "key": "ctrl+alt+p",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Git: Stage & Push (tracked only)",
+    "when": "editorTextFocus && isWindows"
+  },
+  {
+    "key": "cmd+alt+p",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Git: Stage & Push (tracked only)",
+    "when": "editorTextFocus && isMac"
+  }
+]

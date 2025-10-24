@@ -323,7 +323,7 @@
     margin: 0 0 1.5rem;
     letter-spacing: -0.03em;
     text-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    text-wrap: balance; /* nicer multi-line wrapping */
+    /* text-wrap: balance; */ /* disabled for Safari < 17.5 compatibility */
   }
   
   .hero-subtitle {
@@ -333,7 +333,7 @@
     opacity: 0.95;
     font-weight: 400;
     text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    text-wrap: pretty; /* avoid orphan words */
+    /* text-wrap: pretty; */ /* disabled for Firefox/Safari compatibility */
   }
 
   @media (max-width: 1024px) {
@@ -349,14 +349,14 @@
     gap: 0.5rem;
     padding: 0.5rem 1.25rem;
     background: rgba(255,255,255,0.2);
-    backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
     border-radius: 999px;
     font-size: 0.9375rem;
     font-weight: 600;
     margin-bottom: 1.5rem;
     border: 1px solid rgba(255,255,255,0.3);
-    text-wrap: balance;
+    /* text-wrap: balance; */ /* disabled for Safari < 17.4 compatibility */
   }
   
   /* Hero Section */
@@ -603,68 +603,94 @@
 
   .study-tools-grid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(220px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
   }
 
-  @media (max-width: 1300px) {
+  @media (max-width: 900px) {
     .study-tools-grid {
-      grid-auto-flow: column;
-      grid-auto-columns: minmax(220px, 260px);
-      overflow-x: auto;
-      padding-bottom: 0.5rem;
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .study-tools-grid {
+      grid-template-columns: 1fr;
     }
   }
 
   .tool-card {
-    min-height: 260px;
-    padding: 2rem 1.75rem;
-    background: #ffffff;
-    color: var(--text);
-    border-radius: var(--radius-xl);
-    border: 6px solid var(--tool-accent, var(--primary));
-    box-shadow: var(--shadow-lg);
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 16px;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 2px solid transparent;
   }
 
   .tool-card:hover {
-    transform: none;
-    box-shadow: 0 18px 45px rgba(17,24,39,0.12);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    transform: translateY(-4px);
     border-color: var(--tool-accent, var(--primary));
   }
 
   .tool-card .tool-badge {
     background: var(--tool-badge-bg, rgba(224,0,27,0.12));
-    border-color: var(--tool-accent, var(--primary));
     color: var(--tool-accent, var(--primary));
+    border-radius: 12px;
+    padding: 8px 16px;
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    width: fit-content;
+    align-self: flex-start;
   }
 
   .tool-points {
     list-style: none;
-    margin: 0;
     padding: 0;
+    margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.65rem;
-    color: var(--text);
-    font-size: 0.95rem;
-    line-height: 1.45;
-    flex: 1 1 auto;
+    gap: 8px;
+    flex-grow: 1;
   }
 
   .tool-points li {
-    background: var(--tool-chip-bg, rgba(15,23,42,0.05));
-    border: 1px solid var(--tool-chip-border, rgba(15,23,42,0.12));
-    border-radius: 12px;
-    padding: 0.6rem 0.85rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #555;
+    position: relative;
+    padding-left: 20px;
+    text-align: left;
+  }
+
+  .tool-points li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--tool-accent, var(--primary));
+    font-weight: 700;
+    flex-shrink: 0;
   }
 
   .tool-card .tool-actions {
     display: flex;
     flex-direction: column;
-    gap: 0.7rem;
+    gap: 10px;
     width: 100%;
   }
 
@@ -673,13 +699,18 @@
     justify-content: center;
     background: var(--tool-accent, var(--primary));
     color: #ffffff;
-    border: none;
-    box-shadow: none;
+    padding: 12px 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    font-size: 1rem;
     font-weight: 700;
+    border-radius: 8px;
+    border: none;
   }
 
   .tool-card .btn-primary:hover {
     background: var(--tool-accent-hover, var(--primary-hover));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
   }
 
   .tool-card .btn-ghost {
@@ -688,12 +719,15 @@
     background: #ffffff;
     border: 2px solid var(--tool-accent, var(--primary));
     color: var(--tool-accent, var(--primary));
+    padding: 10px 20px;
     font-weight: 600;
+    border-radius: 8px;
   }
 
   .tool-card .btn-ghost:hover {
     background: var(--tool-accent, var(--primary));
     color: #ffffff;
+    border-color: var(--tool-accent, var(--primary));
   }
 
   .tool-card .btn-primary,
@@ -701,9 +735,96 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.45rem;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
     font-size: 1rem;
+    letter-spacing: -0.01em;
     white-space: nowrap;
+  }
+
+  /* Output Format Card Specific Styles */
+  .output-format-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border: 2px solid var(--border);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .output-format-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111;
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .output-format-card p {
+    font-size: 0.95rem;
+    color: #555;
+    margin: 0 0 16px 0;
+    line-height: 1.5;
+    flex-grow: 1;
+  }
+
+  .output-format-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .format-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: #ffffff;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    text-align: center;
+    min-height: 48px;
+    position: relative;
+    z-index: 1;
+    pointer-events: auto;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .format-option:hover {
+    border-color: var(--primary);
+    background: rgba(224,0,27,0.02);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  .format-option.active {
+    background: #E0001B;
+    color: white;
+    border-color: #E0001B;
+    box-shadow: 0 4px 12px rgba(224,0,27,0.3);
+  }
+
+  .format-option.active:hover {
+    background: #c00017;
+    border-color: #c00017;
+    transform: translateY(-2px);
   }
 
   .study-preview-panel {
@@ -1742,16 +1863,6 @@
   <div class="workflow-content study-workflow hidden">
     <h2 class="gradient-title" style="margin-top: 2rem; margin-bottom: 3rem;">Study Guide Builder</h2>
 
-    <!-- Format Selector -->
-    <div class="quick-start" style="margin-top: -0.5rem; margin-bottom: 1.5rem;">
-      <div class="section-title">Output Format</div>
-      <div id="studyFormatSelector" style="display: flex; gap: 1rem; align-items: center;">
-        <div class="chip active" data-format="word" style="cursor: pointer; padding: 0.75rem 1.5rem;">📄 Word (.docx)</div>
-        <div class="chip" data-format="powerpoint" style="cursor: pointer; padding: 0.75rem 1.5rem;">📊 PowerPoint (.pptx)</div>
-      </div>
-      <p class="help">Choose the output format for your study guide documents.</p>
-    </div>
-
     <!-- Study Guide Quick Intro (no customiser) -->
     <div class="helper-message" style="margin-top: 0.5rem; margin-bottom: 1.5rem;">
       <div class="helper-message-icon">🧭</div>
@@ -2059,6 +2170,36 @@ const QUESTION_TYPES = [
   { id: 'numerical_question', label: 'Numerical' }
 ];
 
+const TYPE_LABEL = {
+  multiple_choice_question: 'Multiple Choice',
+  multiple_answers_question: 'Multiple Answers',
+  true_false_question: 'True/False',
+  short_answer_question: 'Short Answer',
+  essay_question: 'Essay',
+  numerical_question: 'Numerical'
+};
+
+function getSelectedTypes() {
+  const arr = Array.isArray(state.questionTypes) ? state.questionTypes.filter(Boolean) : [];
+  return arr.length ? arr : ['multiple_choice_question'];
+}
+
+function getQuizCount() {
+  let n = parseInt(state.quizCount, 10);
+  if (Number.isNaN(n)) n = 3;
+  if (n < 1) n = 1;
+  if (n > 12) n = 12;
+  return n;
+}
+
+function getPedagogy() {
+  return state.pedagogy || 'Concept Check (Retrieval)';
+}
+
+function selectedTypesList() {
+  return getSelectedTypes().map(t => TYPE_LABEL[t] || t).join(', ');
+}
+
 /* ---------- Initialisation: mount chips once DOM is ready ---------- */
 document.addEventListener('DOMContentLoaded', () => {
   try {
@@ -2083,6 +2224,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sel.addEventListener('change', () => {
       state.pedagogy = sel.value;
       updatePedBrief();
+      if (typeof render === 'function') render();
     });
   }
 });
@@ -2090,6 +2232,119 @@ document.addEventListener('DOMContentLoaded', () => {
 // DOM helpers
 const $ = id => document.getElementById(id);
 const $$ = sel => document.querySelectorAll(sel);
+
+// Hero content for each workflow page
+const heroContent = {
+  help: {
+    badge: 'Getting Started',
+    title: 'Welcome to Prompt Builder',
+    subtitle: 'Your guide to generating QUB-aligned quizzes and study resources in minutes',
+    class: 'help-hero'
+  },
+  quiz: {
+    badge: 'Canvas Quiz Builder',
+    title: 'Create Perfect Quizzes in Seconds',
+    subtitle: 'Transform your Panopto lectures into Canvas-ready quizzes with AI—aligned with Queen\'s Beyond Blended pedagogy',
+    class: 'quiz-hero'
+  },
+  study: {
+    badge: 'Study Guide Generator',
+    title: 'Build Comprehensive Study Resources',
+    subtitle: 'Generate rich, pedagogy-first study guides with flashcards, problems, and reflections from your lectures',
+    class: 'study-hero'
+  },
+  notes: {
+    badge: 'Notes to Resources',
+    title: 'Transform Notes into Study Packs',
+    subtitle: 'Convert your lecture notes into structured, student-ready study materials with expert guidance',
+    class: 'notes-hero'
+  },
+};
+
+// switchWorkflow function - must be global for inline onclick handlers
+window.switchWorkflow = function(tab) {
+  console.log('switchWorkflow called with tab:', tab);
+  if (!tab) return;
+  
+  // Update active state
+  $$('.workflow-btn').forEach(b => b.classList.remove('active'));
+  const activeBtn = document.querySelector('[data-tab="' + tab + '"]');
+  if (activeBtn) activeBtn.classList.add('active');
+  if (typeof state !== 'undefined') state.workflow = tab;
+
+  // Toggle content visibility
+  $$('.workflow-content').forEach(w => w.classList.add('hidden'));
+  const target = document.querySelector('.' + tab + '-workflow');
+  console.log('Target element for', tab + '-workflow:', target);
+  if (target) {
+    target.classList.remove('hidden');
+    console.log('Successfully switched to', tab, 'workflow');
+  } else {
+    console.error('Could not find element with class', tab + '-workflow');
+  }
+
+  // Update hero banner
+  const hero = heroContent[tab];
+  if (hero) {
+    const heroBanner = $('heroBanner');
+    if (heroBanner) {
+      heroBanner.className = 'hero-banner ' + hero.class;
+      if ($('heroBadgeText')) $('heroBadgeText').textContent = hero.badge;
+      if ($('heroTitle')) $('heroTitle').textContent = hero.title;
+      if ($('heroSubtitle')) $('heroSubtitle').textContent = hero.subtitle;
+    }
+  }
+
+  if (tab === 'study') {
+    setTimeout(() => {
+      try {
+        if (typeof mountStudyToolCards === 'function') mountStudyToolCards();
+      } catch (e) {
+        console.warn('Study tools deck failed:', e);
+      }
+    }, 0);
+  } else if (tab === 'notes') {
+    setTimeout(() => {
+      try {
+        if (typeof mountNotesToolCards === 'function') mountNotesToolCards();
+      } catch (e) {
+        console.warn('Notes tools deck failed:', e);
+      }
+    }, 0);
+  }
+
+  // Show/hide preview section
+  const previewSection = $('previewSection');
+  if (previewSection) previewSection.style.display = (tab === 'help' || tab === 'study' || tab === 'notes') ? 'none' : 'block';
+
+  const studyPanel = $('studyPreviewPanel');
+  if (studyPanel && typeof setStudyPreview === 'function') {
+    if (tab === 'study') {
+      studyPanel.classList.remove('hidden');
+      setStudyPreview('', '');
+    } else {
+      studyPanel.classList.add('hidden');
+    }
+  }
+
+  const notesPanel = $('notesPreviewPanel');
+  if (notesPanel) {
+    if (tab === 'notes') {
+      notesPanel.classList.remove('hidden');
+    } else {
+      notesPanel.classList.add('hidden');
+    }
+  }
+
+  // Re-setup FAQ when switching to help page
+  if (tab === 'help') {
+    setTimeout(() => {
+      if (typeof setupFaqAccordion === 'function') setupFaqAccordion();
+    }, 0);
+  } else if (tab !== 'study' && tab !== 'notes') {
+    if (typeof render === 'function') render();
+  }
+};
 
 // Detect Panopto title (enhanced)
 function detectPanoptoTitle() {
@@ -2106,87 +2361,51 @@ function slugify(s) {
   return (a.replace(/[^A-Za-z0-9]+/g, '_').replace(/_+/g, '_').replace(/^_+|_+$/g, '') || 'Lecture_Quiz');
 }
 
-// Panopto source block (compact)
-const PANOPTO_BLOCK = `SOURCE PREPARATION
-1) Confirm this is a Panopto Watch page (not the Canvas embed).
-2) Open Captions/Transcript and Contents/Slides panels; expand any collapsed sections.
-3) Scroll the transcript to the very bottom once so every caption loads.
-4) Wait until no new lines appear, then read the DOM for captions + slides only (no external sources).
-
-TITLE EXTRACTION (MANDATORY): Extract real video title from <meta property="og:title">, [data-role="session-title"], .session-title, or document.title. Use the real title (e.g., "Week 5: Cell Division") — never "Lecture Quiz" or placeholders.
-
-FAIL-CLOSED: If the combined captions/slides corpus < 300 words after dedupe, return exactly:
-  "INSUFFICIENT_PAGE_CONTENT — Expand captions & slides, scroll transcript fully, then retry."
-`;
+// Panopto source block (ultra-compact)
+const PANOPTO_BLOCK = `SRC: Panopto Watch pg. Open+scroll Captions/Slides to bottom. DOM only. Real title from og:title|session-title|doc.title (never "Lecture Quiz"). FAIL if <300 words: "INSUFFICIENT_PAGE_CONTENT"`;
 
 // Prompt builders
 function buildQuizPrompt() {
   const title = panoptoTitle || 'Lecture Quiz';
   const slug = slugify(title);
-  const types = state.questionTypes.join(', ');
-  const target = state.questionTypes.length * state.quizCount;
-  const ped = PEDAGOGY[state.pedagogy] || PEDAGOGY["Concept Check (Retrieval)"];
-  const pedBlock = ped.inject.map(l => `• ${l}`).join('\n');
+  const count = getQuizCount();
+  const types = getSelectedTypes();
+  const target = types.length * count;
+  const pedagogyKey = getPedagogy();
+  const ped = PEDAGOGY[pedagogyKey] || PEDAGOGY["Concept Check (Retrieval)"];
+  const pedBlock = ped.inject.map(l => `• ${l}`).join(' ');
+  const typesList = selectedTypesList();
   
-  let tfNum = '';
-  if (state.questionTypes.includes('true_false_question')) tfNum += '\nTF: <response_lid> with 2 labels: True/False.';
-  if (state.questionTypes.includes('numerical_question')) tfNum += '\nNUM: <response_num> + tolerance.';
-  
-  return `SYSTEM: Return EXACTLY 2 files: (1) ${slug}_quiz_qti.zip, (2) ${slug}_quiz.pdf
-Use ONLY THIS Panopto page. Language=${state.quizLang}. Do NOT ask questions.
+  return `SYS: ${slug}_quiz_qti.zip + .pdf | Lang=${state.quizLang} | Panopto pg only
 ${PANOPTO_BLOCK}
-PEDAGOGY: ${pedBlock}
+PED: ${pedBlock}
+HE: Clear stems, plausible distractors, feedback+TS, Bloom mix | ${count}/type (${typesList}) = ${target} total
 
-HE STANDARDS: Clear stems testing outcomes (not trivia); plausible distractors from lecture; meaningful feedback explaining WHY with timestamps; mix Bloom levels; university-level precision.
-ADAPT TO PRESET: Make stems, distractors and feedback reflect the selected pedagogy ("${state.pedagogy}").
+QTI: imsmanifest.xml=<manifest id="m1" xmlns="http://www.imsglobal.org/xsd/imscp_v1p1"><resources><resource id="r1" type="imsqti_xmlv1p2" href="assessment.xml"><file href="assessment.xml"/></resource></resources></manifest> | assessment.xml=<questestinterop xmlns="http://www.imsglobal.org/xsd/ims_qtiasiv1p2"><assessment id="a1" title="[REAL]"><section id="s1"><!--${target}--></section></assessment></questestinterop>
 
-Q TYPES: ${types} | ${state.quizCount} per type | TARGET=${target} exactly | Rewrite invalid as essay${tfNum}
+BASE: <item ident="ID" title="Q#"><itemmetadata><qtimetadata><qtimetadatafield><fieldlabel>question_type</fieldlabel><fieldentry>TYPE</fieldentry></qtimetadatafield><qtimetadatafield><fieldlabel>points_possible</fieldlabel><fieldentry>1</fieldentry></qtimetadatafield></qtimetadata></itemmetadata><presentation><material><mattext texttype="text/html">STEM</mattext></material>RSP</presentation><resprocessing><outcomes><decvar varname="SCORE" vartype="Decimal" minvalue="0" maxvalue="100"/></outcomes>SCORE</resprocessing>${state.quizFeedback !== 'off' ? 'FB' : ''}</item>
 
-QTI ZIP — ${slug}_quiz_qti.zip:
-imsmanifest.xml:
-<?xml version="1.0" encoding="UTF-8"?>
-<manifest identifier="man1" xmlns="http://www.imsglobal.org/xsd/imscp_v1p1">
-  <resources><resource identifier="res1" type="imsqti_xmlv1p2" href="assessment.xml"><file href="assessment.xml"/></resource></resources>
-</manifest>
+MC: TYPE=multiple_choice_question | RSP=<response_lid ident="r1" rcardinality="Single"><render_choice shuffle="Yes"><response_label ident="A"><material><mattext>OPT_A</mattext></material></response_label>...(B,C,D)</render_choice></response_lid> | SCORE=<respcondition continue="No"><conditionvar><varequal respident="r1">A</varequal></conditionvar><setvar varname="SCORE" action="Set">100</setvar></respcondition>
 
-assessment.xml:
-<?xml version="1.0" encoding="UTF-8"?>
-<questestinterop xmlns="http://www.imsglobal.org/xsd/ims_qtiasiv1p2">
-  <assessment ident="asmt1" title="[ACTUAL_VIDEO_TITLE]"><section ident="root_section"><!-- ${target} items --></section></assessment>
-</questestinterop>
+MA: TYPE=multiple_answers_question | RSP=rcardinality="Multiple" | SCORE=<respcondition><conditionvar><and><varequal respident="r1">A</varequal><varequal respident="r1">C</varequal><not><varequal respident="r1">B</varequal></not></and></conditionvar><setvar varname="SCORE" action="Set">100</setvar></respcondition>
 
-MC ITEM:
-<item ident="q1" title="Q1">
-<itemmetadata><qtimetadata>
-<qtimetadatafield><fieldlabel>question_type</fieldlabel><fieldentry>multiple_choice_question</fieldentry></qtimetadatafield>
-<qtimetadatafield><fieldlabel>points_possible</fieldlabel><fieldentry>1</fieldentry></qtimetadatafield>
-</qtimetadata></itemmetadata>
-<presentation><material><mattext texttype="text/html">STEM</mattext></material>
-<response_lid ident="response1" rcardinality="Single"><render_choice shuffle="Yes">
-<response_label ident="A"><material><mattext texttype="text/html">OPT_A</mattext></material></response_label>
-<response_label ident="B"><material><mattext texttype="text/html">OPT_B</mattext></material></response_label>
-<response_label ident="C"><material><mattext texttype="text/html">OPT_C</mattext></material></response_label>
-<response_label ident="D"><material><mattext texttype="text/html">OPT_D</mattext></material></response_label>
-</render_choice></response_lid></presentation>
-<resprocessing><outcomes><decvar varname="SCORE" vartype="Decimal" minvalue="0" maxvalue="100"/></outcomes>
-<respcondition continue="No"><conditionvar><varequal respident="response1">CORRECT</varequal></conditionvar>
-<setvar varname="SCORE" action="Set">100</setvar>${state.quizFeedback !== 'off' ? '<displayfeedback feedbacktype="Response" linkrefid="fb"/>' : ''}</respcondition></resprocessing>${state.quizFeedback !== 'off' ? '<itemfeedback ident="fb"><material><mattext texttype="text/html">WHY correct [mm:ss]</mattext></material></itemfeedback>' : ''}
-</item>
+TF: TYPE=true_false_question | RSP=<response_lid ident="r1" rcardinality="Single"><render_choice shuffle="No"><response_label ident="true"><material><mattext>True</mattext></material></response_label><response_label ident="false"><material><mattext>False</mattext></material></response_label></render_choice></response_lid> | SCORE=<respcondition><conditionvar><varequal respident="r1">true</varequal></conditionvar><setvar varname="SCORE" action="Set">100</setvar></respcondition>
 
-GUARDS: UTF-8; escape XML chars; mattext≤1200; exactly ${target} items; all have metadata
+SA: TYPE=short_answer_question | RSP=<response_str ident="r1" rcardinality="Single"><render_fib fibtype="String"><response_label ident="a1" rshuffle="No"/></render_fib></response_str> | SCORE=<respcondition continue="Yes"><conditionvar><varequal respident="r1">ans1</varequal></conditionvar><setvar varname="SCORE" action="Set">100</setvar></respcondition> (add <respcondition> for alts)
 
-PDF: A4. Title=[ACTUAL_VIDEO_TITLE], TOC, then 1Q/page: number, stem, options, answer${state.quizFeedback !== 'off' ? ', feedback+timestamp' : ''}
+ESSAY: TYPE=essay_question | RSP=<response_str ident="r1" rcardinality="Single"><render_fib fibtype="String"><response_label ident="a1" rshuffle="No"/></render_fib></response_str> | SCORE=(empty-manual)
 
-VALIDATE: (1) ≥300w or "INSUFFICIENT_PAGE_CONTENT", (2) Real title extracted, (3) ${target} items, (4) Valid XML, (5) All metadata, (6) HE quality (clear/defensible/plausible/meaningful), (7) Mixed Bloom, (8) Expert-approvable
+NUM: TYPE=numerical_question | RSP=<response_num ident="r1" rcardinality="Single"><render_fib fibtype="Decimal"><response_label ident="a1" rshuffle="No"/></render_fib></response_num> | SCORE=<respcondition><conditionvar><or><varequal respident="r1">42</varequal><and><vargte respident="r1">41.5</vargte><varlte respident="r1">42.5</varlte></and></or></conditionvar><setvar varname="SCORE" action="Set">100</setvar></respcondition>
 
-OUTPUT: [ACTUAL_TITLE_SLUG]_quiz_qti.zip + [ACTUAL_TITLE_SLUG]_quiz.pdf using REAL title from og:title/[data-role="session-title"]/h1/document.title—NOT "Lecture_Quiz" placeholder.`;
+ESC: &amp; &lt; &gt; &quot; &apos; | VAL: ${target} items, UTF-8, <mattext>≤1200ch, all tags closed, real title, Bloom mix | PDF: A4, TOC, 1Q/pg${state.quizFeedback !== 'off' ? '+FB' : ''} | OUT: [REAL_SLUG]_quiz_qti.zip+.pdf from og:title`;
 }
 
 // -------- Study Tool Prompts (v13 with scroll/expand + Bloom intent) --------
 
 function promptCoreConceptsV13(){
+  const ext = state.studyFormat === 'powerpoint' ? 'pptx (PowerPoint)' : 'docx (Word A4)';
   return `SYSTEM
-Return ONE file only: [REAL_TITLE_SLUG]_study_core_concepts.docx (Word A4).
+Return ONE file only: [REAL_TITLE_SLUG]_study_core_concepts.${ext}.
 Use only the Panopto Watch page. No external sources.
 
 SOURCE PREPARATION
@@ -2230,12 +2449,13 @@ PEDAGOGY
 Link concepts to outcomes; embed Beyond Blended pillars; apply ≥7 UDL checkpoints; UK English; QUB red #E0001B; WCAG-AA.
 
 VALIDATION
-Corpus ≥ 500 words; ≥ 3 thresholds; ≥ 12 key concepts; ≥ 24 timestamps; no placeholders; one .docx output.`;
+Corpus ≥ 500 words; ≥ 3 thresholds; ≥ 12 key concepts; ≥ 24 timestamps; no placeholders; one .${state.studyFormat === 'powerpoint' ? 'pptx' : 'docx'} output.`;
 }
 
 function promptKnowledgeToolsV13(){
+  const ext = state.studyFormat === 'powerpoint' ? 'pptx (PowerPoint)' : 'docx (Word A4)';
   return `SYSTEM
-Return ONE file only: [REAL_TITLE_SLUG]_study_knowledge_tools.docx (Word A4).
+Return ONE file only: [REAL_TITLE_SLUG]_study_knowledge_tools.${ext}.
 
 SOURCE PREPARATION — same scroll/expand steps as Prompt 1; fail if < 500 words.
 
@@ -2252,7 +2472,7 @@ PEDAGOGY
 Link each term/example to outcomes; Bloom Apply/Analyse via intent phrasing; ≥7 UDL checkpoints; Beyond Blended alignment; UK English.
 
 VALIDATION
-Glossary ≥ 28; Examples = 3; Cases = 2; ≥ 24 timestamps; no duplicates; one .docx output.`;
+Glossary ≥ 28; Examples = 3; Cases = 2; ≥ 24 timestamps; no duplicates; one .${state.studyFormat === 'powerpoint' ? 'pptx' : 'docx'} output.`;
 }
 
 function promptPracticeTestingV13Word(){
@@ -2423,8 +2643,9 @@ function promptPracticeTestingV13(){
 }
 
 function promptReflectionPlanningV13(){
+  const ext = state.studyFormat === 'powerpoint' ? 'pptx (PowerPoint)' : 'docx (Word A4)';
   return `SYSTEM
-Return ONE file only: [REAL_TITLE_SLUG]_study_reflection_planning.docx (Word A4).
+Return ONE file only: [REAL_TITLE_SLUG]_study_reflection_planning.${ext}.
 
 SOURCE PREPARATION — scroll & expand captions/slides fully; fail if < 500 words.
 
@@ -2441,7 +2662,7 @@ PEDAGOGY
 Link to outcomes; Beyond Blended (Pace & Flex); ≥7 UDL checkpoints; inclusive UK English.
 
 VALIDATION
-≥6 reflections; 8 rewatch segments; 14-day planner; ≥24 timestamps; one .docx output.`;
+≥6 reflections; 8 rewatch segments; 14-day planner; ≥24 timestamps; one .${state.studyFormat === 'powerpoint' ? 'pptx' : 'docx'} output.`;
 }
 
 function promptExtensionSupportV13Word(){
@@ -2531,76 +2752,75 @@ Return ONE file only: [REAL_TITLE_SLUG]_study_extension_support.pptx (PowerPoint
 Use UK English. Use only the Panopto Watch page. No external sources. Work silently.
 
 SOURCE PREP
-1) Confirm this is a Panopto Watch page.
+1) Confirm Panopto Watch page.
 2) Open Captions/Transcript and Contents/Slides. Expand all sections.
-3) Scroll the transcript to the last line so all captions load. Wait until no new lines appear.
+3) Scroll transcript to the last line; wait until no new lines appear.
 4) Click slide thumbnails so all slide text loads.
-5) Extract on-screen text from Captions, Contents and Slides with timestamps in [h:mm:ss] or [mm:ss].
-→ If combined text after de-duplication is < 500 words, output exactly:
+5) Extract on-screen text from Captions, Contents and Slides with timestamps ([mm:ss] or [h:mm:ss]).
+→ If combined text after de-duplication < 500 words, output exactly:
 "INSUFFICIENT_PAGE_CONTENT — Expand captions & slides, scroll transcript fully, then retry."
 
 COLLECT
-Build a pool named QUOTES with at least 36 UNIQUE fragments, each 5–20 words, each with a DISTINCT timestamp.
-If a caption fragment is garbled, prefer the parallel wording from Slides or Contents for that concept.
+Build QUOTES with ≥ 36 UNIQUE fragments, each 5–20 words, each with a DISTINCT timestamp.
+Trim long fragments to 5–20 words. Reject ASR filler/garble; prefer the matching Slides/Contents wording when captions are messy.
 
 TITLE
-Extract the real title from <meta property="og:title"> or [data-role="session-title"] or .session-title or document.title.
+Extract the real title from og:title or [data-role="session-title"] or .session-title or document.title.
 Use it as H1 and to build [REAL_TITLE_SLUG].
 
 FORMAT
-Use Word styles: H1 for title, H2 for sections, H3 for subheads. Use proper tables where requested.
+Use Word styles: H1 for title, H2 for sections, H3 for subheads. Use real tables where requested.
 
 H2 Flashcards (12)
-Create TWELVE flashcards covering at least THREE distinct topics from the lecture. Do not use any one topic more than THREE times.
+Create TWELVE flashcards covering at least THREE distinct topics. Do not use any one topic more than THREE times.
 Each card fields:
 • ID: FC01–FC12
-• Question: specific to the lecture wording. Ban generic stems such as "What is X?"
-• Answer: 1–3 sentences using lecture wording and include ONE quote + timestamp from QUOTES
-• Connection: why this matters for study or practice
-• Difficulty: Foundation or Intermediate or Advanced
-• Related IDs: 1–3 IDs. Do not include the card's own ID. Do not repeat the same ID twice.
+• Question: lecture-specific (ban generic "What is X?")
+• Answer: 1–3 sentences using lecture wording + include ONE direct quote (from QUOTES) + timestamp
+• Connection: why this matters for study/practice
+• Difficulty: Foundation / Intermediate / Advanced
+• Related IDs: 1–3 other IDs (no self-reference; no duplicates)
 • Source: the same timestamp used in the Answer
-Use TWELVE different quotes and timestamps. No repeats across cards.
+Use TWELVE different quotes and timestamps. No repeats.
 
 H2 Group Tasks (2)
-Create TWO activities of 140–180 words each grounded in lecture specifics.
-Each task must include ONE quote + timestamp from QUOTES that has not been used in Flashcards and is not reused between tasks.
-For each task include:
-• Activity type
-• Learning objective
-• Facilitation steps
-• One specific lecture cue with [mm:ss] or [h:mm:ss]
-• Pedagogical intent
-• Time estimate
-• Assessment note
+Create TWO activities, 140–180 words each, grounded in lecture specifics.
+Each task includes ONE new quote + timestamp (not used in Flashcards) and provides:
+• Activity type • Learning objective • 3–5 facilitation steps
+• One specific lecture cue with timestamp • Pedagogical intent
+• Time estimate • Assessment note
 Tasks must be distinct from each other.
 
 H2 Authentic Practice Task (1)
-Create ONE scenario of 170–220 words grounded in the lecture. Include ONE new quote + timestamp from QUOTES not used earlier.
+Create ONE scenario, 170–220 words, grounded in the lecture.
+Include ONE new quote + timestamp not used earlier.
 Add a 3×3 rubric table with criteria tied to lecture specifics and three levels: Developing, Competent, Excellent.
 
-H2 Appendix A: Quotes Used
-List every quote used in the document, grouped by section.
-Show the exact quoted text in quotation marks plus the timestamp. Do not add any new quotes here.
+H2 Appendix A — Quotes Used
+List ONLY the quotes actually used above, grouped by section.
+Format each as: "quoted text" [timestamp]. Do not add new quotes here.
 
-H2 Appendix B: Flashcards Table
+H2 Appendix B — Flashcards Table
 Provide a Word table with headers: ID, Question, Answer, Connection, Difficulty, Related IDs, Source.
 Fill rows FC01–FC12 using the exact Flashcard content.
 
-UNIQUENESS AND QUALITY CHECKS (hard rules)
+UNIQUENESS & QUALITY CHECKS (hard rules)
 Before output:
-• No quote text or timestamp is reused anywhere in the document, apart from being listed again in Appendix A.
+• No quote text or timestamp is reused anywhere except in Appendix A.
 • Related IDs never repeat within a card and never include the card's own ID.
-• Flashcards cover at least three distinct topics and do not exceed three cards on any single topic.
-• Group tasks are distinct from each other and from the Authentic Practice Task.
-• No placeholder text such as "Question 1", "Sample quote", "Concept N", or generic answer patterns.
-• All timestamps match ^(\d{1,2}:)?[0-5]\d:[0-5]\d$ ([mm:ss] or [h:mm:ss]).
+• Flashcards cover ≥ 3 topics and do not exceed three cards per single topic.
+• Group tasks are distinct from each other and from the Authentic task.
+• No placeholders like "Question 1", "Sample quote", "Concept N".
+• All timestamps match ^(\d{1,2}:)?[0-5]\d:[0-5]\d$ (accept [mm:ss] or [h:mm:ss]).
 • Remove any stray quotation marks after timestamps.
 
-VALIDATION
-1) Every quoted fragment exists in Captions or Slides.
+VALIDATION (hard fail if not met)
+If ANY required section is missing, output exactly:
+"MISSING_SECTIONS — Regenerate with Flashcards 12, Group Tasks 2, Authentic Task 1 + rubric, Appendix A, Appendix B."
+Otherwise confirm:
+1) Every quoted fragment exists in Captions or Slides and is 5–20 words.
 2) Each Flashcard "Source" matches the timestamp quoted in its Answer.
-3) Use UK spelling throughout.
+3) UK spelling throughout; timestamps normalised to [mm:ss] (<1h) or [h:mm:ss] (≥1h).
 
 OUTPUT
 Produce the .pptx file only.`;
@@ -2689,35 +2909,106 @@ let currentNotesPrompt = '';
 function mountStudyToolCards(){
   const grid = document.getElementById('studyToolsGrid');
   if(!grid) return;
-  grid.innerHTML = '';
-  STUDY_TOOLS.forEach((tool, index)=>{
-    const card = document.createElement('div');
-    card.className = 'preset-card tool-card';
-    const style = TOOL_STYLE_PALETTE[index % TOOL_STYLE_PALETTE.length] || TOOL_STYLE_PALETTE[0];
-    card.style.setProperty('--tool-accent', style.accent);
-    card.style.setProperty('--tool-accent-hover', style.accentHover || style.accent);
-    card.style.setProperty('--tool-badge-bg', style.badge);
-    card.style.setProperty('--tool-chip-bg', style.chip);
-    card.style.setProperty('--tool-chip-border', style.chipBorder);
-    const points = (tool.points || []).map(point => `<li>${point}</li>`).join('');
-    card.innerHTML = `
-      <div class="tool-badge">${tool.icon} ${tool.name}</div>
-      <ul class="tool-points">${points}</ul>
-      <div class="tool-actions">
-        <button class="btn-primary" data-tool="${tool.id}">📋 Copy Prompt</button>
-      </div>`;
-    grid.appendChild(card);
-  });
-
-  grid.querySelectorAll('button[data-tool]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const id = btn.getAttribute('data-tool');
-      const tool = STUDY_TOOLS.find(t=>t.id===id);
-      if(!tool) return;
-      const prompt = tool.builder();
-      copyTextToClipboard(prompt);
+  
+  // Check if format card already exists to prevent duplicate event listeners
+  const existingFormatCard = grid.querySelector('.output-format-card');
+  if (existingFormatCard) {
+    // Just update the active state without recreating
+    existingFormatCard.querySelectorAll('.format-option').forEach(btn => {
+      const format = btn.getAttribute('data-format');
+      if (format === state.studyFormat) {
+        btn.classList.add('active');
+        btn.setAttribute('aria-checked', 'true');
+      } else {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-checked', 'false');
+      }
     });
-  });
+  } else {
+    // Create format card only if it doesn't exist
+    grid.innerHTML = '';
+    
+    // Add Output Format card as the first card
+    const formatCard = document.createElement('div');
+    formatCard.className = 'preset-card tool-card output-format-card';
+    formatCard.innerHTML = `
+      <h3 id="format-title">📄 Output Format</h3>
+      <p>Choose the output format for your study guide documents.</p>
+      <div class="output-format-options" role="radiogroup" aria-labelledby="format-title">
+        <button class="format-option ${state.studyFormat === 'word' ? 'active' : ''}" 
+                data-format="word" 
+                role="radio" 
+                aria-checked="${state.studyFormat === 'word'}"
+                aria-label="Select Word document format">
+          📝 Word (.docx)
+        </button>
+        <button class="format-option ${state.studyFormat === 'powerpoint' ? 'active' : ''}" 
+                data-format="powerpoint" 
+                role="radio" 
+                aria-checked="${state.studyFormat === 'powerpoint'}"
+                aria-label="Select PowerPoint presentation format">
+          📊 PowerPoint (.pptx)
+        </button>
+      </div>
+    `;
+    grid.appendChild(formatCard);
+    
+    // Add format toggle functionality
+    formatCard.querySelectorAll('.format-option').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Format button clicked:', btn.getAttribute('data-format'));
+        
+        const format = btn.getAttribute('data-format');
+        state.studyFormat = format;
+        console.log('State updated to:', state.studyFormat);
+        
+        // Update visual state
+        formatCard.querySelectorAll('.format-option').forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-checked', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-checked', 'true');
+        
+        console.log('Visual state updated');
+      });
+    });
+  }
+  
+  // Add study tool cards only if they don't exist
+  const existingToolCards = grid.querySelectorAll('.tool-card:not(.output-format-card)');
+  if (existingToolCards.length === 0) {
+    STUDY_TOOLS.forEach((tool, index)=>{
+      const card = document.createElement('div');
+      card.className = 'preset-card tool-card';
+      const style = TOOL_STYLE_PALETTE[index % TOOL_STYLE_PALETTE.length] || TOOL_STYLE_PALETTE[0];
+      card.style.setProperty('--tool-accent', style.accent);
+      card.style.setProperty('--tool-accent-hover', style.accentHover || style.accent);
+      card.style.setProperty('--tool-badge-bg', style.badge);
+      card.style.setProperty('--tool-chip-bg', style.chip);
+      card.style.setProperty('--tool-chip-border', style.chipBorder);
+      const points = (tool.points || []).map(point => `<li>${point}</li>`).join('');
+      card.innerHTML = `
+        <div class="tool-badge">${tool.icon} ${tool.name}</div>
+        <ul class="tool-points">${points}</ul>
+        <div class="tool-actions">
+          <button class="btn-primary" data-tool="${tool.id}">📋 Copy Prompt</button>
+        </div>`;
+      grid.appendChild(card);
+    });
+
+    grid.querySelectorAll('button[data-tool]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = btn.getAttribute('data-tool');
+        const tool = STUDY_TOOLS.find(t=>t.id===id);
+        if(!tool) return;
+        const prompt = tool.builder();
+        copyTextToClipboard(prompt);
+      });
+    });
+  }
 }
 
 function showToast(){
@@ -2937,12 +3228,14 @@ function render() {
   setCharStatus(prompt.length);
   
   if (prompt) {
-    $('previewPlaceholder').classList.add('hidden');
-    $('previewText').classList.remove('hidden');
-    $('previewText').textContent = prompt;
+    if ($('previewPlaceholder')) $('previewPlaceholder').classList.add('hidden');
+    if ($('previewText')) {
+      $('previewText').classList.remove('hidden');
+      $('previewText').textContent = prompt;
+    }
   } else {
-    $('previewPlaceholder').classList.remove('hidden');
-    $('previewText').classList.add('hidden');
+    if ($('previewPlaceholder')) $('previewPlaceholder').classList.remove('hidden');
+    if ($('previewText')) $('previewText').classList.add('hidden');
   }
 }
 
@@ -3038,122 +3331,6 @@ function setCharStatus(charLength) {
   }
 }
 
-// Hero content for each workflow page
-const heroContent = {
-  help: {
-    badge: 'Getting Started',
-    title: 'Welcome to Prompt Builder',
-    subtitle: 'Your guide to generating QUB-aligned quizzes and study resources in minutes',
-    class: 'help-hero'
-  },
-  quiz: {
-    badge: 'Canvas Quiz Builder',
-    title: 'Create Perfect Quizzes in Seconds',
-    subtitle: 'Transform your Panopto lectures into Canvas-ready quizzes with AI—aligned with Queen\'s Beyond Blended pedagogy',
-    class: 'quiz-hero'
-  },
-  study: {
-    badge: 'Study Guide Generator',
-    title: 'Build Comprehensive Study Resources',
-    subtitle: 'Generate rich, pedagogy-first study guides with flashcards, problems, and reflections from your lectures',
-    class: 'study-hero'
-  },
-  notes: {
-    badge: 'Notes to Resources',
-    title: 'Transform Notes into Study Packs',
-    subtitle: 'Convert your lecture notes into structured, student-ready study materials with expert guidance',
-    class: 'notes-hero'
-  },
-};
-
-// switchWorkflow function - must be global for inline onclick handlers
-window.switchWorkflow = function(tab) {
-  console.log('switchWorkflow called with tab:', tab);
-  if (!tab) return;
-  
-  // Update active state
-  $$('.workflow-btn').forEach(b => b.classList.remove('active'));
-  const activeBtn = document.querySelector('[data-tab="' + tab + '"]');
-  if (activeBtn) activeBtn.classList.add('active');
-  state.workflow = tab;
-
-  // Toggle content visibility
-  $$('.workflow-content').forEach(w => w.classList.add('hidden'));
-  const target = document.querySelector('.' + tab + '-workflow');
-  console.log('Target element for', tab + '-workflow:', target);
-  if (target) {
-    target.classList.remove('hidden');
-    console.log('Successfully switched to', tab, 'workflow');
-  } else {
-    console.error('Could not find element with class', tab + '-workflow');
-  }
-
-  // Update hero banner
-  const hero = heroContent[tab];
-  if (hero) {
-    const heroBanner = $('heroBanner');
-    if (heroBanner) {
-      heroBanner.className = 'hero-banner ' + hero.class;
-      if ($('heroBadgeText')) $('heroBadgeText').textContent = hero.badge;
-      if ($('heroTitle')) $('heroTitle').textContent = hero.title;
-      if ($('heroSubtitle')) $('heroSubtitle').textContent = hero.subtitle;
-    }
-  }
-
-  if (tab === 'study') {
-    setTimeout(() => {
-      try {
-        mountStudyToolCards();
-      } catch (e) {
-        console.warn('Study tools deck failed:', e);
-      }
-    }, 0);
-  } else if (tab === 'notes') {
-    setTimeout(() => {
-      try {
-        mountNotesToolCards();
-      } catch (e) {
-        console.warn('Notes tools deck failed:', e);
-      }
-    }, 0);
-  }
-
-  // Show/hide preview section
-  const previewSection = $('previewSection');
-  if (previewSection) previewSection.style.display = (tab === 'help' || tab === 'study' || tab === 'notes') ? 'none' : 'block';
-
-  const studyPanel = $('studyPreviewPanel');
-  if (studyPanel) {
-    if (tab === 'study') {
-      studyPanel.classList.remove('hidden');
-      setStudyPreview('', '');
-    } else {
-      studyPanel.classList.add('hidden');
-      currentStudyPrompt = '';
-    }
-  }
-
-  const notesPanel = $('notesPreviewPanel');
-  if (notesPanel) {
-    if (tab === 'notes') {
-      notesPanel.classList.remove('hidden');
-    } else {
-      notesPanel.classList.add('hidden');
-      currentNotesPrompt = '';
-      currentNotesTemplate = null;
-    }
-  }
-
-  // Re-setup FAQ when switching to help page
-  if (tab === 'help') {
-    setTimeout(() => {
-      if (typeof setupFaqAccordion === 'function') setupFaqAccordion();
-    }, 0);
-  } else if (tab !== 'study' && tab !== 'notes') {
-    render();
-  }
-};
-
 // Init
 function init() {
   // Update pedagogy brief on load (quiz)
@@ -3247,18 +3424,7 @@ function init() {
     quizFeedbackEl.onchange = e => { state.quizFeedback = e.target.value; render(); };
   }
   
-  // Form inputs - Study Guide - Format Selector
-  const formatSelector = $('studyFormatSelector');
-  if (formatSelector) {
-    formatSelector.querySelectorAll('.chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        const format = chip.getAttribute('data-format');
-        state.studyFormat = format;
-        formatSelector.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-      });
-    });
-  }
+  // Format selector is now handled in mountStudyToolCards()
   
   // Form inputs - From Notes (using inline handlers, no duplicates needed)
   if ($('notesInput')) {
@@ -3345,3 +3511,5 @@ init();
 
 </body>
 </html>
+
+
