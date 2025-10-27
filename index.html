@@ -1414,6 +1414,169 @@
     display: none !important;
   }
   
+  /* Quick Start Showcase */
+  .qs-showcase {
+    margin: 3rem 0;
+  }
+  
+  .qs-wrap {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 2rem;
+    align-items: center;
+  }
+  
+  @media (max-width: 960px) {
+    .qs-wrap {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+  
+  .qs-card {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(224,0,27,0.08), rgba(224,0,27,0.02));
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .qs-video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16/9;
+    background: #000;
+  }
+  
+  .qs-popout {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    border: 0;
+    border-radius: 10px;
+    padding: 0.5rem 0.6rem;
+    cursor: pointer;
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: all 0.3s;
+  }
+  
+  .qs-popout:hover {
+    background: rgba(0,0,0,0.7);
+    transform: scale(1.1);
+  }
+  
+  .qs-popout:focus {
+    outline: 3px solid var(--qub);
+  }
+  
+  .qs-tabs {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--border);
+    background: rgba(255,255,255,0.75);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+  
+  .qs-tabs [role="tab"] {
+    border: 0;
+    background: transparent;
+    padding: 0.5rem 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--text-secondary);
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+  }
+  
+  .qs-tabs [role="tab"].active {
+    color: var(--primary);
+    border-color: var(--primary);
+  }
+  
+  .qs-tabs [role="tab"]:hover:not(.active) {
+    color: var(--text);
+  }
+  
+  .qs-tabs [role="tab"]:focus {
+    outline: 3px solid var(--primary);
+  }
+  
+  .qs-copy h2 {
+    font-weight: 800;
+    margin: 0 0 0.5rem;
+    font-size: 2rem;
+    letter-spacing: -0.02em;
+  }
+  
+  .qs-copy p {
+    color: var(--text-secondary);
+    margin: 0 0 1rem;
+    line-height: 1.6;
+  }
+  
+  .qs-ctas {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  
+  .qs-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+  
+  .qs-modal-inner {
+    width: min(960px, 92vw);
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+    animation: fadeInUp 0.3s ease-out;
+  }
+  
+  .qs-modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-secondary);
+  }
+  
+  .qs-modal-head h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+  
+  .qs-modal-body {
+    padding: 1rem;
+    background: #000;
+  }
+  
+  @media (prefers-reduced-motion: no-preference) {
+    .qs-video {
+      transition: opacity 0.4s ease;
+    }
+  }
+  
   /* Utility classes */
   .w-100 {
     width: 100%;
@@ -1762,6 +1925,58 @@
 </div>
 
 <main>
+  <!-- Quick Start Showcase -->
+  <section class="qs-showcase" aria-labelledby="qs-title">
+    <div class="qs-wrap">
+      <div class="qs-media">
+        <div class="qs-card">
+          <!-- active video injected by JS; keep both in DOM for preload -->
+          <video id="qs-video-quiz" class="qs-video" muted playsinline preload="metadata"
+                 poster="assets/img/quiz_poster.jpg">
+            <source src="assets/vid/canvas_quiz_tutorial.mp4" type="video/mp4">
+            <track kind="captions" src="assets/vtt/canvas_quiz.vtt" srclang="en" label="English">
+          </video>
+          <video id="qs-video-study" class="qs-video hidden" muted playsinline preload="metadata"
+                 poster="assets/img/study_poster.jpg">
+            <source src="assets/vid/study_guide_tutorial.mp4" type="video/mp4">
+            <track kind="captions" src="assets/vtt/study_guide.vtt" srclang="en" label="English">
+          </video>
+
+          <button class="qs-popout" aria-label="Open video in a pop-out" data-action="open-modal">⛶</button>
+
+          <nav class="qs-tabs" role="tablist" aria-label="Showcase tabs">
+            <button role="tab" aria-selected="true" tabindex="0" class="active" data-tab="quiz">Canvas Quiz</button>
+            <button role="tab" aria-selected="false" tabindex="-1" data-tab="study">Study Guide</button>
+          </nav>
+        </div>
+      </div>
+
+      <div class="qs-copy">
+        <h2 id="qs-title">Make it fast with Quick Steps</h2>
+        <p>Create a quiz or study guide straight from Panopto. Copy a prompt, paste to Copilot, download the file. Clear, consistent, QUB-aligned.</p>
+        <div class="qs-ctas">
+          <button class="btn-primary" data-jump="quiz">See Canvas Quiz steps</button>
+          <button class="btn-secondary" data-jump="study">See Study Guide steps</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accessible modal -->
+    <div class="qs-modal hidden" role="dialog" aria-modal="true" aria-labelledby="qs-modal-title">
+      <div class="qs-modal-inner" role="document">
+        <div class="qs-modal-head">
+          <h3 id="qs-modal-title">Tutorial video</h3>
+          <button class="btn" data-action="close-modal" aria-label="Close video">✕</button>
+        </div>
+        <div class="qs-modal-body">
+          <video id="qs-modal-video" controls playsinline preload="metadata" style="width:100%;">
+            <!-- src switched by JS -->
+          </video>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Help Info Boxes (Hidden by default) -->
   <div class="info" id="about">
     <div class="section-title">
@@ -3507,6 +3722,120 @@ function init() {
 }
 
 init();
+
+// Quick Start Showcase functionality
+(function(){
+  const quiz = document.getElementById('qs-video-quiz');
+  const study = document.getElementById('qs-video-study');
+  if(!quiz || !study) return;
+
+  const tabs = Array.from(document.querySelectorAll('.qs-tabs [role="tab"]'));
+  const modal = document.querySelector('.qs-modal');
+  const modalVideo = document.getElementById('qs-modal-video');
+  const popoutBtn = document.querySelector('.qs-popout');
+  const ctaBtns = document.querySelectorAll('.qs-ctas button');
+
+  let active = 'quiz';
+  let seqTimer = null;
+  let reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function show(id){
+    active = id;
+    const isQuiz = id === 'quiz';
+    quiz.classList.toggle('hidden', !isQuiz);
+    study.classList.toggle('hidden', isQuiz);
+    tabs.forEach(t=>{
+      const on = t.dataset.tab === id;
+      t.classList.toggle('active', on);
+      t.setAttribute('aria-selected', on ? 'true':'false');
+      t.tabIndex = on ? 0 : -1;
+    });
+    // restart playback
+    [quiz,study].forEach(v=>{ try{ v.pause(); v.currentTime=0; }catch(e){} });
+    const v = isQuiz ? quiz : study;
+    try{ v.muted = true; v.play().catch(()=>{}); }catch(e){}
+    startSequence();
+  }
+
+  function next(){
+    show(active === 'quiz' ? 'study' : 'quiz');
+  }
+
+  function startSequence(){
+    clearTimeout(seqTimer);
+    if(reduced) return;
+    const v = active === 'quiz' ? quiz : study;
+    const remaining = Math.max(0, (v.duration || 0) - (v.currentTime || 0));
+    if(remaining > 0){
+      seqTimer = setTimeout(next, remaining * 1000 + 300); // small fade margin
+    }else{
+      // duration unknown yet: wait for metadata then schedule
+      v.onloadedmetadata = ()=> startSequence();
+    }
+  }
+
+  // Tabs click/keyboard
+  tabs.forEach(t=>{
+    t.addEventListener('click', ()=> show(t.dataset.tab));
+    t.addEventListener('keydown', (e)=>{
+      if(e.key==='ArrowRight'||e.key==='ArrowLeft'){
+        const idx = tabs.findIndex(x=>x===document.activeElement);
+        const dir = e.key==='ArrowRight' ? 1 : -1;
+        const nxt = (idx + dir + tabs.length) % tabs.length;
+        tabs[nxt].focus(); show(tabs[nxt].dataset.tab);
+      }
+      if(e.key==='Enter' || e.key===' '){ e.preventDefault(); show(t.dataset.tab); }
+    });
+  });
+
+  // CTA buttons
+  ctaBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const tab = btn.dataset.jump;
+      if(tab) show(tab);
+    });
+  });
+
+  // Pop-out modal
+  function openModal(){
+    const src = active === 'quiz'
+      ? 'assets/vid/canvas_quiz_tutorial.mp4'
+      : 'assets/vid/study_guide_tutorial.mp4';
+    modalVideo.src = src;
+    modalVideo.currentTime = (active==='quiz'?quiz:study).currentTime || 0;
+    modalVideo.muted = false;
+    modal.classList.remove('hidden');
+    modalVideo.play().catch(()=>{});
+    document.body.style.overflow='hidden';
+  }
+  function closeModal(){
+    modal.classList.add('hidden');
+    try{ modalVideo.pause(); modalVideo.removeAttribute('src'); modalVideo.load(); }catch(e){}
+    document.body.style.overflow='';
+    // resume inline muted
+    const v = active==='quiz'?quiz:study;
+    try{ v.muted=true; v.play().catch(()=>{}); }catch(e){}
+    startSequence();
+  }
+  if(popoutBtn) popoutBtn.addEventListener('click', openModal);
+  const closeBtn = document.querySelector('[data-action="close-modal"]');
+  if(closeBtn) closeBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e)=>{ if(e.target===modal) closeModal(); });
+  document.addEventListener('keydown', (e)=>{ if(!modal.classList.contains('hidden') && e.key==='Escape') closeModal(); });
+
+  // Pause when off-screen
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver(entries=>{
+    entries.forEach(ent=>{
+      const v = active==='quiz'?quiz:study;
+      if(ent.isIntersecting){ try{ v.play().catch(()=>{});}catch(e){} startSequence(); }
+      else { try{ v.pause(); }catch(e){} clearTimeout(seqTimer); }
+    });
+  }, {threshold:.25}) : null;
+  if(io) io.observe(document.querySelector('.qs-showcase'));
+
+  // Start
+  show('quiz');
+})();
 </script>
 
 </body>
